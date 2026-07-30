@@ -12,10 +12,21 @@
 //  설정(글씨 크기·언어)은 기기마다 다를 수 있어 서버로 올리지 않는다.
 // ═══════════════════════════════════════════════════════════
 
+// Supabase 대시보드 → Settings → API Keys 에서 복사한 값.
+//
+// anonKey 는 **공개돼도 되는 키**다. 브라우저로 내려가는 파일에 적고 GitHub 에
+// 올리는 것이 정상이다 (Supabase 도 "safely shared publicly" 라고 적어 둔다).
+// 남의 기도문을 막아 주는 건 이 키가 아니라 schema.sql 의 RLS 규칙이다 —
+// 로그인 없이 남의 이름으로 써넣어 보니 서버가 401 로 거부하는 것을 확인했다.
+//
+// 절대 여기 넣지 말 것: `sb_secret_...` (예전 이름 service_role).
+// 그건 RLS 를 통째로 통과하는 키라서 공개되면 남의 일기가 다 열린다.
+//
+// 대시보드가 키 이름을 바꿨다. 예전 `anon public` = 지금 `Publishable key`.
+// 두 형식(`eyJ...` JWT, `sb_publishable_...`) 다 그대로 통한다.
 const CLOUD_CONFIG = {
-  // Supabase 대시보드 → Project Settings → API 에서 복사
-  url: '',       // 예: 'https://abcdefgh.supabase.co'
-  anonKey: ''    // 예: 'eyJhbGciOi...'  (anon public 키 — 공개돼도 되는 키다)
+  url: 'https://isoudiuhtyxloerxmtfp.supabase.co',
+  anonKey: 'sb_publishable_5S9IHh_uQd2JbMZcoOMrMw_msLRCXbT'
 };
 
 const Cloud = {
