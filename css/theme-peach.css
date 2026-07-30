@@ -1,0 +1,101 @@
+/* ═══════════════════════════════════════════════════════
+   시안 C — 화사 피치 & 크림
+   기존의 따뜻함은 지키고 탁한 머스터드만 걷어낸 안. style.css 뒤에 로드.
+═══════════════════════════════════════════════════════ */
+
+:root {
+  --bg:         #FFFAF7;   /* 옅은 크림 화이트 */
+  --bg2:        #FBEFE7;
+  --surface:    #FFFFFF;
+  --surface2:   #FFFCFA;
+  --surface3:   #FEF5F0;
+
+  /* 포인트 — 산호빛 피치 (머스터드 대체) */
+  --gold:       #E8734A;
+  --gold-bright:#FB9068;
+  --gold-pale:  #FFF0E8;
+  --gold-line:  rgba(232,115,74,0.20);
+
+  /* 보조 — 민트로 균형 */
+  --green:      #35B090;
+  --green-pale: #E6F8F3;
+  --green-line: rgba(53,176,144,0.22);
+
+  /* 글자 — 웜 브라운 */
+  --ink:        #33241D;
+  --ink2:       #5C443A;
+  --ink3:       #92756A;
+  --ink4:       #C4AAA0;
+
+  --red:        #E05A5A;
+
+  --shadow-xs: 0 1px 4px rgba(200,110,70,0.07);
+  --shadow-sm: 0 3px 14px rgba(200,110,70,0.10);
+  --shadow-md: 0 8px 28px rgba(200,110,70,0.14);
+  --shadow-gold: 0 5px 20px rgba(232,115,74,0.30);
+}
+
+/* ─── 온보딩 배경 — 피치에서 민트로 ─── */
+#screen-onboard {
+  background: linear-gradient(160deg, #FFEEE4 0%, #FFF9F5 45%, #E7F7F2 100%);
+}
+#screen-onboard::before { background: radial-gradient(circle, rgba(251,144,104,0.18) 0%, transparent 70%); }
+#screen-onboard::after  { background: radial-gradient(circle, rgba(53,176,144,0.16) 0%, transparent 70%); }
+
+/* ─── 유지할 다크 카드 2곳 ─── */
+/* 웜 테라코타 브라운 — 어둡지만 따뜻해서 우울하지 않음 */
+.hero-card    { background: linear-gradient(145deg, #6B3A2A 0%, #4E271B 100%); }
+.verse-hero   { background: linear-gradient(145deg, #6B3A2A 0%, #4E271B 100%); }
+.fullscreen-verse { background: linear-gradient(155deg, #5F3324 0%, #3B1D14 100%); }
+
+/* ─── 밝게 바꾸는 카드들 ─── */
+
+/* 찬양 플레이어 — 피치 크림 */
+.now-playing {
+  background: linear-gradient(145deg, #FFF0E6 0%, #FFDFCC 100%);
+  border: 1px solid rgba(232,115,74,0.18);
+}
+.now-playing::before { color: rgba(232,115,74,0.10) !important; }
+.np-label  { color: #A96A4C !important; }
+.np-title  { color: #4A2317 !important; }
+.np-artist { color: #A96A4C !important; }
+.np-lyrics { background: rgba(255,255,255,0.75) !important; }
+.np-lyrics-text { color: #5A2E1E !important; }
+.np-note   { color: #B07E63 !important; }
+.np-ctrl {
+  background: rgba(255,255,255,0.88) !important;
+  color: #C25A34 !important;
+  border: 1px solid rgba(232,115,74,0.20);
+}
+.np-ctrl:active { background: #FFFFFF !important; }
+.np-play {
+  background: linear-gradient(145deg, #FB9068 0%, #E8734A 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(232,115,74,0.38);
+}
+
+/* 감사 스트릭 — 민트 (보색 포인트로 화면에 리듬) */
+.streak-card {
+  background: linear-gradient(145deg, #E8F9F4 0%, #CFF0E6 100%);
+  border: 1px solid rgba(53,176,144,0.24);
+}
+.streak-big  { color: #1F8A6C !important; }
+.streak-main { color: #15503F !important; }
+.streak-sub  { color: #3D8471 !important; }
+
+/* 기억앨범 배너 — 소프트 라일락 */
+.album-banner {
+  background: linear-gradient(145deg, #F6EEFB 0%, #EBDDF6 100%);
+  border: 1px solid rgba(150,105,190,0.20);
+}
+.album-banner-verse { color: #4A2C63 !important; }
+.album-banner-ref   { color: #8A6AA8 !important; }
+
+/* 유튜브 썸네일 */
+.video-thumb { background: linear-gradient(145deg, #FFEDE4 0%, #FFD9C6 100%); }
+
+.app-header { background: rgba(255,250,247,0.92); }
+.tab-nav    { background: rgba(255,255,255,0.95); }
+.tab-btn.active .tab-label { color: var(--gold); }
+
+.era-chip.active { background: linear-gradient(145deg, #E8734A 0%, #CC5B34 100%) !important; }

@@ -1,0 +1,58 @@
+<!-- 캐릭터 "햇살이" — 해 (말라기 4:2 "공의로운 해가 떠올라서", 시편 84:11)
+     기쁨 = 빛 · 온기 · 새 아침. 가장 밝고 발랄한 방향. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="sn-face" cx="38%" cy="30%" r="72%">
+      <stop offset="0%"   stop-color="#FFF3C4"/>
+      <stop offset="55%"  stop-color="#FFD95E"/>
+      <stop offset="100%" stop-color="#FFB627"/>
+    </radialGradient>
+    <linearGradient id="sn-ray" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#FFE07A"/>
+      <stop offset="100%" stop-color="#FFC132"/>
+    </linearGradient>
+    <radialGradient id="sn-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#FFE9A8" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FFE9A8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 은은한 광채 -->
+  <circle cx="100" cy="100" r="92" fill="url(#sn-glow)"/>
+
+  <!-- 햇살 (12방향 — 둥근 물방울 모양으로 부드럽게) -->
+  <g fill="url(#sn-ray)" stroke="#F5A916" stroke-width="1.6" stroke-linejoin="round">
+    <path d="M100 8   q9 16 0 30 q-9 -14 0 -30z"/>
+    <path d="M100 192 q9 -16 0 -30 q-9 14 0 30z"/>
+    <path d="M8 100   q16 9 30 0 q-14 -9 -30 0z"/>
+    <path d="M192 100 q-16 9 -30 0 q14 -9 30 0z"/>
+    <path d="M35 35   q17 5 24 19 q-16 -3 -24 -19z"/>
+    <path d="M165 35  q-17 5 -24 19 q16 -3 24 -19z"/>
+    <path d="M35 165  q17 -5 24 -19 q-16 3 -24 19z"/>
+    <path d="M165 165 q-17 -5 -24 -19 q16 3 24 19z"/>
+    <path d="M66 14   q11 14 6 29 q-12 -12 -6 -29z"/>
+    <path d="M134 14  q-11 14 -6 29 q12 -12 6 -29z"/>
+    <path d="M66 186  q11 -14 6 -29 q-12 12 -6 29z"/>
+    <path d="M134 186 q-11 -14 -6 -29 q12 12 6 29z"/>
+  </g>
+
+  <!-- 얼굴 (본체) -->
+  <circle cx="100" cy="100" r="58" fill="url(#sn-face)" stroke="#F5A916" stroke-width="3"/>
+
+  <!-- 하이라이트 -->
+  <ellipse cx="80" cy="80" rx="17" ry="12" fill="#FFFFFF" opacity="0.38" transform="rotate(-28 80 80)"/>
+
+  <!-- 눈 (웃는 반달 — 크게) -->
+  <path d="M78 96 q8 -11 16 0"  fill="none" stroke="#8A5A10" stroke-width="5" stroke-linecap="round"/>
+  <path d="M106 96 q8 -11 16 0" fill="none" stroke="#8A5A10" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- 볼터치 -->
+  <ellipse cx="73"  cy="113" rx="9" ry="6" fill="#FF8FA8" opacity="0.62"/>
+  <ellipse cx="127" cy="113" rx="9" ry="6" fill="#FF8FA8" opacity="0.62"/>
+
+  <!-- 활짝 웃는 입 -->
+  <path d="M86 112 q14 17 28 0 q-3 15 -14 15 q-11 0 -14 -15z"
+        fill="#C4600F" opacity="0.9"/>
+  <!-- 혀 -->
+  <path d="M94 122 q6 8 12 0 q-3 -3 -6 -3 q-3 0 -6 3z" fill="#FF8FA8"/>
+</svg>

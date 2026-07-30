@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>예수님 얼굴 시안 — 항상기쁨</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: #EEF1F5; color: #1C2430; padding: 22px 18px 70px; }
+  .head { max-width: 1240px; margin: 0 auto 20px; }
+  h1 { font-size: 21px; font-weight: 700; margin-bottom: 6px; }
+  .head p { font-size: 13px; color: #5A6675; line-height: 1.75; }
+  .head b { color: #1C2430; }
+
+  .grid { max-width: 1240px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 16px; }
+  .cell {
+    flex: 0 0 232px; background: #fff; border-radius: 16px; padding: 14px 12px 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center;
+  }
+  .cell svg { display: block; margin: 0 auto; }
+  .cell .no {
+    display: inline-block; background: #1C2430; color: #fff;
+    font-size: 12px; font-weight: 700; padding: 3px 11px; border-radius: 50px; margin-bottom: 8px;
+  }
+  .cell h2 { font-size: 14px; font-weight: 700; margin: 8px 0 4px; }
+  .cell p { font-size: 11.5px; color: #6B7684; line-height: 1.6; }
+  .zoom { background: #F7F9FC; border-radius: 12px; padding: 4px 0 0; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>예수님 얼굴 시안 6개</h1>
+  <p>
+    몸(팔 벌린 자세)은 전부 같고 <b>얼굴만 다르게</b> 그렸어. 번호로 알려주면 그걸로 확정할게.<br>
+    섞어도 돼 — 예: <b>“3번 얼굴형 + 5번 수염”</b> 같은 식으로.
+  </p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+// ── 공통 정의 (모든 시안이 같은 그라디언트를 쓴다) ──
+const DEFS = `
+  <linearGradient id="rb" x1="20%" y1="0%" x2="80%" y2="100%">
+    <stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#EDF3F9"/>
+  </linearGradient>
+  <linearGradient id="ht" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#FF9C8F"/><stop offset="100%" stop-color="#E8695B"/>
+  </linearGradient>
+  <linearGradient id="sk" x1="30%" y1="0%" x2="70%" y2="100%">
+    <stop offset="0%" stop-color="#FFE7D0"/><stop offset="100%" stop-color="#F7D0AE"/>
+  </linearGradient>
+  <linearGradient id="hr" x1="15%" y1="0%" x2="85%" y2="100%">
+    <stop offset="0%" stop-color="#7C5334"/><stop offset="60%" stop-color="#684023"/><stop offset="100%" stop-color="#553219"/>
+  </linearGradient>
+  <radialGradient id="gl" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#FFE9A8" stop-opacity="0.85"/><stop offset="100%" stop-color="#FFE9A8" stop-opacity="0"/>
+  </radialGradient>
+  <path id="hp" d="M0 10 C0 10, -11 1, -11 -5 C-11 -10, -6.5 -13, -3 -11
+                   C-1.5 -10.2, -0.6 -9, 0 -7.6 C0.6 -9, 1.5 -10.2, 3 -11
+                   C6.5 -13, 11 -10, 11 -5 C11 1, 0 10, 0 10 Z"/>
+`;
+
+// ── 몸 = 전 시안 공통 (팔 벌린 자세 · 작은 하트) ──
+const BODY = `
+  <circle cx="100" cy="68" r="62" fill="url(#gl)"/>
+  <use href="#hp" transform="translate(19,32) scale(0.45)"  fill="#FF9CAE" stroke="#E0697C" stroke-width="3"/>
+  <use href="#hp" transform="translate(181,32) scale(0.45)" fill="#FF9CAE" stroke="#E0697C" stroke-width="3"/>
+  <g fill="#FFD05C">
+    <path d="M42 24 l2.8 6.6 6.6 2.8 -6.6 2.8 -2.8 6.6 -2.8 -6.6 -6.6 -2.8 6.6 -2.8z" opacity="0.8"/>
+    <path d="M158 22 l2.4 5.6 5.6 2.4 -5.6 2.4 -2.4 5.6 -2.4 -5.6 -5.6 -2.4 5.6 -2.4z" opacity="0.6"/>
+  </g>
+  <g fill="url(#rb)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round">
+    <path d="M84 104 C70 98, 56 86, 45 70 L29 80 C40 98, 56 112, 74 120 Z"/>
+    <path d="M116 104 C130 98, 144 86, 155 70 L171 80 C160 98, 144 112, 126 120 Z"/>
+  </g>
+  <g fill="none" stroke="#B9C9D8" stroke-width="1.6" stroke-linecap="round" opacity="0.75">
+    <path d="M60 86 C56 91, 53 94, 49 96"/><path d="M140 86 C144 91, 147 94, 151 96"/>
+  </g>
+  <g fill="url(#sk)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round">
+    <circle cx="28" cy="67" r="11"/><circle cx="172" cy="67" r="11"/>
+  </g>
+  <g fill="none" stroke="#D9A57C" stroke-width="1.7" stroke-linecap="round">
+    <path d="M24 62 L24 70"/><path d="M29 61 L29 70"/><path d="M34 63 L34 70"/>
+    <path d="M176 62 L176 70"/><path d="M171 61 L171 70"/><path d="M166 63 L166 70"/>
+  </g>
+  <path d="M100 94 C88 94, 80 99, 76 108 C71 120, 68 136, 65 154 C62 170, 61 180, 61 186
+           L139 186 C139 180, 138 170, 135 154 C132 136, 129 120, 124 108 C120 99, 112 94, 100 94 Z"
+        fill="url(#rb)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round"/>
+  <g fill="none" stroke="#B9C9D8" stroke-width="1.6" stroke-linecap="round" opacity="0.7">
+    <path d="M84 128 C82 146, 81 166, 81 184"/><path d="M116 128 C118 146, 119 166, 119 184"/>
+  </g>
+  <use href="#hp" transform="translate(100,124) scale(0.8)" fill="url(#ht)" stroke="#3F352C" stroke-width="2.6"/>
+  <ellipse cx="94.5" cy="120" rx="2.8" ry="1.9" fill="#FFFFFF" opacity="0.42" transform="rotate(-32 94.5 120)"/>
+`;
+
+// ── 얼굴 시안 6개 ──
+const FACES = [
+  {
+    title: '길쭉한 턱 · 짧은 턱수염',
+    note: '현재 파일에 적용된 안. 세로로 긴 얼굴 + 콧수염 없음',
+    svg: `
+      <path d="M100 16 C74 16, 61 34, 61 58 C61 74, 65 88, 70 100 C76 96, 80 86, 81 74
+               L119 74 C120 86, 124 96, 130 100 C135 88, 139 74, 139 58 C139 34, 126 16, 100 16 Z"
+            fill="url(#hr)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M81 48 C81 34, 89 27, 100 27 C111 27, 119 34, 119 48 C119 60, 117 70, 112 76
+               C108 80.5, 104 82, 100 82 C96 82, 92 80.5, 88 76 C83 70, 81 60, 81 48 Z"
+            fill="url(#sk)" stroke="#3F352C" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M84 62 C85 72, 91 82, 100 82 C109 82, 115 72, 116 62
+               C114 70, 108 74, 100 74 C92 74, 86 70, 84 62 Z" fill="url(#hr)"/>
+      <path d="M80 48 C80.5 31, 89 23.5, 100 23.5 C111 23.5, 119.5 31, 120 48
+               C114 35, 108.5 31, 100 31 C91.5 31, 86 35, 80 48 Z" fill="url(#hr)"/>
+      <circle cx="92" cy="53" r="3.2" fill="#3F352C"/><circle cx="108" cy="53" r="3.2" fill="#3F352C"/>
+      <ellipse cx="85" cy="61" rx="4.2" ry="2.6" fill="#FF97B4" opacity="0.4"/>
+      <ellipse cx="115" cy="61" rx="4.2" ry="2.6" fill="#FF97B4" opacity="0.4"/>
+      <path d="M94.5 64 C96.8 67.4, 103.2 67.4, 105.5 64" fill="none" stroke="#3F352C" stroke-width="2.4" stroke-linecap="round"/>`
+  },
+  {
+    title: '수염이 턱을 감싸는 형',
+    note: '얼굴 옆까지 수염이 이어져 가장 예수님답다. 참고 이미지에 가까움',
+    svg: `
+      <path d="M100 14 C72 14, 58 33, 58 58 C58 76, 63 92, 69 104 C75 99, 79 88, 80 76
+               L120 76 C121 88, 125 99, 131 104 C137 92, 142 76, 142 58 C142 33, 128 14, 100 14 Z"
+            fill="url(#hr)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M79 46 C79 32, 88 25, 100 25 C112 25, 121 32, 121 46 C121 62, 116 76, 100 84
+               C84 76, 79 62, 79 46 Z" fill="url(#hr)"/>
+      <path d="M82 44 C82 33, 89 27, 100 27 C111 27, 118 33, 118 44 C118 56, 113 66, 100 68
+               C87 66, 82 56, 82 44 Z" fill="url(#sk)"/>
+      <path d="M80 44 C80.5 30, 89 23, 100 23 C111 23, 119.5 30, 120 44
+               C114 33, 108.5 29.5, 100 29.5 C91.5 29.5, 86 33, 80 44 Z" fill="url(#hr)"/>
+      <circle cx="92" cy="47" r="3.2" fill="#3F352C"/><circle cx="108" cy="47" r="3.2" fill="#3F352C"/>
+      <ellipse cx="86" cy="56" rx="4" ry="2.5" fill="#FF97B4" opacity="0.42"/>
+      <ellipse cx="114" cy="56" rx="4" ry="2.5" fill="#FF97B4" opacity="0.42"/>
+      <path d="M95 60 C97.2 63.2, 102.8 63.2, 105 60" fill="none" stroke="#3F352C" stroke-width="2.3" stroke-linecap="round"/>`
+  },
+  {
+    title: '각진 턱선 (남성적)',
+    note: '턱을 사각으로 깎아 가장 남성적. 여자 같지 않게',
+    svg: `
+      <path d="M100 16 C74 16, 61 34, 61 58 C61 74, 65 88, 70 100 C76 96, 80 86, 81 74
+               L119 74 C120 86, 124 96, 130 100 C135 88, 139 74, 139 58 C139 34, 126 16, 100 16 Z"
+            fill="url(#hr)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M80 46 C80 33, 89 26, 100 26 C111 26, 120 33, 120 46 L120 68
+               C120 76, 114 81, 106 81.5 L94 81.5 C86 81, 80 76, 80 68 Z"
+            fill="url(#sk)" stroke="#3F352C" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M83 62 C84 73, 90 81.5, 100 81.5 C110 81.5, 116 73, 117 62
+               C115 70, 108 74, 100 74 C92 74, 85 70, 83 62 Z" fill="url(#hr)"/>
+      <path d="M80 46 C80 31, 89 23.5, 100 23.5 C111 23.5, 120 31, 120 46
+               C114 34, 108.5 30, 100 30 C91.5 30, 86 34, 80 46 Z" fill="url(#hr)"/>
+      <g fill="none" stroke="#5E3820" stroke-width="2.6" stroke-linecap="round">
+        <path d="M86 46 L95 45.6"/><path d="M105 45.6 L114 46"/>
+      </g>
+      <circle cx="92" cy="54" r="3.2" fill="#3F352C"/><circle cx="108" cy="54" r="3.2" fill="#3F352C"/>
+      <path d="M95 65 C97.2 68.2, 102.8 68.2, 105 65" fill="none" stroke="#3F352C" stroke-width="2.4" stroke-linecap="round"/>`
+  },
+  {
+    title: '웃는 반달 눈',
+    note: '점 눈 대신 반달 눈. 가장 따뜻하고 친근한 인상',
+    svg: `
+      <path d="M100 16 C74 16, 61 34, 61 58 C61 74, 65 88, 70 100 C76 96, 80 86, 81 74
+               L119 74 C120 86, 124 96, 130 100 C135 88, 139 74, 139 58 C139 34, 126 16, 100 16 Z"
+            fill="url(#hr)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M81 48 C81 34, 89 27, 100 27 C111 27, 119 34, 119 48 C119 60, 117 70, 112 76
+               C108 80.5, 104 82, 100 82 C96 82, 92 80.5, 88 76 C83 70, 81 60, 81 48 Z"
+            fill="url(#sk)" stroke="#3F352C" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M84 62 C85 72, 91 82, 100 82 C109 82, 115 72, 116 62
+               C114 70, 108 74, 100 74 C92 74, 86 70, 84 62 Z" fill="url(#hr)"/>
+      <path d="M80 48 C80.5 31, 89 23.5, 100 23.5 C111 23.5, 119.5 31, 120 48
+               C114 35, 108.5 31, 100 31 C91.5 31, 86 35, 80 48 Z" fill="url(#hr)"/>
+      <g fill="none" stroke="#3F352C" stroke-width="3" stroke-linecap="round">
+        <path d="M87 54 C89.5 49.6, 94.5 49.6, 97 54"/>
+        <path d="M103 54 C105.5 49.6, 110.5 49.6, 113 54"/>
+      </g>
+      <ellipse cx="85" cy="62" rx="4.2" ry="2.6" fill="#FF97B4" opacity="0.45"/>
+      <ellipse cx="115" cy="62" rx="4.2" ry="2.6" fill="#FF97B4" opacity="0.45"/>
+      <path d="M94.5 64 C96.8 67.6, 103.2 67.6, 105.5 64" fill="none" stroke="#3F352C" stroke-width="2.4" stroke-linecap="round"/>`
+  },
+  {
+    title: '수염 길게 (원로 느낌)',
+    note: '수염이 가슴 쪽까지. 가장 권위 있고 전통적인 인상',
+    svg: `
+      <path d="M100 14 C72 14, 58 33, 58 58 C58 78, 64 96, 71 108 C77 102, 80 90, 81 78
+               L119 78 C120 90, 123 102, 129 108 C136 96, 142 78, 142 58 C142 33, 128 14, 100 14 Z"
+            fill="url(#hr)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M80 46 C80 32, 89 25, 100 25 C111 25, 120 32, 120 46
+               C120 62, 116 78, 100 96 C84 78, 80 62, 80 46 Z"
+            fill="url(#hr)" stroke="#3F352C" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M83 43 C83 32, 90 26, 100 26 C110 26, 117 32, 117 43 C117 55, 112 64, 100 66
+               C88 64, 83 55, 83 43 Z" fill="url(#sk)"/>
+      <path d="M81 43 C81.5 29, 90 22, 100 22 C110 22, 118.5 29, 119 43
+               C113 32, 108 28.5, 100 28.5 C92 28.5, 87 32, 81 43 Z" fill="url(#hr)"/>
+      <circle cx="92" cy="46" r="3.1" fill="#3F352C"/><circle cx="108" cy="46" r="3.1" fill="#3F352C"/>
+      <ellipse cx="87" cy="55" rx="3.8" ry="2.4" fill="#FF97B4" opacity="0.4"/>
+      <ellipse cx="113" cy="55" rx="3.8" ry="2.4" fill="#FF97B4" opacity="0.4"/>
+      <path d="M95.5 59 C97.4 61.8, 102.6 61.8, 104.5 59" fill="none" stroke="#3F352C" stroke-width="2.2" stroke-linecap="round"/>`
+  },
+  {
+    title: '수염 없음 (가장 젊고 단정)',
+    note: '수염을 아예 뺀 안. 가장 깔끔하고 친근하지만 예수님 느낌은 약함',
+    svg: `
+      <path d="M100 16 C74 16, 61 34, 61 58 C61 74, 65 88, 70 100 C76 96, 80 86, 81 74
+               L119 74 C120 86, 124 96, 130 100 C135 88, 139 74, 139 58 C139 34, 126 16, 100 16 Z"
+            fill="url(#hr)" stroke="#3F352C" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M81 48 C81 34, 89 27, 100 27 C111 27, 119 34, 119 48 C119 60, 117 70, 112 76
+               C108 80.5, 104 82, 100 82 C96 82, 92 80.5, 88 76 C83 70, 81 60, 81 48 Z"
+            fill="url(#sk)" stroke="#3F352C" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M80 48 C80.5 31, 89 23.5, 100 23.5 C111 23.5, 119.5 31, 120 48
+               C114 35, 108.5 31, 100 31 C91.5 31, 86 35, 80 48 Z" fill="url(#hr)"/>
+      <g fill="none" stroke="#6B4326" stroke-width="2.2" stroke-linecap="round" opacity="0.8">
+        <path d="M87 46 L95 45.6"/><path d="M105 45.6 L113 46"/>
+      </g>
+      <circle cx="92" cy="53" r="3.3" fill="#3F352C"/><circle cx="108" cy="53" r="3.3" fill="#3F352C"/>
+      <path d="M100 60 C98.9 63, 98.6 64.4, 100.6 65" fill="none" stroke="#D89E76" stroke-width="1.8" stroke-linecap="round"/>
+      <ellipse cx="85" cy="63" rx="4.4" ry="2.7" fill="#FF97B4" opacity="0.45"/>
+      <ellipse cx="115" cy="63" rx="4.4" ry="2.7" fill="#FF97B4" opacity="0.45"/>
+      <path d="M94 70 C96.6 74.4, 103.4 74.4, 106 70" fill="none" stroke="#3F352C" stroke-width="2.4" stroke-linecap="round"/>`
+  },
+];
+
+document.getElementById('grid').innerHTML = FACES.map((f, i) => `
+  <div class="cell">
+    <div class="no">${i + 1}번</div>
+    <div class="zoom">
+      <svg viewBox="0 0 200 200" width="200" height="200">
+        <defs>${DEFS}</defs>
+        ${BODY}
+        ${f.svg}
+      </svg>
+    </div>
+    <h2>${f.title}</h2>
+    <p>${f.note}</p>
+  </div>
+`).join('');
+</script>
+
+</body>
+</html>

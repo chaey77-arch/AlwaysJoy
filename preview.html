@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>색상 시안 비교 — 항상기쁨</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #EEF1F5; color: #1C2430;
+    padding: 20px 16px 60px;
+  }
+  .page-head { max-width: 1400px; margin: 0 auto 22px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .page-head p { font-size: 13px; color: #5A6675; line-height: 1.7; }
+  .page-head code {
+    background: #DCE3EB; padding: 1px 6px; border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .row {
+    max-width: 1400px; margin: 0 auto;
+    display: flex; gap: 18px; align-items: flex-start;
+    overflow-x: auto; padding-bottom: 12px;
+  }
+  .col { flex: 0 0 340px; }
+  .col-head {
+    text-align: center; margin-bottom: 10px;
+    padding: 12px 10px; background: #fff; border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+  .col-head h2 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+  .col-head .swatches { display: flex; gap: 5px; justify-content: center; margin: 8px 0 6px; }
+  .col-head .sw { width: 24px; height: 24px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.08); }
+  .col-head .note { font-size: 11px; color: #6B7684; line-height: 1.6; }
+  .col-head .open {
+    display: inline-block; margin-top: 8px;
+    font-size: 12px; font-weight: 700; color: #fff;
+    background: #2E6BD9; padding: 7px 16px; border-radius: 50px;
+    text-decoration: none;
+  }
+
+  /* 폰 프레임 — 각 시안을 iframe 으로 격리해 CSS 충돌 방지 */
+  .phone {
+    width: 340px; height: 720px;
+    background: #fff; border-radius: 26px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.16);
+    overflow: hidden; border: 1px solid rgba(0,0,0,0.08);
+  }
+  .phone iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+  .tabs { max-width: 1400px; margin: 0 auto 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .tabs button {
+    font-family: inherit; font-size: 12px; font-weight: 600;
+    padding: 8px 14px; border-radius: 50px; cursor: pointer;
+    background: #fff; border: 1.5px solid #CBD4DE; color: #47536220;
+    color: #475362;
+  }
+  .tabs button.on { background: #1C2430; color: #fff; border-color: #1C2430; }
+
+  /* 캐릭터 선택 */
+  .char-row {
+    max-width: 1400px; margin: 0 auto 16px;
+    background: #fff; border-radius: 14px; padding: 14px 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+  .char-row-label { font-size: 12px; font-weight: 700; color: #47536C; margin-bottom: 10px; }
+  .char-opts { display: flex; gap: 10px; flex-wrap: wrap; }
+  .char-opt {
+    font-family: inherit; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 10px 16px; border-radius: 12px;
+    background: #F5F7FA; border: 2px solid #DCE3EB;
+  }
+  .char-opt span { font-size: 12px; font-weight: 700; color: #2A3646; }
+  .char-opt em { font-size: 10px; color: #7C8798; font-style: normal; }
+  .char-opt.on { background: #EAF2FE; border-color: #2E6BD9; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>시간대별 캐릭터 + 색 테마</h1>
+  <p>
+    실제 앱에서는 <strong>하루 세 번</strong> 캐릭터와 색이 함께 바뀐다 —
+    아침엔 해+스카이, 점심엔 숲+민트, 저녁엔 예수님+피치.<br>
+    아래는 세 조합을 나란히 놓고 비교하는 화면이야. 캐릭터와 탭은 따로 바꿔볼 수 있어.
+  </p>
+  <p id="now-line" style="margin-top:8px;font-weight:600;color:#2E6BD9"></p>
+</div>
+
+<div class="char-row">
+  <div class="char-row-label">
+    캐릭터 — 기본은 각 칸이 자기 시간대 짝을 보여준다.
+    아래에서 하나를 고르면 <b>세 칸 전부 같은 캐릭터</b>로 바꿔서 색만 비교할 수 있어.
+  </div>
+  <div class="char-opts">
+    <button class="char-opt on" data-char="">
+      <div style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;font-size:30px">🕒</div>
+      <span>시간대 짝 (기본)</span>
+      <em>실제 앱 동작</em>
+    </button>
+    <button class="char-opt" data-char="sun">
+      <img src="icons/char-sun.svg" alt="" width="72" height="72"/>
+      <span>해 “햇살이”</span>
+      <em>아침 05–10시</em>
+    </button>
+    <button class="char-opt" data-char="forest">
+      <img src="icons/char-forest.svg" alt="" width="72" height="72"/>
+      <span>쉴만한 숲</span>
+      <em>점심 11–16시</em>
+    </button>
+    <button class="char-opt" data-char="jesus">
+      <img src="icons/char-jesus.svg" alt="" width="72" height="72"/>
+      <span>예수님</span>
+      <em>저녁 17시–새벽</em>
+    </button>
+    <button class="char-opt" data-char="dove">
+      <img src="icons/char-dove.svg" alt="" width="72" height="72"/>
+      <span>비둘기 “기쁨이”</span>
+      <em>예비 · 성령</em>
+    </button>
+    <button class="char-opt" data-char="grape">
+      <img src="icons/char-grape.svg" alt="" width="72" height="72"/>
+      <span>포도알</span>
+      <em>예비 · 요 15:5</em>
+    </button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="on" data-tab="home">🏠 홈</button>
+  <button data-tab="hymn">🎵 찬양</button>
+  <button data-tab="gratitude">💛 감사</button>
+  <button data-tab="album">💚 기억</button>
+  <button data-tab="story">📜 역사</button>
+  <button data-tab="word">📖 말씀</button>
+  <button data-tab="onboard">✨ 온보딩</button>
+</div>
+
+<div class="row">
+  <div class="col" data-slot="sky">
+    <div class="col-head">
+      <h2>아침 ☀️ 해 + 스카이</h2>
+      <div class="note" style="font-weight:700;color:#2E86D9;margin-bottom:2px">05–10시</div>
+      <div class="swatches">
+        <div class="sw" style="background:#F8FBFF"></div>
+        <div class="sw" style="background:#2E86D9"></div>
+        <div class="sw" style="background:#E7F2FD"></div>
+        <div class="sw" style="background:#FFEBB0"></div>
+        <div class="sw" style="background:#FFDBE2"></div>
+      </div>
+      <div class="note">가장 밝고 경쾌함<br>하루를 여는 시간</div>
+      <a class="open" href="index.html?theme=sky" target="_blank">전체화면 ↗</a>
+    </div>
+    <div class="phone"><iframe data-theme="sky" src="index.html?theme=sky&preview=home"></iframe></div>
+  </div>
+
+  <div class="col" data-slot="mint">
+    <div class="col-head">
+      <h2>점심 🌳 숲 + 민트</h2>
+      <div class="note" style="font-weight:700;color:#2E9E6B;margin-bottom:2px">11–16시</div>
+      <div class="swatches">
+        <div class="sw" style="background:#F7FBF9"></div>
+        <div class="sw" style="background:#2E9E6B"></div>
+        <div class="sw" style="background:#E6F7EF"></div>
+        <div class="sw" style="background:#FFE6CC"></div>
+        <div class="sw" style="background:#E2DDF8"></div>
+      </div>
+      <div class="note">교회 정체성(초록) 유지<br>잠시 쉬어가는 시간</div>
+      <a class="open" href="index.html?theme=mint" target="_blank">전체화면 ↗</a>
+    </div>
+    <div class="phone"><iframe data-theme="mint" src="index.html?theme=mint&preview=home"></iframe></div>
+  </div>
+
+  <div class="col" data-slot="peach">
+    <div class="col-head">
+      <h2>저녁 ✨ 예수님 + 피치</h2>
+      <div class="note" style="font-weight:700;color:#E8734A;margin-bottom:2px">17시–새벽</div>
+      <div class="swatches">
+        <div class="sw" style="background:#FFFAF7"></div>
+        <div class="sw" style="background:#E8734A"></div>
+        <div class="sw" style="background:#FFF0E8"></div>
+        <div class="sw" style="background:#CFF0E6"></div>
+        <div class="sw" style="background:#EBDDF6"></div>
+      </div>
+      <div class="note">따뜻함 유지 + 머스터드 제거<br>하루를 마무리하는 시간</div>
+      <a class="open" href="index.html?theme=peach" target="_blank">전체화면 ↗</a>
+    </div>
+    <div class="phone"><iframe data-theme="peach" src="index.html?theme=peach&preview=home"></iframe></div>
+  </div>
+
+  <div class="col">
+    <div class="col-head">
+      <h2>현재 (비교용)</h2>
+      <div class="swatches">
+        <div class="sw" style="background:#F5F0E8"></div>
+        <div class="sw" style="background:#A67C2E"></div>
+        <div class="sw" style="background:#FBF5E6"></div>
+        <div class="sw" style="background:#2D4A35"></div>
+        <div class="sw" style="background:#1A3324"></div>
+      </div>
+      <div class="note">베이지 + 머스터드 골드<br>레트로 느낌의 원인</div>
+      <a class="open" href="index.html" target="_blank">전체화면 ↗</a>
+    </div>
+    <div class="phone"><iframe data-theme="" src="index.html?preview=home"></iframe></div>
+  </div>
+</div>
+
+<script>
+  // 테마 ↔ 캐릭터 짝 (index.html / app.js 의 시간대 구간과 동일)
+  const PAIR = { sky: 'sun', mint: 'forest', peach: 'jesus' };
+  // curChar = null 이면 각 칸이 자기 짝 캐릭터를 보여준다 (= 실제 앱 동작)
+  let curTab = 'home', curChar = null;
+
+  function refresh() {
+    document.querySelectorAll('.col').forEach(col => {
+      const slot = col.dataset.slot || '';           // 없으면 '현재(비교용)' 칸
+      const theme = slot || 'none';
+      // 짝 캐릭터가 기본, 사용자가 고르면 그걸로 통일해서 비교
+      const char = curChar || PAIR[slot] || 'jesus';
+
+      const q = new URLSearchParams();
+      q.set('theme', theme);
+      q.set('preview', curTab);
+      q.set('char', char);
+      col.querySelector('iframe').src = 'index.html?' + q.toString();
+
+      const link = col.querySelector('.open');
+      const lq = new URLSearchParams();
+      lq.set('theme', theme);
+      lq.set('char', char);
+      link.href = 'index.html?' + lq.toString();
+    });
+  }
+
+  // 지금 시간대가 어디인지 표시 — index.html 의 구간과 동일하게 계산
+  (function showNow() {
+    const h = new Date().getHours();
+    const slot = (h >= 5 && h < 11) ? 'sky' : (h >= 11 && h < 17) ? 'mint' : 'peach';
+    const label = { sky: '아침 ☀️ 해 + 스카이', mint: '점심 🌳 숲 + 민트', peach: '저녁 ✨ 예수님 + 피치' }[slot];
+    document.getElementById('now-line').textContent =
+      `지금은 ${h}시 → 실제 앱에서는 "${label}" 로 보인다`;
+    const col = document.querySelector(`.col[data-slot="${slot}"] .col-head`);
+    if (col) col.style.outline = '3px solid #2E6BD9';
+  })();
+
+  document.querySelectorAll('.tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      curTab = btn.dataset.tab;
+      refresh();
+    });
+  });
+
+  document.querySelectorAll('.char-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.char-opt').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      curChar = btn.dataset.char || null;   // 빈 값 = 시간대 짝 모드
+      refresh();
+    });
+  });
+
+  refresh();
+</script>
+
+</body>
+</html>

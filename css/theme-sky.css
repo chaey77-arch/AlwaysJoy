@@ -1,0 +1,100 @@
+/* ═══════════════════════════════════════════════════════
+   시안 B — 발랄 스카이 & 레몬
+   가장 밝고 경쾌한 톤. style.css 뒤에 로드.
+═══════════════════════════════════════════════════════ */
+
+:root {
+  --bg:         #F8FBFF;   /* 옅은 하늘 화이트 */
+  --bg2:        #E9F1FC;
+  --surface:    #FFFFFF;
+  --surface2:   #FCFDFF;
+  --surface3:   #F2F7FE;
+
+  /* 포인트 — 맑은 스카이 블루 */
+  --gold:       #2E86D9;
+  --gold-bright:#4FA3EE;
+  --gold-pale:  #E7F2FD;
+  --gold-line:  rgba(46,134,217,0.20);
+
+  --green:      #29A98B;
+  --green-pale: #E4F7F2;
+  --green-line: rgba(41,169,139,0.22);
+
+  /* 글자 — 부드러운 네이비 */
+  --ink:        #16283D;
+  --ink2:       #3B5573;
+  --ink3:       #6C88A6;
+  --ink4:       #A8BED4;
+
+  --red:        #F0757F;
+
+  --shadow-xs: 0 1px 4px rgba(46,134,217,0.07);
+  --shadow-sm: 0 3px 14px rgba(46,134,217,0.10);
+  --shadow-md: 0 8px 28px rgba(46,134,217,0.14);
+  --shadow-gold: 0 5px 20px rgba(46,134,217,0.30);
+}
+
+/* ─── 온보딩 배경 — 하늘에서 레몬으로 ─── */
+#screen-onboard {
+  background: linear-gradient(160deg, #E7F3FE 0%, #F6FAFF 42%, #FFF6E0 100%);
+}
+#screen-onboard::before { background: radial-gradient(circle, rgba(79,163,238,0.18) 0%, transparent 70%); }
+#screen-onboard::after  { background: radial-gradient(circle, rgba(255,206,92,0.20) 0%, transparent 70%); }
+
+/* ─── 유지할 다크 카드 2곳 ─── */
+/* 딥 네이비 블루 — 밤하늘 느낌, 우울하지 않게 채도 유지 */
+.hero-card    { background: linear-gradient(145deg, #1D4E82 0%, #143A63 100%); }
+.verse-hero   { background: linear-gradient(145deg, #1D4E82 0%, #143A63 100%); }
+.fullscreen-verse { background: linear-gradient(155deg, #1B4877 0%, #0F2C4D 100%); }
+
+/* ─── 밝게 바꾸는 카드들 ─── */
+
+/* 찬양 플레이어 — 하늘 파스텔 */
+.now-playing {
+  background: linear-gradient(145deg, #E8F3FE 0%, #D2E7FB 100%);
+  border: 1px solid rgba(46,134,217,0.16);
+}
+.now-playing::before { color: rgba(46,134,217,0.10) !important; }
+.np-label  { color: #4A7BA8 !important; }
+.np-title  { color: #123253 !important; }
+.np-artist { color: #4A7BA8 !important; }
+.np-lyrics { background: rgba(255,255,255,0.75) !important; }
+.np-lyrics-text { color: #1E4468 !important; }
+.np-note   { color: #6A94BC !important; }
+.np-ctrl {
+  background: rgba(255,255,255,0.88) !important;
+  color: #1D4E82 !important;
+  border: 1px solid rgba(46,134,217,0.18);
+}
+.np-ctrl:active { background: #FFFFFF !important; }
+.np-play {
+  background: linear-gradient(145deg, #46A0EB 0%, #2E86D9 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(46,134,217,0.38);
+}
+
+/* 감사 스트릭 — 밝은 레몬 (가장 발랄한 포인트) */
+.streak-card {
+  background: linear-gradient(145deg, #FFF7DC 0%, #FFEBB0 100%);
+  border: 1px solid rgba(226,170,40,0.26);
+}
+.streak-big  { color: #C08A15 !important; }
+.streak-main { color: #6E4E06 !important; }
+.streak-sub  { color: #8F6C15 !important; }
+
+/* 기억앨범 배너 — 소프트 코랄 핑크 */
+.album-banner {
+  background: linear-gradient(145deg, #FFEDF0 0%, #FFDBE2 100%);
+  border: 1px solid rgba(230,110,135,0.20);
+}
+.album-banner-verse { color: #7A2942 !important; }
+.album-banner-ref   { color: #B05C77 !important; }
+
+/* 유튜브 썸네일 */
+.video-thumb { background: linear-gradient(145deg, #E8F3FE 0%, #CFE4FA 100%); }
+
+.app-header { background: rgba(248,251,255,0.92); }
+.tab-nav    { background: rgba(255,255,255,0.95); }
+.tab-btn.active .tab-label { color: var(--gold); }
+
+.era-chip.active { background: linear-gradient(145deg, #2E86D9 0%, #1D6BB5 100%) !important; }

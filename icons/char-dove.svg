@@ -1,0 +1,55 @@
+<!-- 캐릭터 "기쁨이" — 비둘기 (천사링 제거, 실루엣 명확화) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="dv-body" cx="38%" cy="30%" r="72%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#DCEDFB"/>
+    </radialGradient>
+    <linearGradient id="dv-wing" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#C4E0F5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 반짝임 -->
+  <g fill="#FFD05C">
+    <path d="M28 60 l3.4 7.8 7.8 3.4 -7.8 3.4 -3.4 7.8 -3.4 -7.8 -7.8 -3.4 7.8 -3.4z" opacity="0.8"/>
+    <path d="M174 52 l2.6 6 6 2.6 -6 2.6 -2.6 6 -2.6 -6 -6 -2.6 6 -2.6z" opacity="0.6"/>
+  </g>
+
+  <!-- 꼬리 (부채꼴 — 비둘기 특징) -->
+  <path d="M52 118 q-30 4 -42 26 q26 10 48 -6z"
+        fill="url(#dv-wing)" stroke="#9CC8E8" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M18 138 q16 -2 30 -6" fill="none" stroke="#B4D8F0" stroke-width="2" stroke-linecap="round"/>
+  <path d="M22 146 q16 0 28 -4" fill="none" stroke="#B4D8F0" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- 몸통 (통통한 타원 — 오른쪽 위로 향하는 자세) -->
+  <ellipse cx="98" cy="112" rx="50" ry="40" fill="url(#dv-body)" stroke="#9CC8E8" stroke-width="2.5"
+           transform="rotate(-12 98 112)"/>
+
+  <!-- 머리 (몸통과 겹쳐 목 없이 자연스럽게) -->
+  <circle cx="132" cy="72" r="31" fill="url(#dv-body)" stroke="#9CC8E8" stroke-width="2.5"/>
+
+  <!-- 날개 (위로 활짝 — 발랄함, 비둘기 실루엣의 핵심) -->
+  <path class="dv-wing" d="M96 104 q-6 -46 26 -60 q22 16 12 52 q-16 18 -38 8z"
+        fill="url(#dv-wing)" stroke="#9CC8E8" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M104 92 q10 -28 22 -38"  fill="none" stroke="#B4D8F0" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M114 98 q10 -26 20 -34"  fill="none" stroke="#B4D8F0" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- 눈 (웃는 반달) -->
+  <path d="M124 68 q5 -6.5 10 0" fill="none" stroke="#2C4356" stroke-width="3.6" stroke-linecap="round"/>
+  <path d="M144 68 q5 -6.5 10 0" fill="none" stroke="#2C4356" stroke-width="3.6" stroke-linecap="round"/>
+
+  <!-- 볼터치 -->
+  <ellipse cx="122" cy="81" rx="6" ry="4" fill="#FFAEC0" opacity="0.72"/>
+  <ellipse cx="154" cy="81" rx="6" ry="4" fill="#FFAEC0" opacity="0.72"/>
+
+  <!-- 부리 (짧은 삼각 — 오른쪽) -->
+  <path d="M161 74 l15 5 -15 5.5z" fill="#FFB84D" stroke="#EE9E22" stroke-width="1.6" stroke-linejoin="round"/>
+
+  <!-- 올리브 가지 (평화 — 아래로 물고 있는 모습) -->
+  <path d="M92 148 q18 16 42 16" fill="none" stroke="#5BB37E" stroke-width="3.6" stroke-linecap="round"/>
+  <ellipse cx="110" cy="155" rx="8.5" ry="5" fill="#8FD9A8" transform="rotate(26 110 155)"/>
+  <ellipse cx="126" cy="163" rx="8.5" ry="5" fill="#5BB37E" transform="rotate(16 126 163)"/>
+  <ellipse cx="100" cy="149" rx="7" ry="4.5" fill="#B2E6C4" transform="rotate(34 100 149)"/>
+</svg>

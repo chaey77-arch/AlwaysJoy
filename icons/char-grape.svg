@@ -1,0 +1,59 @@
+<!-- 캐릭터 "포도알" — 포도송이 (요한복음 15:5 "나는 포도나무요 너희는 가지라") -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="gr-berry" cx="35%" cy="30%" r="75%">
+      <stop offset="0%"   stop-color="#C9A8F0"/>
+      <stop offset="100%" stop-color="#8B5FCF"/>
+    </radialGradient>
+    <radialGradient id="gr-berry2" cx="35%" cy="30%" r="75%">
+      <stop offset="0%"   stop-color="#DCC3F7"/>
+      <stop offset="100%" stop-color="#9E75DB"/>
+    </radialGradient>
+    <linearGradient id="gr-leaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#8FD9A8"/>
+      <stop offset="100%" stop-color="#4FB377"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 반짝임 -->
+  <g fill="#FFD05C">
+    <path d="M30 52 l3.4 7.8 7.8 3.4 -7.8 3.4 -3.4 7.8 -3.4 -7.8 -7.8 -3.4 7.8 -3.4z" opacity="0.8"/>
+    <path d="M172 84 l2.6 6 6 2.6 -6 2.6 -2.6 6 -2.6 -6 -6 -2.6 6 -2.6z" opacity="0.65"/>
+    <path d="M164 40 l2 4.6 4.6 2 -4.6 2 -2 4.6 -2 -4.6 -4.6 -2 4.6 -2z" opacity="0.5"/>
+  </g>
+
+  <!-- 줄기 -->
+  <path d="M100 40 q4 12 0 24" fill="none" stroke="#7A5A3A" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- 잎사귀 -->
+  <path d="M104 46 q26 -20 44 -6 q-10 26 -40 20z" fill="url(#gr-leaf)" stroke="#3F9E66" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M110 48 q18 -2 32 -6" fill="none" stroke="#3F9E66" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+  <!-- 덩굴 -->
+  <path d="M96 48 q-18 -10 -26 2 q-6 10 4 12" fill="none" stroke="#4FB377" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- 포도알 — 위에서 아래로 삼각 배치 -->
+  <circle cx="76"  cy="86"  r="17" fill="url(#gr-berry2)" stroke="#7A4FBD" stroke-width="2"/>
+  <circle cx="124" cy="86"  r="17" fill="url(#gr-berry2)" stroke="#7A4FBD" stroke-width="2"/>
+  <circle cx="58"  cy="118" r="17" fill="url(#gr-berry)"  stroke="#7A4FBD" stroke-width="2"/>
+  <circle cx="142" cy="118" r="17" fill="url(#gr-berry)"  stroke="#7A4FBD" stroke-width="2"/>
+  <circle cx="78"  cy="146" r="16" fill="url(#gr-berry)"  stroke="#7A4FBD" stroke-width="2"/>
+  <circle cx="122" cy="146" r="16" fill="url(#gr-berry)"  stroke="#7A4FBD" stroke-width="2"/>
+  <circle cx="100" cy="170" r="15" fill="url(#gr-berry)"  stroke="#7A4FBD" stroke-width="2"/>
+
+  <!-- 가운데 큰 알 = 얼굴 (맨 위에 올려 표정이 가려지지 않게) -->
+  <circle cx="100" cy="116" r="26" fill="url(#gr-berry2)" stroke="#7A4FBD" stroke-width="2.5"/>
+
+  <!-- 하이라이트 -->
+  <ellipse cx="91" cy="106" rx="8" ry="6" fill="#FFFFFF" opacity="0.45" transform="rotate(-25 91 106)"/>
+
+  <!-- 눈 (웃는 반달) -->
+  <path d="M89 114 q5 -6 10 0"  fill="none" stroke="#3B2258" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M103 114 q5 -6 10 0" fill="none" stroke="#3B2258" stroke-width="3.4" stroke-linecap="round"/>
+
+  <!-- 볼터치 -->
+  <ellipse cx="86" cy="126" rx="5.5" ry="3.6" fill="#FF9BB8" opacity="0.7"/>
+  <ellipse cx="116" cy="126" rx="5.5" ry="3.6" fill="#FF9BB8" opacity="0.7"/>
+
+  <!-- 웃는 입 -->
+  <path d="M95 124 q6 7 12 0" fill="none" stroke="#3B2258" stroke-width="3" stroke-linecap="round"/>
+</svg>

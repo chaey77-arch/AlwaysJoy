@@ -1,0 +1,126 @@
+<!-- "쉴만한 숲" — 시편 23:2 "푸른 풀밭에 누이시며 쉴 만한 물가로 인도하시는도다"
+     캐릭터(얼굴)가 아니라 편안히 쉬어가는 숲 풍경. 낮 시간대에 보인다. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <radialGradient id="fs-sky" cx="50%" cy="52%" r="56%">
+      <stop offset="0%"   stop-color="#FFF7E2" stop-opacity="0.95"/>
+      <stop offset="65%"  stop-color="#FDF3E4" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#FDF3E4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="fs-sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#FFF1BE"/>
+      <stop offset="100%" stop-color="#FFE08F"/>
+    </radialGradient>
+    <linearGradient id="fs-hill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#B6D3BF"/>
+      <stop offset="100%" stop-color="#9BC0A9"/>
+    </linearGradient>
+    <linearGradient id="fs-pine" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%"   stop-color="#5C9B72"/>
+      <stop offset="100%" stop-color="#3F7250"/>
+    </linearGradient>
+    <linearGradient id="fs-leaf" x1="25%" y1="0%" x2="75%" y2="100%">
+      <stop offset="0%"   stop-color="#8DC49A"/>
+      <stop offset="100%" stop-color="#63A177"/>
+    </linearGradient>
+    <linearGradient id="fs-leaf2" x1="25%" y1="0%" x2="75%" y2="100%">
+      <stop offset="0%"   stop-color="#A6D3AE"/>
+      <stop offset="100%" stop-color="#7BB68C"/>
+    </linearGradient>
+    <linearGradient id="fs-trunk" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#A07852"/>
+      <stop offset="100%" stop-color="#7E5936"/>
+    </linearGradient>
+    <linearGradient id="fs-ground" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#A8CFAE"/>
+      <stop offset="100%" stop-color="#8CBD97"/>
+    </linearGradient>
+    <linearGradient id="fs-water" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#BEE3EC"/>
+      <stop offset="100%" stop-color="#8CC4D8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 은은한 하늘빛 -->
+  <circle cx="100" cy="100" r="96" fill="url(#fs-sky)"/>
+
+  <!-- 낮은 해 (언덕에 반쯤 가려진다) -->
+  <circle cx="100" cy="128" r="17" fill="url(#fs-sun)" opacity="0.9"/>
+
+  <!-- 새 두 마리 -->
+  <g fill="none" stroke="#7E9A88" stroke-width="2.2" stroke-linecap="round" opacity="0.75">
+    <path d="M56 44 q5 -4 9 0"/>
+    <path d="M65 44 q5 -4 9 0"/>
+    <path d="M84 32 q4 -3.4 7.6 0"/>
+    <path d="M91.6 32 q4 -3.4 7.6 0"/>
+  </g>
+
+  <!-- 먼 언덕 -->
+  <path d="M0 142 C22 128, 48 126, 70 136 C92 146, 112 130, 136 130 C160 130, 182 138, 200 134 L200 200 L0 200 Z"
+        fill="url(#fs-hill)"/>
+
+  <!-- ═══ 나무들 (뒤 → 앞) ═══ -->
+
+  <!-- 전나무 (왼쪽, 큼) -->
+  <rect x="63" y="130" width="9" height="24" rx="4" fill="url(#fs-trunk)"/>
+  <g fill="url(#fs-pine)" stroke="#3B6B4A" stroke-width="1.8" stroke-linejoin="round">
+    <path d="M67.5 66 L83 96 L52 96 Z"/>
+    <path d="M67.5 84 L87 116 L48 116 Z"/>
+    <path d="M67.5 102 L91 136 L44 136 Z"/>
+  </g>
+
+  <!-- 전나무 (오른쪽, 작음) -->
+  <rect x="130" y="134" width="8" height="20" rx="4" fill="url(#fs-trunk)"/>
+  <g fill="url(#fs-pine)" stroke="#3B6B4A" stroke-width="1.8" stroke-linejoin="round" opacity="0.95">
+    <path d="M134 88 L147 114 L121 114 Z"/>
+    <path d="M134 104 L151 132 L117 132 Z"/>
+    <path d="M134 118 L155 140 L113 140 Z"/>
+  </g>
+
+  <!-- 둥근 나무 (가장 왼쪽, 작음) -->
+  <rect x="21" y="128" width="8" height="26" rx="4" fill="url(#fs-trunk)"/>
+  <circle cx="25" cy="118" r="18" fill="url(#fs-leaf2)" stroke="#5E9873" stroke-width="1.8"/>
+
+  <!-- 둥근 나무 (가장 오른쪽) -->
+  <rect x="171" y="126" width="8" height="28" rx="4" fill="url(#fs-trunk)"/>
+  <circle cx="175" cy="116" r="19" fill="url(#fs-leaf2)" stroke="#5E9873" stroke-width="1.8"/>
+
+  <!-- 둥근 나무 (가운데, 가장 큼) -->
+  <rect x="98" y="124" width="11" height="32" rx="5" fill="url(#fs-trunk)"/>
+  <path d="M98 152 q-8 3 -11 6" fill="none" stroke="#7E5936" stroke-width="4" stroke-linecap="round"/>
+  <path d="M109 152 q8 3 11 6" fill="none" stroke="#7E5936" stroke-width="4" stroke-linecap="round"/>
+  <g stroke="#5E9873" stroke-width="1.8">
+    <circle cx="88"  cy="112" r="17" fill="url(#fs-leaf)"/>
+    <circle cx="118" cy="112" r="17" fill="url(#fs-leaf)"/>
+    <circle cx="103" cy="96"  r="21" fill="url(#fs-leaf)"/>
+  </g>
+  <circle cx="103" cy="108" r="20" fill="url(#fs-leaf)"/>
+  <!-- 잎에 닿는 빛 -->
+  <ellipse cx="94" cy="90" rx="11" ry="7" fill="#FFFFFF" opacity="0.22" transform="rotate(-28 94 90)"/>
+
+  <!-- ═══ 풀밭 ═══ -->
+  <path d="M0 152 C26 145, 52 148, 78 152 C104 156, 130 149, 158 150 C176 151, 190 154, 200 152 L200 200 L0 200 Z"
+        fill="url(#fs-ground)"/>
+
+  <!-- 쉴 만한 물가 -->
+  <ellipse cx="100" cy="176" rx="66" ry="15" fill="url(#fs-water)"/>
+  <ellipse cx="100" cy="176" rx="66" ry="15" fill="none" stroke="#7BB3C9" stroke-width="1.6" opacity="0.7"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" opacity="0.55">
+    <path d="M66 172 q9 -2.6 18 0"/>
+    <path d="M108 179 q11 -2.6 22 0"/>
+    <path d="M80 183 q8 -2.2 16 0"/>
+  </g>
+
+  <!-- 물가 돌 -->
+  <ellipse cx="42"  cy="166" rx="9"   ry="4.6" fill="#C3CBC2"/>
+  <ellipse cx="156" cy="164" rx="7.5" ry="4"   fill="#CDD4CB"/>
+
+  <!-- 잔풀 -->
+  <g fill="none" stroke="#6FA97E" stroke-width="2.2" stroke-linecap="round" opacity="0.85">
+    <path d="M18 158 q2 -8 5 -11"/>
+    <path d="M23 158 q0 -8 1 -12"/>
+    <path d="M180 156 q-2 -8 -5 -11"/>
+    <path d="M175 156 q0 -8 -1 -12"/>
+    <path d="M60 158 q1.6 -7 4 -10"/>
+  </g>
+</svg>

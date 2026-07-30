@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- 배경 — 연초록 자연 그라디언트 -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFF8E7"/>
+      <stop offset="100%" stop-color="#C8E6C9"/>
+    </radialGradient>
+    <radialGradient id="goldg" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#F5D060"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 배경 원 -->
+  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+
+  <!-- 연초록 잎사귀 장식 -->
+  <ellipse cx="80" cy="420" rx="70" ry="40" fill="#A5D6A7" opacity="0.45" transform="rotate(-30 80 420)"/>
+  <ellipse cx="430" cy="100" rx="60" ry="35" fill="#C8E6C9" opacity="0.50" transform="rotate(20 430 100)"/>
+  <ellipse cx="380" cy="420" rx="50" ry="28" fill="#81C784" opacity="0.35" transform="rotate(40 380 420)"/>
+  <ellipse cx="110" cy="120" rx="45" ry="25" fill="#A5D6A7" opacity="0.40" transform="rotate(-15 110 120)"/>
+
+  <!-- 십자가 -->
+  <rect x="228" y="100" width="56" height="220" rx="14" fill="url(#goldg)"/>
+  <rect x="148" y="165" width="216" height="56" rx="14" fill="url(#goldg)"/>
+
+  <!-- 십자가 광채 -->
+  <circle cx="256" cy="220" r="44" fill="#FFFFFF" opacity="0.22"/>
+
+  <!-- 아래 한글 첫 글자 강조 -->
+  <text x="256" y="390" text-anchor="middle" font-family="'Noto Sans KR', sans-serif"
+        font-size="72" font-weight="900" fill="#B8860B" opacity="0.90">기쁨</text>
+
+  <!-- 외곽 링 -->
+  <circle cx="256" cy="256" r="248" fill="none" stroke="#B8860B" stroke-width="8" opacity="0.35"/>
+</svg>

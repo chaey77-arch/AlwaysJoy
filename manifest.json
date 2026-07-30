@@ -1,0 +1,14 @@
+{
+  "name": "항상기쁨 Always Joy",
+  "short_name": "항상기쁨",
+  "description": "말씀·찬양·기도로 항상 기쁨을 누리는 신앙 동반자",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFF8E7",
+  "theme_color": "#B8860B",
+  "orientation": "portrait",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

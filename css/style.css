@@ -1,0 +1,1746 @@
+/* ===== 항상기쁨 — Modern Cafe Style ===== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Warm Cafe Palette */
+  --bg:         #F5F0E8;
+  --bg2:        #EDE8DE;
+  --surface:    #FFFFFF;
+  --surface2:   #FDFAF5;
+  --surface3:   #F7F3EC;
+
+  --gold:       #A67C2E;
+  --gold-bright:#C9962A;
+  --gold-pale:  #FBF5E6;
+  --gold-line:  rgba(166,124,46,0.18);
+
+  --green:      #4A7C59;
+  --green-pale: #EDF5EF;
+  --green-line: rgba(74,124,89,0.20);
+
+  --ink:        #1C1A14;
+  --ink2:       #4A4438;
+  --ink3:       #8A8070;
+  --ink4:       #B8B0A2;
+
+  --red:        #B85450;
+
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  22px;
+  --r-xl:  30px;
+
+  --shadow-xs: 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-sm: 0 2px 12px rgba(0,0,0,0.07);
+  --shadow-md: 0 6px 24px rgba(0,0,0,0.09);
+  --shadow-gold: 0 4px 20px rgba(166,124,46,0.20);
+
+  --t: 0.2s ease;
+}
+
+/* ─── Reset ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+a { text-decoration: none; color: inherit; }
+input, textarea { font-family: inherit; }
+
+/* ─── Screen switching ─── */
+/* dvh = 주소창을 뺀 "실제로 보이는" 높이. 100vh 는 주소창까지 포함해서
+   모바일에서 화면보다 크게 잡히므로 아래 버튼이 잘려 보인다.
+   dvh 를 모르는 구형 브라우저는 앞의 100vh 를 쓴다. */
+.screen { display: none; flex-direction: column; min-height: 100vh; }
+.screen { min-height: 100dvh; }
+.screen.active { display: flex; }
+/* active 가 아닌 화면은 무조건 숨긴다.
+   #screen-onboard 는 ID 선택자로 display:flex 를 갖고 있어 특정도가 더 높다.
+   이 규칙이 없으면 시작하기를 눌러도 온보딩이 화면에 남아, 홈이 그 아래로
+   밀려 스크롤해야 보였다. */
+.screen:not(.active) { display: none !important; }
+
+/* ══════════════════════════════════════
+   ONBOARDING
+══════════════════════════════════════ */
+/* 온보딩은 "주님 안에서 시작하기" 버튼까지 한 화면에 들어와야 한다.
+   그래서 세로 여백·크기를 화면 높이(vh)에 비례해 줄인다 —
+   clamp(최소, 화면비례, 최대) 라서 큰 화면에서는 지금 모습 그대로고
+   작은 폰에서만 촘촘해진다. 글씨 크기는 어르신을 생각해 많이 줄이지 않았다. */
+#screen-onboard {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(155deg, #F0EBE0 0%, #E8F0E9 50%, #EDE4D4 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: clamp(10px, 2.4vh, 52px) 24px clamp(10px, 2vh, 40px);
+  position: relative; overflow: hidden;
+}
+/* 아주 낮은 화면(가로로 눕힘 등)에서는 가운데 정렬을 풀고 스크롤을 허용한다.
+   flex 가운데 정렬 상태로 넘치면 위쪽이 잘려 스크롤로도 닿을 수 없기 때문. */
+@media (max-height: 520px) {
+  #screen-onboard {
+    justify-content: flex-start;
+    overflow-x: hidden; overflow-y: auto;
+  }
+}
+
+/* 배경 장식 원 */
+#screen-onboard::before {
+  content: '';
+  position: absolute; top: -120px; right: -80px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(74,124,89,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+#screen-onboard::after {
+  content: '';
+  position: absolute; bottom: -80px; left: -60px;
+  width: 260px; height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(166,124,46,0.10) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ob-cross {
+  font-size: 40px; margin-bottom: 16px;
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* 캐릭터 "기쁨이" — 온보딩 */
+.ob-char {
+  width: clamp(60px, 10.5vh, 112px);
+  height: clamp(60px, 10.5vh, 112px);
+  margin-bottom: clamp(2px, 1vh, 10px);
+  animation: char-float 3.4s ease-in-out infinite;
+}
+@keyframes char-float {
+  0%,100% { transform: translateY(0) rotate(-1.5deg); }
+  50%     { transform: translateY(-9px) rotate(1.5deg); }
+}
+/* 움직임에 민감한 사용자 배려 */
+@media (prefers-reduced-motion: reduce) {
+  .ob-char, .greet-char, .ob-cross, .fsv-cross { animation: none; }
+}
+@keyframes breathe {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.82; }
+}
+
+.ob-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(24px, 4.4vh, 34px); font-weight: 700;
+  color: var(--gold);
+  letter-spacing: -0.5px;
+  margin-bottom: 2px;
+}
+.ob-sub {
+  font-size: 13px; color: var(--ink3);
+  letter-spacing: 2px; margin-bottom: clamp(6px, 1.6vh, 24px);
+}
+
+.ob-verse-card {
+  width: 100%; max-width: 360px;
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(166,124,46,0.22);
+  border-radius: var(--r-lg);
+  padding: clamp(10px, 1.8vh, 20px) 22px;
+  margin-bottom: clamp(8px, 2.2vh, 28px);
+  text-align: center;
+}
+.ob-verse-line {
+  font-size: 17px; font-weight: 600;
+  color: var(--ink); line-height: clamp(24px, 4vh, 32px);
+  /* 좁은 폰에서도 '범사/에 감사하라' 처럼 낱말 중간이 잘리지 않게 */
+  word-break: keep-all;
+  overflow-wrap: break-word;   /* 낱말 자체가 줄보다 길면 그때만 쪼갠다 */
+}
+.ob-verse-ref {
+  font-size: 12px; color: var(--ink3);
+  margin-top: clamp(4px, 1vh, 10px); letter-spacing: 0.5px;
+}
+
+.ob-form { width: 100%; max-width: 360px; }
+.ob-label {
+  font-size: 13px; font-weight: 600;
+  color: var(--ink3); letter-spacing: 0.5px;
+  margin-bottom: clamp(4px, 0.9vh, 8px); display: block;
+}
+.ob-input {
+  width: 100%; padding: clamp(10px, 1.8vh, 14px) 18px;
+  background: rgba(255,255,255,0.85);
+  border: 1.5px solid rgba(166,124,46,0.25);
+  border-radius: var(--r-md);
+  font-size: 17px; color: var(--ink);
+  outline: none; margin-bottom: clamp(8px, 1.8vh, 16px);
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.ob-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(166,124,46,0.12);
+}
+
+.ob-age-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: clamp(5px, 1vh, 8px); margin-bottom: clamp(10px, 2.2vh, 20px);
+}
+.ob-age-btn {
+  padding: clamp(7px, 1.4vh, 12px) 8px;
+  background: rgba(255,255,255,0.70);
+  border: 1.5px solid rgba(166,124,46,0.18);
+  border-radius: var(--r-md);
+  font-size: 14px; font-weight: 600;
+  color: var(--ink2); line-height: 1.5;
+  transition: all var(--t);
+}
+/* 연령대 이름은 버튼 크기 그대로, 범위만 작게 */
+.ob-age-btn .ob-age-name { display: block; }
+.ob-age-btn .ob-age-range { font-size: 11px; color: var(--ink3); display: block; font-weight: 400; }
+.ob-age-btn.selected {
+  background: var(--gold); color: #fff;
+  border-color: var(--gold);
+  box-shadow: var(--shadow-gold);
+}
+.ob-age-btn.selected .ob-age-range { color: rgba(255,255,255,0.8); }
+
+.ob-start-btn {
+  width: 100%; padding: clamp(12px, 2.2vh, 16px);
+  background: var(--gold);
+  color: #fff; font-size: 16px; font-weight: 700;
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-gold);
+  transition: transform var(--t), box-shadow var(--t);
+  letter-spacing: 0.3px;
+}
+.ob-start-btn:active { transform: scale(0.97); box-shadow: none; }
+
+/* ══════════════════════════════════════
+   APP HEADER
+══════════════════════════════════════ */
+.app-header {
+  position: sticky; top: 0; z-index: 90;
+  background: rgba(245,240,232,0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.hdr-left { display: flex; flex-direction: column; min-width: 0; }
+.hdr-name {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--ink);
+  /* 한글은 기본 규칙이 음절 단위라 '주님 안에서' 가 '주님 안 / 에서' 로
+     갈렸다. keep-all 로 낱말 중간을 막고, 낱말 자체가 줄보다 길 때만 쪼갠다 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.45;
+}
+.hdr-date { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.hdr-bell {
+  width: 40px; height: 40px;
+  background: var(--surface);
+  border: 1px solid var(--gold-line);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; box-shadow: var(--shadow-xs);
+  transition: background var(--t);
+}
+.hdr-bell:active { background: var(--gold-pale); }
+
+/* ══════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════ */
+.tab-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0,0,0,0.07);
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab-btn {
+  flex: 1; padding: 8px 0 6px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 2px;
+  transition: background var(--t);
+  min-width: 0;
+}
+.tab-btn:active { background: var(--gold-pale); }
+.tab-icon { font-size: 20px; transition: transform 0.2s; }
+.tab-btn.active .tab-icon { transform: scale(1.1); }
+.tab-label { font-size: 9px; font-weight: 600; color: var(--ink4); letter-spacing: 0; white-space: nowrap; }
+.tab-btn.active .tab-label { color: var(--gold); }
+
+/* ══════════════════════════════════════
+   TAB CONTENT AREA
+══════════════════════════════════════ */
+.tab-content {
+  display: none; flex: 1;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 16px 16px 88px;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-content.active { display: block; }
+
+/* ─── Card base ─── */
+.card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.card-inner { padding: 18px; }
+.card-label {
+  font-size: 11px; font-weight: 700;
+  color: var(--ink3); letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.card-label::before { content: ''; display: block; width: 3px; height: 12px; background: var(--gold); border-radius: 2px; }
+
+/* ─── 2-col grid ─── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+
+/* ═══════ HOME TAB ═══════ */
+
+/* 인사 카드 — 캐릭터가 말을 걸어주는 느낌 */
+.greet-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-lg);
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.greet-char {
+  width: 72px; height: 72px; flex-shrink: 0;
+  animation: char-float 3.4s ease-in-out infinite;
+}
+.greet-body { flex: 1; min-width: 0; }
+/* 인사 문구는 낱말 중간에서 끊지 않는다 — '좋은 저 / 녁이에요' 방지.
+   어디서 줄을 갈지는 JS(setPhrase)가 줄바꿈 없는 공백으로 정해 준다 */
+.greet-hi {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 17px; font-weight: 700;
+  color: var(--ink); margin-bottom: 3px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+.greet-msg {
+  font-size: 13px; color: var(--ink2); line-height: 1.6;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* Hero verse */
+.hero-card {
+  background: linear-gradient(145deg, #2D4A35 0%, #1A3324 100%);
+  border-radius: var(--r-xl);
+  padding: 28px 22px 24px;
+  margin-bottom: 12px;
+  position: relative; overflow: hidden;
+}
+.hero-card::before {
+  content: '✦';
+  position: absolute; right: 18px; top: 16px;
+  font-size: 80px; color: rgba(255,255,255,0.04);
+  line-height: 1;
+}
+.hero-label {
+  font-size: 11px; font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 1.5px; margin-bottom: 14px;
+}
+.hero-verse {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 20px; font-weight: 600;
+  color: #fff; line-height: 1.75;
+  margin-bottom: 14px;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.hero-ref {
+  font-size: 12px; color: rgba(255,255,255,0.55);
+  margin-bottom: 16px;
+}
+.hero-actions { display: flex; gap: 8px; }
+.hero-btn {
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50px; color: #fff;
+  font-size: 12px; font-weight: 600;
+  transition: background var(--t);
+}
+.hero-btn:active { background: rgba(255,255,255,0.22); }
+.hero-btn.primary { background: var(--gold); border-color: var(--gold); }
+
+/* Quick grid cards */
+.quick-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 16px 12px;
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+  border: 1px solid rgba(0,0,0,0.04);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  transition: transform var(--t), box-shadow var(--t);
+}
+.quick-card:active { transform: scale(0.96); box-shadow: none; }
+.quick-icon { font-size: 26px; }
+.quick-label { font-size: 12px; font-weight: 600; color: var(--ink2); }
+
+/* Three commands */
+.cmd-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.cmd-row:last-child { border-bottom: none; padding-bottom: 0; }
+.cmd-dot {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.cmd-body { flex: 1; }
+.cmd-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+.cmd-ref { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+
+/* Streak pill */
+.streak-pill {
+  background: var(--gold-pale);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-xl);
+  padding: 12px 18px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.streak-left { display: flex; align-items: center; gap: 10px; }
+.streak-num { font-family: 'Noto Serif KR', serif; font-size: 26px; font-weight: 700; color: var(--gold); }
+.streak-text { font-size: 13px; color: var(--ink2); font-weight: 500; }
+.streak-arrow { font-size: 18px; color: var(--gold); }
+
+/* ═══════ WORD TAB ═══════ */
+.verse-hero {
+  background: linear-gradient(145deg, #1A3324 0%, #2D5040 100%);
+  border-radius: var(--r-xl);
+  padding: 28px 22px;
+  margin-bottom: 12px;
+  text-align: center; position: relative;
+}
+.verse-hero-text {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 18px; font-weight: 600;
+  color: #fff; line-height: 1.8; margin-bottom: 10px;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.verse-hero-ref { font-size: 12px; color: rgba(255,255,255,0.55); margin-bottom: 18px; }
+.verse-nav { display: flex; gap: 8px; justify-content: center; }
+.verse-nav-btn {
+  padding: 8px 18px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50px; color: #fff;
+  font-size: 12px; font-weight: 600;
+  transition: background var(--t);
+}
+.verse-nav-btn:active { background: rgba(255,255,255,0.22); }
+.verse-nav-btn.accent { background: var(--gold); border-color: var(--gold); }
+
+/* Topic chips */
+.chip-scroll {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; margin-bottom: 14px;
+}
+.chip-scroll::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 7px 14px;
+  background: var(--surface);
+  border: 1.5px solid rgba(0,0,0,0.08);
+  border-radius: 50px;
+  font-size: 12px; font-weight: 600;
+  color: var(--ink2); white-space: nowrap;
+  transition: all var(--t); flex-shrink: 0;
+}
+.chip.active { background: var(--gold); border-color: var(--gold); color: #fff; }
+
+/* Topic verses */
+.topic-verse {
+  background: var(--surface3);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.topic-verse-text { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.75; }
+.topic-verse-ref { font-size: 11px; color: var(--gold); margin-top: 6px; font-weight: 600; }
+.topic-verse-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+/* ══════════════════════════════════════
+   좋아하는 말씀 — 읽는 자리에서 바로 담는 하트
+   손끝이 둔한 어르신도 누를 수 있게 44px 을 확보한다
+══════════════════════════════════════ */
+.fav-btn {
+  flex-shrink: 0;
+  min-width: 44px; min-height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none;
+  font-size: 20px; line-height: 1;
+  color: var(--ink4);
+  transition: color var(--t), transform var(--t);
+}
+.fav-btn.on { color: #C64B5C; }
+.fav-btn:active { transform: scale(0.86); }
+
+/* 오늘의 말씀(다크 카드) 안의 담기 버튼 — 글씨까지 있어 찾기 쉽다 */
+.fav-hero-btn {
+  margin-top: 12px; padding: 10px 20px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50px;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.78);
+  transition: background var(--t), color var(--t);
+}
+.fav-hero-btn.on {
+  background: rgba(198,75,92,0.26);
+  border-color: rgba(255,160,175,0.5);
+  color: #FFD9DF;
+}
+
+/* ══════════════════════════════════════
+   말씀 탭 안의 서브탭 — 주제별 말씀 · 성경읽기 · 설교 유튜브
+══════════════════════════════════════ */
+.subtabs {
+  display: flex; gap: 6px;
+  background: var(--bg2);
+  padding: 5px; border-radius: 50px;
+  margin-bottom: 14px;
+}
+.subtab {
+  flex: 1; padding: 11px 6px;
+  border-radius: 50px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--ink3); background: transparent;
+  white-space: nowrap; transition: all var(--t);
+}
+.subtab.active {
+  background: var(--surface); color: var(--gold);
+  box-shadow: var(--shadow-xs);
+}
+.subpanel { display: none; }
+.subpanel.active { display: block; }
+
+/* ══════════════════════════════════════
+   성경읽기 — 66권 (개역한글)
+   어르신이 읽는 화면이라 글씨·터치 영역을 넉넉하게 잡았다
+══════════════════════════════════════ */
+.bible-picker { display: flex; gap: 8px; margin-bottom: 12px; }
+.bible-select {
+  flex: 1; min-width: 0;
+  padding: 14px 12px;
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  color: var(--ink); background: var(--surface);
+  border: 1.5px solid var(--gold-line);
+  border-radius: var(--r-md);
+  appearance: none; -webkit-appearance: none;
+  /* 직접 그린 화살표 — 기본 화살표가 기기마다 너무 작다 */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' fill='none' stroke='%23A67C2E' stroke-width='2' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  padding-right: 36px;
+}
+.bible-select:focus { outline: none; border-color: var(--gold); }
+/* 책 이름은 길고 장은 숫자뿐이라 너비를 다르게 준다 */
+#bible-book { flex: 2.1; }
+#bible-chapter { flex: 1; }
+
+/* 이어읽기 */
+.bible-resume-btn {
+  width: 100%; padding: 13px 16px;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--gold-pale);
+  border: 1.5px solid var(--gold-line);
+  border-radius: var(--r-md);
+  font-family: inherit; text-align: left;
+}
+.bible-resume-icon { font-size: 20px; flex-shrink: 0; }
+.bible-resume-body { flex: 1; min-width: 0; }
+.bible-resume-label { font-size: 11px; color: var(--ink3); font-weight: 600; }
+.bible-resume-where { font-size: 15px; color: var(--gold); font-weight: 700; margin-top: 1px; }
+.bible-resume-arrow { color: var(--gold); font-size: 17px; flex-shrink: 0; }
+
+/* 처음 읽는 분께 권하는 곳 */
+.bible-starters { display: flex; flex-wrap: wrap; gap: 7px; }
+.bible-starter {
+  padding: 9px 13px;
+  background: var(--surface3);
+  border: 1.5px solid rgba(0,0,0,0.07);
+  border-radius: 50px;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  color: var(--ink2); text-align: left;
+}
+.bible-starter em {
+  font-style: normal; font-weight: 400;
+  color: var(--ink3); font-size: 11px;
+}
+
+/* 본문 */
+.bible-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 12px;
+}
+.bible-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 19px; font-weight: 700; color: var(--ink);
+}
+.bible-size-btn {
+  flex-shrink: 0;
+  padding: 8px 13px;
+  background: var(--surface3);
+  border: 1.5px solid var(--gold-line);
+  border-radius: 50px;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  color: var(--ink2);
+}
+
+/* 절 — 크기는 .bible-body 의 --v 로 조절한다 (글씨 크기 버튼) */
+.bible-body { --v: 17px; }
+.bible-verse {
+  display: flex; gap: 9px;
+  align-items: flex-start;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+/* 절 본문이 남는 폭을 다 쓰고, 하트는 오른쪽에 붙는다 */
+.bible-verse .bible-verse-text { flex: 1; min-width: 0; }
+/* 절 안의 하트는 본문을 밀지 않게 폭만 좁힌다 (세로 44px 은 그대로) */
+.bible-verse .fav-btn { min-width: 34px; margin-right: -6px; font-size: 18px; }
+.bible-verse:last-child { border-bottom: none; }
+.bible-verse-num {
+  flex-shrink: 0; min-width: 22px;
+  font-size: calc(var(--v) - 4px); font-weight: 700;
+  color: var(--gold); line-height: 1.95;
+  text-align: right;
+}
+.bible-verse-text {
+  font-size: var(--v); color: var(--ink);
+  line-height: 1.95;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+
+/* 불러오는 중 · 오류 */
+.bible-state {
+  padding: 30px 16px; text-align: center;
+  font-size: 14px; color: var(--ink3); line-height: 1.8;
+}
+.bible-retry {
+  margin-top: 12px; padding: 11px 22px;
+  background: var(--gold); color: #fff;
+  border-radius: 50px;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+}
+
+.bible-nav { display: flex; gap: 8px; margin-top: 14px; }
+.bible-nav-btn {
+  flex: 1; padding: 14px 10px;
+  background: var(--surface3);
+  border: 1.5px solid var(--gold-line);
+  border-radius: var(--r-md);
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  color: var(--ink2);
+}
+.bible-nav-btn:disabled { opacity: 0.4; }
+
+/* 맨 위로 — 이전/다음 장 사이. 한 장을 다 읽고 나면 손가락으로 한참
+   올려야 책 고르는 칸이 나와서, 그 수고를 없앤다.
+   가운데라 좁은 폰에서도 양쪽 버튼 글씨가 깨지지 않게 폭을 조금 줄였다. */
+.bible-top-btn {
+  flex: 0.74;
+  padding: 14px 6px;
+  font-size: 13px;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.bible-credit {
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  font-size: 10.5px; color: var(--ink4); line-height: 1.7;
+}
+
+/* 읽기 진도 — "창세기 12/50장" */
+.bible-progress { margin: 12px 0 4px; }
+.bible-progress-bar {
+  height: 6px; border-radius: 50px;
+  background: var(--bg2); overflow: hidden;
+}
+.bible-progress-bar > span {
+  display: block; height: 100%;
+  background: var(--gold); border-radius: 50px;
+  transition: width var(--t);
+}
+.bible-progress-text {
+  margin-top: 6px;
+  font-size: 11px; font-weight: 600; color: var(--ink3);
+}
+
+/* ══════════════════════════════════════
+   내 기록 이어가기 (클라우드)
+══════════════════════════════════════ */
+.cloud-who { font-size: 13px; color: var(--ink2); line-height: 1.6; margin-bottom: 4px; }
+.cloud-status { font-size: 11.5px; color: var(--gold); margin-bottom: 8px; }
+.cloud-row { display: flex; gap: 8px; }
+.cloud-btn {
+  width: 100%; margin-top: 10px; padding: 15px 12px;
+  border: none; border-radius: var(--r-md);
+  font-family: inherit; font-size: 15px; font-weight: 700;
+  color: var(--ink);
+}
+/* 카카오 공식 색 — 어르신이 아는 노란 버튼이라 찾기 쉽다 */
+.cloud-btn.kakao { background: #FEE500; color: #191600; }
+.cloud-btn.ghost {
+  flex: 1; padding: 12px 10px;
+  background: var(--surface3);
+  border: 1.5px solid var(--gold-line);
+  font-size: 13px; color: var(--ink2);
+}
+.cloud-note {
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  font-size: 10.5px; color: var(--ink4); line-height: 1.75;
+}
+
+/* Video list */
+.video-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.video-item:last-child { border-bottom: none; }
+.video-thumb {
+  width: 48px; height: 48px; border-radius: var(--r-sm);
+  background: #1A1A1A;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.video-body { flex: 1; min-width: 0; }
+.video-title { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.4; }
+.video-ch { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.video-arrow { font-size: 14px; color: var(--ink4); }
+
+/* ═══════ HYMN TAB ═══════ */
+.now-playing {
+  background: linear-gradient(145deg, #2A1F0E 0%, #3D2E15 100%);
+  border-radius: var(--r-xl);
+  padding: 28px 22px 24px;
+  margin-bottom: 12px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.now-playing::before {
+  content: '♪';
+  position: absolute; right: 12px; top: 8px;
+  font-size: 100px; color: rgba(255,255,255,0.04);
+  line-height: 1; font-family: serif;
+}
+.np-label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 1.5px; margin-bottom: 10px; }
+.np-title { font-family: 'Noto Serif KR', serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.np-artist { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 18px; }
+
+.np-lyrics {
+  background: rgba(255,255,255,0.07);
+  border-radius: var(--r-md);
+  padding: 16px;
+  margin-bottom: 20px;
+  max-height: 140px; overflow-y: auto;
+}
+.np-lyrics-text {
+  font-size: 13px; color: rgba(255,255,255,0.80);
+  line-height: 2; white-space: pre-line; text-align: center;
+}
+.np-controls { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.np-ctrl {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255,255,255,0.10);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: #fff;
+  transition: background var(--t);
+}
+.np-ctrl:active { background: rgba(255,255,255,0.2); }
+.np-play {
+  width: 60px; height: 60px; border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: #fff;
+  box-shadow: 0 4px 16px rgba(166,124,46,0.5);
+  transition: transform var(--t);
+}
+.np-play:active { transform: scale(0.92); }
+.np-note { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 14px; }
+
+/* Hymn list row */
+.hymn-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  transition: background var(--t);
+}
+.hymn-row:last-child { border-bottom: none; }
+.hymn-row.playing .hymn-row-title { color: var(--gold); }
+.hymn-row-num { font-size: 13px; font-weight: 700; color: var(--ink4); min-width: 20px; }
+.hymn-row-body { flex: 1; }
+.hymn-row-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+.hymn-row-note { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.hymn-row-badge { font-size: 13px; }
+
+/* ═══════ PRAYER TAB ═══════ */
+.prayer-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.prayer-type-card {
+  background: var(--surface);
+  border: 1.5px solid rgba(0,0,0,0.06);
+  border-radius: var(--r-md);
+  padding: 14px 12px;
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+  transition: all var(--t); cursor: pointer;
+}
+.prayer-type-card:active, .prayer-type-card.selected {
+  border-color: var(--gold);
+  background: var(--gold-pale);
+}
+.prayer-type-icon { font-size: 24px; margin-bottom: 4px; }
+.prayer-type-label { font-size: 12px; font-weight: 700; color: var(--ink2); }
+
+.prayer-guide-box {
+  background: var(--green-pale);
+  border-left: 3px solid var(--green);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.prayer-guide-line {
+  font-size: 13px; color: var(--ink);
+  line-height: 1.8; display: flex; gap: 8px;
+  margin-bottom: 6px;
+}
+.prayer-guide-line:last-child { margin-bottom: 0; }
+.prayer-guide-line::before { content: '•'; color: var(--green); flex-shrink: 0; }
+
+.prayer-textarea {
+  width: 100%; padding: 14px;
+  background: var(--surface3);
+  border: 1.5px solid rgba(0,0,0,0.07);
+  border-radius: var(--r-md);
+  font-size: 14px; color: var(--ink);
+  line-height: 1.7; resize: none; outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+  margin-bottom: 10px;
+}
+.prayer-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(166,124,46,0.10);
+}
+.prayer-textarea::placeholder { color: var(--ink4); }
+
+.prayer-saved-row {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.prayer-saved-row:last-child { border-bottom: none; }
+.prayer-saved-meta { font-size: 11px; color: var(--gold); font-weight: 600; margin-bottom: 4px; }
+.prayer-saved-text { font-size: 13px; color: var(--ink); line-height: 1.65; }
+
+/* ═══════ GRATITUDE TAB ═══════ */
+.streak-card {
+  background: linear-gradient(145deg, var(--gold) 0%, var(--gold-bright) 100%);
+  border-radius: var(--r-xl);
+  padding: 22px;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 16px;
+}
+.streak-big { font-family: 'Noto Serif KR', serif; font-size: 44px; font-weight: 700; color: #fff; line-height: 1; }
+.streak-right { flex: 1; }
+.streak-main { font-size: 15px; font-weight: 700; color: #fff; }
+.streak-sub { font-size: 12px; color: rgba(255,255,255,0.70); margin-top: 2px; }
+
+.g-input-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.g-badge {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--gold); color: #fff;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.g-input {
+  flex: 1; padding: 12px 14px;
+  background: var(--surface3);
+  border: 1.5px solid rgba(0,0,0,0.06);
+  border-radius: var(--r-md);
+  font-size: 14px; color: var(--ink); outline: none;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.g-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(166,124,46,0.10);
+}
+.g-input::placeholder { color: var(--ink4); }
+
+.g-history-day { margin-bottom: 14px; }
+.g-history-date {
+  font-size: 11px; font-weight: 700; color: var(--gold);
+  letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.g-history-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 13px; color: var(--ink); line-height: 1.6;
+  margin-bottom: 4px;
+}
+.g-history-item::before { content: '✦'; color: var(--gold); font-size: 9px; margin-top: 4px; flex-shrink: 0; }
+
+/* ─── 임마누엘 일기 ───────────────────────────────────────
+   '하나님이 우리와 함께 계시다'. 다섯 단계를 차례로 적는 화면이라
+   단계마다 번호를 크게 두어 어디까지 썼는지 한눈에 보이게 했다.
+   글씨 크기는 --imm-fs 로 JS 가 정해 준다 (어르신이 직접 키운다) */
+.imm-intro {
+  font-size: 12px; color: var(--ink3);
+  line-height: 1.7; margin-bottom: 12px;
+  word-break: keep-all;
+}
+.imm-intro b { color: var(--gold); font-weight: 700; }
+
+/* 곁에 두는 말씀 — 함께하심을 붙들어 주는 한 구절 */
+.imm-verse {
+  background: var(--green-pale);
+  border-left: 3px solid var(--green);
+  border-radius: var(--r-sm);
+  padding: 12px 14px; margin-bottom: 14px;
+}
+.imm-verse-text {
+  font-size: var(--imm-fs, 13px);
+  font-weight: 600; color: var(--ink);
+  line-height: 1.65;
+  word-break: keep-all;       /* 말씀이 낱말 중간에서 갈리지 않게 */
+  overflow-wrap: break-word;
+}
+.imm-verse-ref { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 5px; }
+
+.imm-step {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.imm-step:last-of-type { border-bottom: none; }
+.imm-step-head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+.imm-step-num {
+  width: 20px; height: 20px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--green); color: #fff;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.imm-step-icon { font-size: 15px; flex-shrink: 0; }
+.imm-step-title {
+  font-size: var(--imm-fs, 14px);
+  font-weight: 700; color: var(--ink);
+  word-break: keep-all;
+}
+.imm-step-ask {
+  font-size: calc(var(--imm-fs, 14px) - 1px);
+  color: var(--ink3); line-height: 1.6;
+  margin-bottom: 8px; padding-left: 27px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+.imm-input {
+  width: 100%; padding: 11px 13px;
+  background: var(--surface3);
+  border: 1.5px solid rgba(0,0,0,0.06);
+  border-radius: var(--r-md);
+  font-size: var(--imm-fs, 14px);
+  color: var(--ink); line-height: 1.65;
+  outline: none; resize: none;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.imm-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(74,124,89,0.10);
+}
+.imm-input::placeholder { color: var(--ink4); }
+.imm-note {
+  font-size: 11px; color: var(--ink4);
+  margin: 12px 0 10px; text-align: center;
+  word-break: keep-all;
+}
+
+/* ─── 사진 (최대 5장) ─────────────────────────────────────
+   쓸 말이 없는 날에도 사진으로 하루가 남는다.
+   두 칸씩 놓아 어르신 화면에서도 사진이 충분히 크게 보이게 했다 */
+.imm-photo-box {
+  padding: 12px 0 4px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  margin-top: 4px;
+}
+.imm-photo-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 8px;
+}
+.imm-photo-wrap { position: relative; }
+.imm-photo {
+  width: 100%; aspect-ratio: 1 / 1;
+  object-fit: cover;                 /* 세로·가로 사진이 섞여도 격자가 안 흔들린다 */
+  border-radius: var(--r-md);
+  display: block;
+  background: var(--surface3);
+}
+/* 지우기 단추 — 어르신이 정확히 누를 수 있게 28px 확보 */
+.imm-photo-del {
+  position: absolute; top: 6px; right: 6px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,0.55); color: #fff;
+  font-size: 13px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.imm-photo-del:active { transform: scale(0.9); }
+.imm-photo-size {
+  font-size: 11px; color: var(--ink4);
+  text-align: right; margin-bottom: 8px;
+}
+/* 다섯 장을 다 채우면 버튼을 눌러도 소용없으니 눌리지 않게 보인다 */
+#imm-photo-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* 기록 목록의 사진 */
+.imm-hist-photo { margin-top: 6px; }
+.imm-hist-photo .imm-photo { aspect-ratio: 1 / 1; }
+
+/* 임마누엘 일기 기록 */
+.imm-hist-day {
+  padding-bottom: 12px; margin-bottom: 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.imm-hist-day:last-child { border-bottom: none; margin-bottom: 0; }
+.imm-hist-date {
+  font-size: 11px; font-weight: 700; color: var(--green);
+  letter-spacing: 0.5px; margin-bottom: 7px;
+}
+.imm-hist-row { margin-bottom: 7px; }
+.imm-hist-label { font-size: 11px; font-weight: 600; color: var(--ink3); margin-bottom: 2px; }
+.imm-hist-text {
+  font-size: var(--imm-fs, 13px);
+  color: var(--ink); line-height: 1.65;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* ═══════ ALBUM TAB ═══════ */
+.album-banner {
+  background: linear-gradient(145deg, #1D3A28 0%, #2D5040 100%);
+  border-radius: var(--r-xl);
+  padding: 24px 20px;
+  margin-bottom: 12px; text-align: center;
+}
+.album-banner-verse {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 16px; font-weight: 600; color: #fff;
+  line-height: 1.8; margin-bottom: 6px;
+}
+.album-banner-ref { font-size: 11px; color: rgba(255,255,255,0.45); }
+
+.album-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.album-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 18px 14px;
+  box-shadow: var(--shadow-xs);
+  border: 1px solid rgba(0,0,0,0.04);
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  transition: transform var(--t);
+  cursor: pointer;
+}
+.album-card:active { transform: scale(0.96); }
+.album-card-icon { font-size: 28px; }
+.album-card-label { font-size: 12px; font-weight: 700; color: var(--ink2); text-align: center; }
+.album-card-count { font-size: 11px; color: var(--ink3); }
+
+/* ═══════ BUTTONS ═══════ */
+.btn-primary {
+  width: 100%; padding: 15px;
+  background: var(--gold); color: #fff;
+  font-size: 15px; font-weight: 700;
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-gold);
+  transition: transform var(--t), box-shadow var(--t);
+  letter-spacing: 0.2px;
+}
+.btn-primary:active { transform: scale(0.97); box-shadow: none; }
+.btn-secondary {
+  width: 100%; padding: 13px;
+  background: var(--surface3); color: var(--ink2);
+  font-size: 14px; font-weight: 600;
+  border-radius: var(--r-xl);
+  border: 1.5px solid rgba(0,0,0,0.08);
+  transition: background var(--t);
+}
+.btn-secondary:active { background: var(--bg2); }
+
+/* ═══════ MODAL ═══════ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.40); z-index: 200;
+  align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  padding: 0 20px calc(env(safe-area-inset-bottom,0) + 24px);
+  width: 100%; max-height: 88vh; overflow-y: auto;
+  animation: slide-up 0.28s ease;
+}
+@keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--bg2); border-radius: 2px;
+  margin: 14px auto 20px;
+}
+.modal-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 18px; font-weight: 700;
+  color: var(--ink); margin-bottom: 18px;
+}
+.modal-input {
+  width: 100%; padding: 13px 15px;
+  background: var(--surface3);
+  border: 1.5px solid rgba(0,0,0,0.07);
+  border-radius: var(--r-md);
+  font-size: 14px; color: var(--ink);
+  outline: none; margin-bottom: 8px;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.modal-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(166,124,46,0.10);
+}
+.modal-saved-item {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+/* 담아 둔 말씀 목록 — 되읽는 글이라 크기를 고를 수 있다 (--fav-fs 는 JS 가 심는다) */
+.fav-verse-text {
+  font-size: var(--fav-fs, 14px);
+  font-weight: 500; color: var(--ink);
+  line-height: 1.7;
+  word-break: keep-all;        /* 말씀이 낱말 중간에서 갈리지 않게 */
+  overflow-wrap: break-word;
+}
+.fav-verse-ref {
+  font-size: calc(var(--fav-fs, 14px) - 2px);
+  color: var(--gold); font-weight: 600; margin-top: 4px;
+}
+.modal-saved-item:last-child { border-bottom: none; }
+.modal-saved-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.modal-saved-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+.modal-del-btn {
+  margin-top: 6px; padding: 4px 12px;
+  background: var(--bg2); border-radius: 50px;
+  font-size: 11px; color: var(--ink3);
+}
+
+/* ═══════ COMPANION BANNER ═══════ */
+.companion-banner {
+  display: none; position: fixed;
+  top: 0; left: 0; right: 0; z-index: 300;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(166,124,46,0.20);
+  padding: 16px 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  animation: slide-down 0.3s ease;
+}
+.companion-banner.show { display: block; }
+@keyframes slide-down { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+.cb-text { font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.6; margin-bottom: 12px; }
+.cb-actions { display: flex; gap: 8px; }
+.cb-btn {
+  padding: 9px 18px; border-radius: 50px;
+  font-size: 13px; font-weight: 600;
+  transition: all var(--t);
+}
+.cb-btn.primary { background: var(--gold); color: #fff; }
+.cb-btn.secondary { background: var(--bg2); color: var(--ink3); }
+
+/* ═══════ FULLSCREEN VERSE ═══════ */
+.fullscreen-verse {
+  display: none; position: fixed; inset: 0; z-index: 400;
+  background: linear-gradient(155deg, #1A2E1F 0%, #0F1F14 100%);
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 48px 32px; text-align: center;
+}
+.fullscreen-verse.show { display: flex; }
+.fsv-cross { font-size: 40px; margin-bottom: 24px; animation: breathe 4s ease-in-out infinite; }
+.fsv-text {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 22px; font-weight: 600;
+  color: #fff; line-height: 1.85;
+  margin-bottom: 16px;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.fsv-ref { font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 48px; }
+.fsv-close {
+  padding: 14px 36px; background: var(--gold);
+  color: #fff; font-size: 15px; font-weight: 700;
+  border-radius: 50px; box-shadow: var(--shadow-gold);
+}
+
+/* ═══════ TOAST ═══════ */
+.toast {
+  position: fixed; bottom: 86px;
+  left: 50%; transform: translateX(-50%) translateY(8px);
+  background: rgba(28,26,20,0.90);
+  backdrop-filter: blur(8px);
+  color: #fff; padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; transition: opacity 0.25s, transform 0.25s;
+  z-index: 500; white-space: nowrap; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ═══════ Empty state ═══════ */
+.empty { padding: 32px 0; text-align: center; }
+.empty-icon { font-size: 36px; margin-bottom: 8px; }
+.empty-text { font-size: 13px; color: var(--ink3); line-height: 1.7; }
+
+/* ═══════ Scrollbar ═══════ */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg2); border-radius: 2px; }
+
+/* ═══════ Section spacing ═══════ */
+.section-gap { height: 8px; }
+
+/* ══════════════════════════════════════
+   성경 이야기 탭 — Bible Story Tab
+══════════════════════════════════════ */
+
+/* 시대 타임라인 가로 스크롤 */
+.era-scroll {
+  display: flex; gap: 10px;
+  overflow-x: auto; padding: 4px 2px 12px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.era-scroll::-webkit-scrollbar { display: none; }
+
+.era-chip {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; flex-shrink: 0;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid rgba(0,0,0,0.07);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--t);
+  min-width: 80px;
+  text-align: center;
+}
+.era-chip:active, .era-chip.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+.era-chip-icon { font-size: 22px; }
+.era-chip-label {
+  font-size: 11px; font-weight: 700;
+  color: var(--ink2); line-height: 1.3;
+}
+.era-chip.active .era-chip-label { color: #fff; }
+.era-chip-period {
+  font-size: 10px; color: var(--ink4);
+}
+.era-chip.active .era-chip-period { color: rgba(255,255,255,0.55); }
+
+/* 시대 히어로 배너 */
+.story-hero {
+  border-radius: var(--r-xl);
+  padding: 24px 20px 20px;
+  margin-bottom: 12px;
+  position: relative; overflow: hidden;
+  color: #fff;
+}
+.story-hero::before {
+  content: attr(data-icon);
+  position: absolute; right: 16px; top: 12px;
+  font-size: 72px; opacity: 0.12; line-height: 1;
+}
+.story-hero-period {
+  font-size: 11px; color: rgba(255,255,255,0.50);
+  letter-spacing: 1.5px; margin-bottom: 6px;
+}
+.story-hero-era {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 6px;
+}
+.story-hero-books {
+  font-size: 12px; color: rgba(255,255,255,0.60);
+  margin-bottom: 12px;
+}
+.story-hero-tagline {
+  font-size: 14px; line-height: 1.6;
+  color: rgba(255,255,255,0.85);
+  background: rgba(0,0,0,0.15);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+}
+
+/* TTS 컨트롤 바 — 라벨을 버튼 위 한 줄로 올린다.
+   한 줄에 같이 두면 좁은 폰에서 라벨이 버튼에 밀려 글자 폭까지
+   찌그러지면서 세로로 한 자씩 쪼개진다 (시대 이름이 길어서 특히 심하다) */
+.tts-bar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 12px 14px;
+  background: var(--surface3);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: var(--r-md);
+  margin-bottom: 12px;
+}
+.tts-label {
+  /* 한 줄 통째로 차지 — 아래 버튼들과 같은 줄에 서지 않게 한다 */
+  flex: 0 0 100%;
+  min-width: 0;
+  font-size: 13px; font-weight: 600;
+  color: var(--ink2);
+  line-height: 1.5;
+  word-break: keep-all;   /* 한글은 단어 단위로 끊는다 */
+}
+.tts-speed-btn {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  background: var(--bg2); border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  white-space: nowrap;    /* '느리게' 가 두 줄로 갈라지지 않게 */
+  color: var(--ink3); transition: all var(--t);
+}
+.tts-speed-btn.active { background: var(--gold); color: #fff; }
+/* 재생·정지는 36px — 40px 이면 320px 폭 폰에서 다섯 버튼 합이 넘쳐
+   정지 버튼 혼자 아래 줄로 떨어진다. margin-left:auto 도 그 원인이라 뺐다 */
+.tts-btn {
+  flex-shrink: 0;
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; line-height: 1;
+  transition: all var(--t);
+}
+.tts-btn.play { background: var(--green); color: #fff; box-shadow: 0 3px 12px rgba(74,124,89,0.35); }
+.tts-btn.stop { background: var(--bg2); color: var(--ink3); }
+.tts-btn:active { transform: scale(0.92); }
+
+/* 역사 이야기 글씨 크기 버튼 줄 — 오른쪽에 붙여 본문을 가리지 않게 */
+.story-size-row {
+  display: flex; justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+/* 스토리 본문 — 크기는 JS 가 인라인으로 덮어쓴다 (여기 값은 기본값) */
+.story-body {
+  font-size: 14px; line-height: 1.9;
+  color: var(--ink); white-space: pre-wrap;
+}
+.story-body strong { font-weight: 700; color: var(--gold); }
+
+/* 핵심 구절 목록 */
+.story-verse-item {
+  background: var(--surface3);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  padding: 12px 14px; margin-bottom: 8px;
+}
+/* 본문을 키우면 핵심 구절·오늘 연결도 같이 커진다 — 본문만 커지면 짝이 안 맞는다.
+   --story-fs 는 applyStoryFontSize 가 #tab-story 에 심어 준다 */
+.story-verse-text { font-size: var(--story-fs, 14px); font-weight: 600; color: var(--ink); line-height: 1.7; }
+.story-verse-ref { font-size: 11px; color: var(--gold); font-weight: 700; margin-top: 5px; }
+.story-verse-en {
+  font-size: 12px; color: var(--ink3);
+  font-style: italic; margin-top: 4px; line-height: 1.6;
+}
+
+/* 현대 적용 카드 */
+.modern-card {
+  background: var(--surface);
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex; gap: 12px;
+  box-shadow: var(--shadow-xs);
+}
+.modern-card-emoji { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+.modern-card-body { flex: 1; min-width: 0; }
+
+/* ══════════════════════════════════════
+   접이식 카드 (스크롤 길이 단축)
+══════════════════════════════════════ */
+.card.collapsible > .card-inner > .card-label,
+.card.collapsible > .card-inner > .story-section-header {
+  cursor: pointer;
+  user-select: none; -webkit-user-select: none;
+  /* 어르신도 누르기 쉽도록 터치 영역 확보 */
+  min-height: 30px;
+  margin-top: 0;
+}
+
+.collapse-chevron {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 15px; line-height: 1;
+  color: var(--gold);
+  transition: transform var(--t);
+  transform: rotate(0deg);
+}
+.card.collapsed .collapse-chevron { transform: rotate(180deg); }
+
+/* 접힌 상태: 본문 숨기고 헤더 아래 여백 제거 */
+.card.collapsed > .card-inner > .card-body { display: none; }
+.card.collapsed > .card-inner > .card-label,
+.card.collapsed > .card-inner > .story-section-header { margin-bottom: 0; }
+.card.collapsed > .card-inner { padding: 14px 18px; }
+
+/* 앱 소개 목록 (인라인 flex를 대체 — .collapsed 의 display:none 이 이겨야 함) */
+.about-list { flex-direction: column; gap: 10px; margin-top: 4px; }
+.card:not(.collapsed) > .card-inner > .about-list { display: flex; }
+
+/* 접힌 카드에 내용 개수 힌트 */
+.collapse-hint {
+  margin-left: 8px;
+  font-size: 10px; font-weight: 600;
+  color: var(--ink4);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.card:not(.collapsed) .collapse-hint { display: none; }
+.modern-card-title { font-size: var(--story-fs, 14px); font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.modern-card-text { font-size: var(--story-fs, 13px); color: var(--ink2); line-height: 1.7; }
+
+/* 진행 타임라인 (세로) */
+.timeline-nav {
+  display: flex; flex-direction: column; gap: 0;
+  margin-bottom: 12px;
+}
+.timeline-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 14px; cursor: pointer;
+  position: relative; transition: background var(--t);
+  border-radius: var(--r-sm);
+}
+.timeline-item:active, .timeline-item.active { background: var(--gold-pale); }
+.timeline-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+  background: var(--bg2);
+  transition: all var(--t);
+}
+.timeline-item.active .timeline-dot { background: var(--gold); }
+.timeline-item.done .timeline-dot { background: var(--green); }
+.timeline-line {
+  position: absolute; left: 29px; top: 42px;
+  width: 2px; height: calc(100% - 10px);
+  background: var(--bg2);
+}
+.timeline-item:last-child .timeline-line { display: none; }
+.timeline-info { flex: 1; }
+.timeline-era { font-size: 13px; font-weight: 700; color: var(--ink); }
+.timeline-books { font-size: 11px; color: var(--ink3); margin-top: 1px; }
+.timeline-period { font-size: 11px; color: var(--ink4); }
+
+/* TTS 하이라이트 */
+.tts-reading { background: rgba(166,124,46,0.12); border-radius: 3px; transition: background 0.3s; }
+
+/* 섹션 헤더 */
+.story-section-header {
+  font-size: 11px; font-weight: 700;
+  color: var(--ink3); letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+  margin: 18px 0 10px;
+}
+.story-section-header::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(0,0,0,0.07);
+}
+
+/* 진도 표시 */
+.progress-bar-wrap {
+  background: var(--bg2); border-radius: 4px;
+  height: 6px; overflow: hidden; margin-bottom: 4px;
+}
+.progress-bar-fill {
+  height: 100%; background: var(--gold);
+  border-radius: 4px; transition: width 0.4s ease;
+}
+.progress-label {
+  font-size: 11px; color: var(--ink3);
+  text-align: right;
+}
+
+/* ══════════════════════════════════════
+   말로 쓰기 · 읽어주기
+   ══════════════════════════════════════ */
+/* 입력칸 아래에 붙는 버튼 줄. 어르신 손가락 기준으로 세로 48px 이상.
+   voice.js 는 쓸 수 있는 폰에서만 이 줄을 만든다 — 안 되는 버튼은 두지 않는다 */
+.mic-row {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin: 8px 0 12px;
+}
+.mic-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 48px; padding: 10px 16px;
+  background: var(--surface3);
+  border: 1.5px solid var(--gold-line);
+  border-radius: 50px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--ink2);
+  transition: background var(--t), border-color var(--t), transform var(--t);
+}
+.mic-btn:active { transform: scale(0.96); }
+.mic-btn-icon { font-size: 17px; line-height: 1; }
+.mic-btn-label { white-space: nowrap; }
+/* 듣고 있는 중 — 빨간 테두리와 숨쉬는 점으로 '지금 켜져 있다'를 확실히 알린다.
+   어르신이 마이크가 켜진 줄 모르고 두시면 계속 받아적힌다 */
+.mic-btn.on {
+  background: #FDECEB;
+  border-color: var(--red);
+  color: var(--red);
+}
+.mic-btn.on .mic-btn-icon { animation: mic-pulse 1.2s ease-in-out infinite; }
+@keyframes mic-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(1.18); }
+}
+.mic-btn.tidy.on, .mic-btn.read-btn.on {
+  background: var(--green-pale);
+  border-color: var(--green);
+  color: var(--green);
+}
+/* 아직 확정 안 된 말 — 칸에 바로 넣으면 글자가 춤춰서 눈이 어지럽다.
+   그래서 칸 아래 흐린 글씨로 보여주고, 확정되면 칸으로 옮겨 간다 */
+.mic-live {
+  display: none;
+  margin-top: 6px; padding: 9px 12px;
+  background: var(--gold-pale);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: 13px; color: var(--ink3);
+  line-height: 1.6;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.mic-live.show { display: block; }
+
+/* ══════════════════════════════════════
+   추억의 게임
+   ══════════════════════════════════════ */
+/* 기억 탭의 게임 고르기 카드 — 한 줄에 하나. 두 칸으로 나누면 글씨가 작아진다 */
+.game-card {
+  display: flex; align-items: center; gap: 13px;
+  padding: 15px 14px; margin-bottom: 9px;
+  background: var(--surface3);
+  border: 1.5px solid rgba(0,0,0,0.06);
+  border-radius: var(--r-md);
+  transition: transform var(--t), border-color var(--t);
+}
+.game-card:active { transform: scale(0.97); border-color: var(--gold); }
+.game-card-icon { font-size: 28px; flex-shrink: 0; }
+.game-card-body { min-width: 0; }
+.game-card-title {
+  font-size: 15px; font-weight: 700; color: var(--ink);
+  margin-bottom: 3px;
+  word-break: keep-all;
+}
+.game-card-sub {
+  font-size: 12px; color: var(--ink3); line-height: 1.55;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.game-note {
+  margin-top: 10px; font-size: 12px; color: var(--ink3);
+  line-height: 1.7; text-align: center;
+  word-break: keep-all;
+}
+
+/* 게임 화면 — 글씨 크기는 --game-fs 로 한꺼번에 조절한다 (games.js 가 심는다) */
+.game-sheet { --game-fs: 16px; max-height: 92vh; }
+
+/* 몇 번째 문제인지 — 숫자보다 점이 부담이 적다 */
+.game-dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 16px; }
+.game-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--bg2);
+}
+.game-dot.done { background: var(--green); }
+.game-dot.now { background: var(--gold); transform: scale(1.35); }
+
+.game-q {
+  background: var(--gold-pale);
+  border-radius: var(--r-md);
+  padding: 18px 16px; margin-bottom: 16px;
+  text-align: center;
+}
+.game-q-label {
+  font-size: 12px; font-weight: 700; color: var(--gold);
+  margin-bottom: 9px;
+  word-break: keep-all;
+}
+.game-q-text {
+  font-family: 'Noto Serif KR', serif;
+  font-size: calc(var(--game-fs) + 3px);
+  font-weight: 600; color: var(--ink);
+  line-height: 1.75;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.game-q-ask {
+  margin-top: 10px;
+  font-size: calc(var(--game-fs) - 3px);
+  color: var(--ink3);
+  word-break: keep-all;
+}
+
+/* 보기 — 세로로 쌓는다. 가로로 두면 글이 길어 두 줄이 되고 손가락이 헷갈린다 */
+.game-choices { display: flex; flex-direction: column; gap: 10px; }
+.game-choice {
+  width: 100%; min-height: 60px; padding: 15px 16px;
+  background: var(--surface);
+  border: 2px solid rgba(0,0,0,0.09);
+  border-radius: var(--r-md);
+  font-family: inherit;
+  font-size: var(--game-fs); font-weight: 600;
+  color: var(--ink); line-height: 1.6;
+  text-align: center;
+  word-break: keep-all; overflow-wrap: break-word;
+  transition: transform var(--t), border-color var(--t), background var(--t), opacity var(--t);
+}
+.game-choice:active { transform: scale(0.97); }
+/* 맞힌 보기 — 초록으로 확실히 */
+.game-choice.right {
+  background: var(--green-pale);
+  border-color: var(--green);
+  color: var(--green);
+}
+/* 아닌 보기는 흐려만 둔다. 빨간 X 는 쓰지 않는다 —
+   평생 시험을 겪어 오신 분들께 채점은 기쁨을 깎는다 */
+.game-choice.dim { opacity: 0.35; }
+.game-choice:disabled { cursor: default; }
+
+.game-feedback {
+  display: none;
+  margin-top: 14px; text-align: center;
+  font-size: calc(var(--game-fs) - 2px);
+  line-height: 1.7;
+  word-break: keep-all;
+}
+.game-feedback.show { display: block; }
+.game-feedback.soft { color: var(--ink3); }
+.game-feedback.good { color: var(--green); }
+.game-fb-big {
+  font-size: calc(var(--game-fs) + 2px);
+  font-weight: 700; color: var(--green);
+  margin-bottom: 5px;
+}
+.game-fb-sub { font-size: 12px; color: var(--ink3); margin-bottom: 14px; word-break: keep-all; }
+.game-next { margin-top: 4px; }
+
+/* 짝 맞추기 — 3열 4행. 카드가 커야 누르기 쉽다 */
+.pair-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+.pair-card {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  min-height: 74px;
+  border-radius: var(--r-sm);
+  border: 2px solid var(--gold-line);
+  background: var(--gold-pale);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform var(--t), background var(--t), border-color var(--t);
+}
+.pair-card:active { transform: scale(0.96); }
+/* 뒤집기는 3D 회전 대신 겉면을 바꾼다 — 구형 폰에서 회전이 끊기면
+   어디를 눌렀는지 놓치신다. 바뀌는 게 눈에 확실히 보이는 쪽이 낫다 */
+.pair-back { font-size: 26px; color: var(--gold); opacity: 0.5; }
+.pair-face {
+  display: none;
+  flex-direction: column; align-items: center; gap: 3px;
+  padding: 4px;
+}
+.pair-card.open { background: var(--surface); border-color: var(--gold); }
+.pair-card.open .pair-back { display: none; }
+.pair-card.open .pair-face { display: flex; }
+.pair-icon { font-size: 27px; line-height: 1; }
+.pair-name {
+  font-size: 11px; font-weight: 600; color: var(--ink2);
+  word-break: keep-all; text-align: center;
+}
+/* 찾은 짝 — 초록으로 두고 더 못 누르게 */
+.pair-card.done {
+  background: var(--green-pale);
+  border-color: var(--green);
+  opacity: 0.75;
+}
+.pair-card.done .pair-name { color: var(--green); }
+
+/* 마침 화면 — 점수를 매기지 않는다. 끝까지 하셨다는 것만 칭찬한다 */
+.game-end { text-align: center; padding: 6px 0 0; }
+.game-end-icon { font-size: 44px; margin-bottom: 10px; }
+.game-end-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: calc(var(--game-fs) + 4px);
+  font-weight: 700; color: var(--ink);
+  margin-bottom: 7px;
+  word-break: keep-all;
+}
+.game-end-sub {
+  font-size: calc(var(--game-fs) - 2px);
+  color: var(--ink3); line-height: 1.75;
+  margin-bottom: 18px;
+  word-break: keep-all;
+}
+.game-end-verse {
+  background: var(--green-pale);
+  border-radius: var(--r-md);
+  padding: 16px 15px; margin-bottom: 18px;
+}
+.game-end-verse-text {
+  font-family: 'Noto Serif KR', serif;
+  font-size: var(--game-fs);
+  font-weight: 600; color: var(--green);
+  line-height: 1.8;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+.game-end-verse-ref {
+  font-size: 11px; color: var(--green);
+  font-weight: 600; margin-top: 7px; opacity: 0.8;
+}
+.game-end .btn-primary { margin-bottom: 9px; }

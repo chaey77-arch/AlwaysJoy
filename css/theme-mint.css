@@ -1,0 +1,105 @@
+/* ═══════════════════════════════════════════════════════
+   시안 A — 산뜻 민트 & 세이지
+   style.css 뒤에 로드해서 색만 덮어쓴다 (구조 변경 없음)
+═══════════════════════════════════════════════════════ */
+
+:root {
+  --bg:         #F7FBF9;   /* 아주 옅은 민트 화이트 */
+  --bg2:        #E9F4EF;
+  --surface:    #FFFFFF;
+  --surface2:   #FCFEFD;
+  --surface3:   #F1F9F5;
+
+  /* 포인트 — 생기 있는 세이지 그린 */
+  --gold:       #2E9E6B;   /* 변수명은 유지, 값만 교체 */
+  --gold-bright:#3FBF83;
+  --gold-pale:  #E6F7EF;
+  --gold-line:  rgba(46,158,107,0.20);
+
+  --green:      #2E9E6B;
+  --green-pale: #E6F7EF;
+  --green-line: rgba(46,158,107,0.22);
+
+  /* 글자 — 차분한 먹green (순검정 아님, 눈이 편함) */
+  --ink:        #16302A;
+  --ink2:       #3D5A50;
+  --ink3:       #6E8C82;
+  --ink4:       #A6C0B7;
+
+  --red:        #E86A6A;
+
+  /* 그림자 — 컬러 섞어 부드럽게 */
+  --shadow-xs: 0 1px 4px rgba(46,158,107,0.07);
+  --shadow-sm: 0 3px 14px rgba(46,158,107,0.10);
+  --shadow-md: 0 8px 28px rgba(46,158,107,0.13);
+  --shadow-gold: 0 5px 20px rgba(46,158,107,0.28);
+}
+
+/* ─── 온보딩 배경 ─── */
+#screen-onboard {
+  background: linear-gradient(160deg, #EAF8F1 0%, #F5FBF8 45%, #E4F4FA 100%);
+}
+#screen-onboard::before { background: radial-gradient(circle, rgba(63,191,131,0.16) 0%, transparent 70%); }
+#screen-onboard::after  { background: radial-gradient(circle, rgba(120,200,235,0.16) 0%, transparent 70%); }
+
+/* ─── 유지할 다크 카드 2곳: 오늘의 말씀 + 전체화면 ─── */
+/* 딥 그린을 좀 더 선명하고 생기 있게 (탁한 올리브 제거) */
+.hero-card    { background: linear-gradient(145deg, #1E6B4E 0%, #14523B 100%); }
+.verse-hero   { background: linear-gradient(145deg, #1E6B4E 0%, #14523B 100%); }
+.fullscreen-verse { background: linear-gradient(155deg, #1B6247 0%, #0E3D2B 100%); }
+
+/* ─── 밝게 바꾸는 카드들 ─── */
+
+/* 찬양 플레이어 — 민트 파스텔 */
+.now-playing {
+  background: linear-gradient(145deg, #E8F8F0 0%, #D3EFE3 100%);
+  border: 1px solid rgba(46,158,107,0.16);
+}
+.now-playing::before { color: rgba(46,158,107,0.10) !important; }
+.np-label  { color: #4E8C74 !important; }
+.np-title  { color: #14402F !important; }
+.np-artist { color: #4E8C74 !important; }
+.np-lyrics { background: rgba(255,255,255,0.72) !important; }
+.np-lyrics-text { color: #23503E !important; }
+.np-note   { color: #6E9C88 !important; }
+.np-ctrl {
+  background: rgba(255,255,255,0.85) !important;
+  color: #1E6B4E !important;
+  border: 1px solid rgba(46,158,107,0.18);
+}
+.np-ctrl:active { background: #FFFFFF !important; }
+.np-play {
+  background: linear-gradient(145deg, #35B57C 0%, #2A9265 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 16px rgba(46,158,107,0.35);
+}
+
+/* 감사 스트릭 카드 — 따뜻한 살구+민트 */
+.streak-card {
+  background: linear-gradient(145deg, #FFF3E4 0%, #FFE6CC 100%);
+  border: 1px solid rgba(230,150,80,0.22);
+}
+.streak-big  { color: #C4703A !important; }
+.streak-main { color: #7A431F !important; }
+.streak-sub  { color: #9A6440 !important; }
+
+/* 기억앨범 배너 — 라벤더 파스텔 */
+.album-banner {
+  background: linear-gradient(145deg, #F0EDFC 0%, #E2DDF8 100%);
+  border: 1px solid rgba(120,100,200,0.18);
+}
+.album-banner-verse { color: #3C3168 !important; }
+.album-banner-ref   { color: #7A6BB5 !important; }
+
+/* 유튜브 썸네일 — 검정 대신 소프트 코랄 */
+.video-thumb { background: linear-gradient(145deg, #FFE9E9 0%, #FFD5D5 100%); }
+
+/* ─── 하단 탭바 / 헤더 ─── */
+.app-header { background: rgba(247,251,249,0.92); }
+.tab-nav    { background: rgba(255,255,255,0.95); }
+
+/* 활성 탭 — 민트 배지로 명확하게 */
+.tab-btn.active .tab-label { color: var(--gold); }
+
+/* ─── 시대 칩 활성 ─── */
+.era-chip.active { background: linear-gradient(145deg, #2E9E6B 0%, #238156 100%) !important; }
