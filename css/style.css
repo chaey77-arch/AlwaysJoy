@@ -1,6 +1,18 @@
 /* ===== 항상기쁨 — Modern Cafe Style ===== */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
 
+/* 본문 글꼴 — Pretendard.
+   Noto Sans KR 은 웹에 흔해서 "관공서 안내문" 처럼 보인다는 말을 들었다
+   (어머니 말: 촌스럽다). Pretendard 는 자모가 조금 크고 획이 고르게
+   두꺼워 같은 크기에서도 더 크고 또렷하게 읽힌다 — 눈이 침침한 분께 이게
+   글씨를 키우는 것과 같은 값을 한다.
+   dynamic-subset 은 화면에 나온 글자만 조각으로 받아 오는 판이라 처음
+   켤 때 내려받는 양이 적다 (전체 한글 글꼴은 몇 MB 다).
+   ⚠ 이 CSS 는 외부(jsdelivr)에서 온다. sw.js 는 남의 도메인을 캐시하지
+   않으므로, 비행기 모드에서는 아래 fallback(애플 SD 산돌고딕/맑은 고딕)
+   으로 떨어진다 — 글씨가 안 보이는 일은 없다. */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
+
 :root {
   /* Warm Cafe Palette */
   --bg:         #F5F0E8;
@@ -42,7 +54,11 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html { font-size: 15px; -webkit-text-size-adjust: 100%; }
 body {
-  font-family: 'Noto Sans KR', sans-serif;
+  /* Pretendard 가 못 오면 폰에 이미 있는 글꼴로 — 아이폰은 애플 SD 산돌고딕,
+     안드로이드는 본고딕(Noto), 윈도우는 맑은 고딕. 마지막에 Noto Sans KR 을
+     남겨 두어 예전 화면과 같은 모습으로 떨어진다. */
+  font-family: 'Pretendard Variable', Pretendard, -apple-system,
+               'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
@@ -188,28 +204,36 @@ input, textarea { font-family: inherit; }
   box-shadow: 0 0 0 3px rgba(166,124,46,0.12);
 }
 
-.ob-age-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: clamp(5px, 1vh, 8px); margin-bottom: clamp(10px, 2.2vh, 20px);
+/* ── 연령대를 고르던 두 줄 네 칸이 있던 자리 ──
+   여기서 나이를 물었다. 없앴다 — 자세한 이유는 index.html 의 같은 자리에.
+
+   ⚠ 높이를 맞춰야 한다. 첫 화면은 스크롤 없이 시작 단추까지 보여야 하는데,
+     없앤 칸이 130px 쯤이었다. 그보다 커지면 단추가 화면 밖으로 밀린다.
+     석 줄 + 출처 + 여백으로 100px 안쪽에 든다.
+
+   위쪽 말씀 카드와 똑같이 생기면 같은 말이 두 번 있는 것처럼 보인다.
+   그래서 이쪽은 판 없이, 위에 실선 한 줄만 두고 조용하게 둔다. */
+.ob-welcome {
+  padding: clamp(8px, 1.6vh, 14px) 4px 0;
+  margin-bottom: clamp(10px, 2.2vh, 18px);
+  border-top: 1px solid rgba(166,124,46,0.20);
+  text-align: center;
 }
-.ob-age-btn {
-  padding: clamp(7px, 1.4vh, 12px) 8px;
-  background: rgba(255,255,255,0.70);
-  border: 1.5px solid rgba(166,124,46,0.18);
-  border-radius: var(--r-md);
-  font-size: 14px; font-weight: 600;
-  color: var(--ink2); line-height: 1.5;
-  transition: all var(--t);
+.ob-welcome-verse {
+  font-size: 15px; font-weight: 500;
+  color: var(--ink2); line-height: clamp(21px, 3.4vh, 26px);
+  /* 위쪽 말씀 카드와 같은 규칙 — 낱말 중간이 갈리지 않게 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
-/* 연령대 이름은 버튼 크기 그대로, 범위만 작게 */
-.ob-age-btn .ob-age-name { display: block; }
-.ob-age-btn .ob-age-range { font-size: 11px; color: var(--ink3); display: block; font-weight: 400; }
-.ob-age-btn.selected {
-  background: var(--gold); color: #fff;
-  border-color: var(--gold);
-  box-shadow: var(--shadow-gold);
+.ob-welcome-ref {
+  /* --ink3 로 두면 12px 에서 4.35:1 입니다 (필요 4.5). 재서 걸렸습니다.
+     크기는 그대로 두고 진하기만 --ink2 로 올립니다 — 출처가 말씀보다
+     도드라지면 안 되니까요. 위 .ob-verse-ref 도 같은 12px/--ink3 인데,
+     그쪽은 흰 카드 위라서 통과합니다 (여기는 파스텔 바탕 위입니다). */
+  font-size: 12px; color: var(--ink2);
+  margin-top: clamp(3px, 0.8vh, 8px); letter-spacing: 0.5px;
 }
-.ob-age-btn.selected .ob-age-range { color: rgba(255,255,255,0.8); }
 
 .ob-start-btn {
   width: 100%; padding: clamp(12px, 2.2vh, 16px);
@@ -279,8 +303,31 @@ input, textarea { font-family: inherit; }
 .tab-btn:active { background: var(--gold-pale); }
 .tab-icon { font-size: 20px; transition: transform 0.2s; }
 .tab-btn.active .tab-icon { transform: scale(1.1); }
-.tab-label { font-size: 9px; font-weight: 600; color: var(--ink4); letter-spacing: 0; white-space: nowrap; }
-.tab-btn.active .tab-label { color: var(--gold); }
+
+/* 메뉴 글씨 — 어른들이 "작다" 하셔서 9px → 12px 로 올렸다.
+   색도 --ink4(연한 회색)에서 --ink3 으로 한 단계 진하게 했다. 크기만
+   키우고 색이 연하면 여전히 잘 안 보인다.
+   왜 12px 인가: 탭이 일곱 개라 무한정 키울 수 없다. 크롬으로 폭마다 재 보니
+   (칸폭 = 메뉴폭 ÷ 7) 한국어('감사')는 14px 까지 남지만 English('Memory',
+   'History')가 먼저 넘친다 — 360px 에서 12px 이 여유 3.6px 로 마지막이다.
+   그 아래 폭(320·280px, 아이폰 SE1·갤럭시 폴드 접은 상태)은 아래 media 로
+   따로 줄인다. 이 숫자를 올리려면 눈으로 보지 말고 다시 재야 한다. */
+.tab-label {
+  font-size: 12px; font-weight: 600; color: var(--ink3);
+  letter-spacing: -0.2px; white-space: nowrap;
+}
+.tab-btn.active .tab-label { color: var(--gold); font-weight: 700; }
+/* 좁은 폰 — 칸폭(= 화면폭 ÷ 7)이 English 라벨보다 좁아지는 구간.
+   넘쳐 잘리는 것보다 작은 게 낫다. 숫자는 크롬으로 재서 정했다
+   (여유 = 칸폭 − 가장 긴 라벨 'Memory'):
+     320–359px  칸폭 45.7 · 11px → 여유 1.9   (12px 는 −2.1 로 넘친다)
+     ~319px     칸폭 40.0 ·  9px → 여유 4.1   (10px 는 0.2 밖에 안 남는다) */
+@media (max-width: 359px) {
+  .tab-label { font-size: 11px; }
+}
+@media (max-width: 319px) {
+  .tab-label { font-size: 9px; }
+}
 
 /* ══════════════════════════════════════
    TAB CONTENT AREA
@@ -325,10 +372,40 @@ input, textarea { font-family: inherit; }
   padding: 14px 18px;
   margin-bottom: 12px;
   box-shadow: var(--shadow-sm);
+  /* 아래 @container 가 이 카드의 폭을 물어볼 수 있게 해 준다 */
+  container-type: inline-size;
 }
 .greet-char {
   width: 72px; height: 72px; flex-shrink: 0;
   animation: char-float 3.4s ease-in-out infinite;
+}
+/* ── 카드가 좁으면 그림이 양보한다 ──
+   접은 갤럭시 폴드(280px)에서 재 보니 인사말 자리가 124px 인데
+   '좋은 아침이에요!' 는 127px 이 필요해서, 느낌표 하나가 혼자 다음 줄로
+   떨어졌습니다. 3px 이 모자란 것이었습니다. ('좋은 오후예요!' 는 111px 이라
+   오후에 재면 멀쩡해 보입니다 — 시각에 따라 있다 없다 하는 흠이었고,
+   오후에 시험을 돌려서 놓쳤습니다.)
+
+   글씨를 줄이지 않고 그림을 줄입니다. 이 화면을 보시는 분께 17px 은
+   양보할 수 없는 쪽이고, 기쁨이 그림은 72 → 52px 이 되어도 알아봅니다.
+
+   ⚠ 두 가지를 안 썼습니다.
+     · flex-shrink — .greet-body 가 min-width:0 이라 글씨 쪽이 먼저 다 줄어듭니다.
+       그래서 그림은 좁아져도 눌릴 일이 없어 아무 일도 일어나지 않습니다.
+     · @media (max-width:300px) — 눈으로는 고쳐지지만 시험이 볼 수 없습니다.
+       시험은 폰 폭을 흉내낼 때 창을 줄이는 게 아니라 html 의 width 를
+       좁히므로 화면 질의(media)가 걸리지 않습니다.
+     남은 것이 @container 입니다. 카드가 실제로 얼마나 좁은지를 보므로
+     폭을 어떻게 흉내내도 똑같이 동작합니다.
+
+     ⚠ 카드 자신의 gap 은 여기서 못 건드립니다 — 폭을 재는 기준이 된 칸은
+       그 결과로 자기를 다시 꾸밀 수 없습니다. 그림만 줄입니다 (20px 이
+       생기고 필요한 건 3px 이라 넉넉합니다).
+     ⚠ 아주 오래된 폰(2022년 이전 브라우저)은 @container 를 모릅니다.
+       그때는 지금처럼 접은 폴드에서만 느낌표가 내려갑니다 — 더 나빠지는
+       것은 없습니다. */
+@container (max-width: 230px) {
+  .greet-char { width: 52px; height: 52px; }
 }
 .greet-body { flex: 1; min-width: 0; }
 /* 인사 문구는 낱말 중간에서 끊지 않는다 — '좋은 저 / 녁이에요' 방지.
@@ -703,6 +780,72 @@ input, textarea { font-family: inherit; }
   margin-top: 6px;
   font-size: 11px; font-weight: 600; color: var(--ink3);
 }
+
+/* ══════════════════════════════════════
+   권별 읽기 진도 (기억 탭)
+   펼쳐 본 책만 나온다. 숫자는 작게 두고 이름을 크게 —
+   어머니가 찾는 건 "내가 어느 책을 읽었나" 이지 퍼센트가 아니다
+══════════════════════════════════════ */
+.read-total {
+  padding: 14px; margin-bottom: 14px;
+  border-radius: var(--r2); background: var(--bg2);
+  text-align: center;
+}
+.read-total-num {
+  font-size: 19px; font-weight: 800; color: var(--ink);
+}
+.read-total-books {
+  margin-top: 4px;
+  font-size: 14px; font-weight: 600; color: var(--ink2);
+}
+.read-group { margin-bottom: 14px; }
+.read-group:last-child { margin-bottom: 0; }
+.read-group-label {
+  margin-bottom: 6px;
+  font-size: 13px; font-weight: 700; color: var(--ink3);
+}
+.read-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 0;
+}
+.read-row-name {
+  flex: 0 0 34%;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  word-break: keep-all;
+}
+.read-row-bar {
+  flex: 1 1 auto; height: 6px;
+  border-radius: 50px; background: var(--bg2); overflow: hidden;
+}
+.read-row-bar > span {
+  display: block; height: 100%;
+  border-radius: 50px; background: var(--gold);
+  transition: width var(--t);
+}
+.read-row-num {
+  flex: 0 0 auto;
+  font-size: 13px; font-weight: 700; color: var(--ink3);
+  font-variant-numeric: tabular-nums;
+}
+/* 끝까지 읽은 책은 초록으로 — 다 읽었다는 표시 */
+.read-row.done .read-row-bar > span { background: var(--green, #6a9c78); }
+.read-row.done .read-row-num { color: var(--green, #6a9c78); }
+
+/* ══════════════════════════════════════
+   기록이 있는 곳 (이 폰에만 있다는 안내)
+   글씨는 어르신이 읽으실 크기로 — 작은 각주가 아니라 읽어야 하는 말이다
+══════════════════════════════════════ */
+.localonly-body { margin-top: 8px; }
+.localonly-line {
+  /* 어르신이 읽어야 하는 말이다. 흐리고 작으면 안 읽히니 뜻이 없다.
+     --ink 는 본문과 같은 진한 색, --ink2 는 그보다 흐리다. */
+  font-size: 18px; font-weight: 500;
+  line-height: 1.8; color: var(--ink);
+  word-break: keep-all;
+}
+.localonly-line + .localonly-line { margin-top: 12px; }
+/* 둘째·셋째 줄도 첫 줄보다 살짝만 작게 — 흐린 각주가 아니다 */
+.localonly-line.dim { font-size: 17px; font-weight: 400; color: var(--ink2); }
 
 /* ══════════════════════════════════════
    내 기록 이어가기 (클라우드)

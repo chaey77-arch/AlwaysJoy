@@ -78,7 +78,7 @@ const Cloud = {
 
   // ─── 로그인 · 로그아웃 ──────────────────────────────────
   async signInKakao() {
-    if (!this.ready) { showToast('아직 연결 준비가 안 됐습니다'); return; }
+    if (!this.ready) { showToast(t('cloudNotReady')); return; }
     try {
       const { error } = await this.sb.auth.signInWithOAuth({
         provider: 'kakao',
@@ -86,7 +86,7 @@ const Cloud = {
       });
       if (error) throw error;
     } catch (e) {
-      showToast('로그인을 시작하지 못했습니다');
+      showToast(t('cloudSigninFail'));
       console.warn('[cloud] 로그인 실패', e);
     }
   },
@@ -96,7 +96,7 @@ const Cloud = {
     try { await this.sb.auth.signOut(); } catch (e) { /* 이미 끊겼으면 그만 */ }
     this.user = null;
     renderCloudUI();
-    showToast('로그아웃했습니다. 기록은 폰에 남아 있습니다');
+    showToast(t('cloudSignedOut'));
   },
 
   // 로그인한 사람의 이름 (카카오에서 받아온다)
@@ -111,16 +111,16 @@ const Cloud = {
   async syncAll() {
     if (!this.ready || !this.user || this.syncing) return;
     this.syncing = true;
-    setCloudStatus('맞추는 중…');
+    setCloudStatus(t('cloudSyncing'));
     try {
       await this.pushAll();
       await this.pullAll();
       Store.save('lastSync', Date.now());
       setCloudStatus('');
-      showToast('기록을 불러왔습니다 ☁');
+      showToast(t('cloudPulled'));
     } catch (e) {
       console.warn('[cloud] 동기화 실패', e);
-      setCloudStatus('나중에 다시 맞춥니다');
+      setCloudStatus(t('cloudSyncLater'));
     } finally {
       this.syncing = false;
     }
@@ -330,6 +330,9 @@ function setCloudStatus(msg) {
 }
 
 function renderCloudUI() {
+  // 로그인하면 "이 폰에만 있어요" 는 더 이상 사실이 아니다 — 같이 고쳐 준다
+  if (typeof renderLocalOnly === 'function') renderLocalOnly();
+
   const card = document.getElementById('cloud-card');
   if (!card) return;
 
@@ -344,12 +347,12 @@ function renderCloudUI() {
 
   if (Cloud.loggedIn()) {
     const name = Cloud.displayName();
-    if (who) who.textContent = (name ? name + ' 님' : '로그인됨') + ' · 기록이 이어집니다';
+    if (who) who.textContent = name ? tf('cloudWhoIn', { name }) : t('cloudWhoInNoName');
     if (inBtn) inBtn.style.display = 'none';
     if (outBtn) outBtn.style.display = '';
     if (syncBtn) syncBtn.style.display = '';
   } else {
-    if (who) who.textContent = '로그인하면 폰을 바꿔도 기록이 이어집니다';
+    if (who) who.textContent = t('cloudWhoAnon');
     if (inBtn) inBtn.style.display = '';
     if (outBtn) outBtn.style.display = 'none';
     if (syncBtn) syncBtn.style.display = 'none';

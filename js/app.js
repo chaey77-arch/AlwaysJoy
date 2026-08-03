@@ -83,7 +83,8 @@ function init() {
       applyLangUI();
       return;
     }
-    if (!State.user) State.user = { name: '홍길동', ageGroup: 'senior', joinDate: new Date().toISOString() };
+    // 미리보기용 가짜 사용자. ageGroup 을 넣지 않는다 — 없앤 값이다
+    if (!State.user) State.user = { name: '홍길동', joinDate: new Date().toISOString() };
     showScreen('main');
     renderAll();
     switchTab(preview);
@@ -130,6 +131,9 @@ function switchTab(tab) {
   if (typeof Voice !== 'undefined' && Voice.listening()) Voice.stop();
   if (typeof PrayerVoice !== 'undefined' && PrayerVoice.active) PrayerVoice.stop();
   State.activeTab = tab;
+  // 기억 탭을 열 때 기록 수를 다시 센다. 감사·기도를 저장해도 앨범 탭을
+  // 다시 그리지는 않으므로, 여기서 세지 않으면 안내가 늦게 나타난다.
+  if (tab === 'album' && typeof renderLocalOnly === 'function') renderLocalOnly();
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tab));
   // 탭을 옮기면 새 탭 맨 위부터 — 이전 탭에서 내려둔 위치가 남지 않게
@@ -139,19 +143,22 @@ function switchTab(tab) {
 
 // ─── Onboarding ──────────────────────────────────────────
 function bindOnboard() {
-  let selectedAge = 'senior';
-  document.querySelectorAll('.ob-age-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.ob-age-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedAge = btn.dataset.age;
-    });
-  });
-
+  // 나이를 묻지 않는다. 어머니께 권했더니 "이런건 어릴때 하는 거야,
+  // 난 하기 싫어" 하셨다 — 첫 화면에 '어르신 · 70대 이상' 이 골라져
+  // 있는 것을 보신 것이다. 앱이 당신을 그렇게 부르는 순간
+  // '내 것이 아니다' 가 된다.
+  //
+  // ageGroup 은 저장만 하고 어디서도 읽지 않았다 (셈해 보니 쓰는 곳이
+  // 0곳이었다). 내용이 달라지지도 않는 것을 물어서 마음만 상하게 한 셈이다.
+  // 그래서 물음 자체를 없앴다 — 나이로 갈리는 문이 아니라, 어린아이와
+  // 같이 들어가는 문 하나만 둔다 (누가복음 18:17).
   document.getElementById('btn-start')?.addEventListener('click', () => {
     const name = (document.getElementById('onboard-name')?.value || '').trim();
     if (!name) { document.getElementById('onboard-name')?.focus(); showToast(t('obNameRequired')); return; }
-    State.user = { name, ageGroup: selectedAge, joinDate: new Date().toISOString() };
+    // ⚠ ageGroup 을 넣지 않는다. 예전에 쓰시던 분의 기록에는 남아 있을 수
+    //   있는데, 그건 지우지 않는다 — 읽는 곳이 없으니 해가 없고,
+    //   지우자고 저장된 기록을 건드리면 이름·가입일까지 위험해진다.
+    State.user = { name, joinDate: new Date().toISOString() };
     Store.save('user', State.user);
     showScreen('main');
     renderAll();
@@ -172,6 +179,7 @@ function renderAll() {
   renderImmanuel();
   renderAlbum();
   renderStory();
+  renderScreenMode();   // 화면 밝기 — 지금 어느 것이 켜져 있는지
   // 말로 쓰기 — 입력칸이 다 그려진 뒤에 붙인다. 쓸 수 없는 폰에서는
   // voice.js 가 스스로 아무것도 붙이지 않는다 (안 되는 버튼을 두지 않는다)
   if (typeof attachAllMics === 'function') attachAllMics();
@@ -231,7 +239,7 @@ function getTimeChar(h) {
 function applyCharacter() {
   const q = new URLSearchParams(location.search).get('char');
   const name = CHAR_NAMES[q] ? q : getTimeChar(new Date().getHours());
-  const alt = (CHAR_NAMES[name] || {})[State.lang === 'en' ? 'en' : 'ko'] || '캐릭터';
+  const alt = (CHAR_NAMES[name] || {})[State.lang === 'en' ? 'en' : 'ko'] || t('charAlt');
   ['ob-char-img', 'greet-char-img'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.src = `icons/char-${name}.svg`; el.alt = alt; }
@@ -246,14 +254,10 @@ function renderGreeting() {
             : h < 18 ? 'greetAfternoon'
             : h < 22 ? 'greetEvening'
             : 'greetNight';
-  const name = State.user?.name || '';
-  const hi = t(key);
-  // 이름을 붙여 말을 걸어주는 느낌 — 언어별 어순 반영.
-  // 이름 뒤에서만 줄이 갈리게 한다: '차정윤님,' / '좋은 저녁이에요!' 처럼
-  // 인사말은 통째로 아래 줄로 내려간다 ('좋은 저 / 녁이에요' 방지).
-  setPhrase('greet-hi', name
-    ? (State.lang === 'en' ? `${hi.replace('!', '')}, ${name}!` : `${name}님,\n${hi}`)
-    : hi);
+  // 이름은 위쪽 머리글에만 둔다. 예전에는 여기에도 붙여서 한 화면에
+  // 이름이 두 번 나왔다 — 어머니가 "내 이름이 왜 두 번 있냐" 하셨다.
+  // 인사말은 통째로 한 덩어리다 ('좋은 저 / 녁이에요' 방지).
+  setPhrase('greet-hi', t(key));
   // 지금 보이는 캐릭터에 맞춘 한마디 (없으면 기본 문구)
   // t() 는 없는 키를 그대로 돌려주므로 ui 객체를 직접 확인한다
   const q = new URLSearchParams(location.search).get('char');
@@ -273,10 +277,8 @@ function renderHome() {
 
   const streak = calcStreak();
   setEl('home-streak-num', streak.toString());
-  const streakText = streak > 0
-    ? (State.lang === 'en' ? `${streak}-day gratitude streak 🔥` : `일째 감사 중 🔥`)
-    : t('streakStart');
-  setEl('home-streak-text', streakText);
+  // 숫자는 옆 칸에 따로 크게 보여주므로 여기엔 뒤에 붙는 말만 넣는다
+  setEl('home-streak-text', streak > 0 ? t('gratitudeStreak') : t('gratitudeStreakNone'));
 
   // 빠른 이동 라벨
   setEl('quick-label-word', t('quickWord'));
@@ -297,11 +299,11 @@ function renderWord() {
   setEl('word-verse-text', verse.text);
   setEl('word-verse-ref', verse.ref);
 
-  // 주제 칩
+  // 주제 칩 — 주제 이름도 영어로 (labelEn)
   const chips = document.getElementById('verse-topic-chips');
   if (chips) {
-    chips.innerHTML = DATA.verseTopics.map((t, i) =>
-      `<button class="chip ${i === State.selectedVerseTopicIdx ? 'active' : ''}" onclick="selectVerseTopic(${i})">${t.icon} ${t.label}</button>`
+    chips.innerHTML = DATA.verseTopics.map((tp, i) =>
+      `<button class="chip ${i === State.selectedVerseTopicIdx ? 'active' : ''}" onclick="selectVerseTopic(${i})">${tp.icon} ${escHtml(topicLabel(tp))}</button>`
     ).join('');
   }
   renderVerseTopicContent();
@@ -309,23 +311,38 @@ function renderWord() {
   renderBibleProgress();
   updateFavDailyBtn();
 
-  // 영상 목록 — youtubeSearch 기반
+  // 영상 목록 — youtubeSearch 기반.
+  // 영상 제목과 채널 이름은 한국어 설교라 그대로 둔다 (영어로 바꿔 놓으면
+  // 유튜브에서 찾을 수 없는 이름이 된다). 분류 이름만 영어로 보여준다.
   const videoList = document.getElementById('video-list');
   if (videoList) {
     videoList.innerHTML = DATA.videos.flatMap(cat =>
       cat.items.map(v => {
         const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(v.searchQuery || v.title)}`;
+        const catName = State.lang === 'en' ? (cat.categoryEn || cat.category) : cat.category;
         return `<a class="video-item" href="${searchUrl}" target="_blank" rel="noopener">
           <div class="video-thumb">${v.thumb}</div>
           <div class="video-body">
             <div class="video-title">${v.title}</div>
-            <div class="video-ch">${v.channel} · ${cat.category}</div>
+            <div class="video-ch">${v.channel} · ${escHtml(catName)}</div>
           </div>
           <div class="video-arrow">▶</div>
         </a>`;
       })
     ).join('');
   }
+}
+
+// 주제 이름 · 주제 안의 구절 — 영어일 때는 짝으로 넣어 둔 영어를 쓴다.
+// 영어가 없으면 한국어로 돌아간다 (빈 화면보다 낫다).
+function topicLabel(tp) {
+  return (State.lang === 'en' && tp.labelEn) ? tp.labelEn : tp.label;
+}
+function verseText(v) {
+  return (State.lang === 'en' && v.textEn) ? v.textEn : v.text;
+}
+function verseRef(v) {
+  return (State.lang === 'en' && v.refEn) ? v.refEn : v.ref;
 }
 
 function selectVerseTopic(idx) {
@@ -338,15 +355,16 @@ function renderVerseTopicContent() {
   const topic = DATA.verseTopics[State.selectedVerseTopicIdx];
   const el = document.getElementById('verse-topic-content');
   if (!el || !topic) return;
-  el.innerHTML = topic.verses.map(v =>
-    `<div class="topic-verse">
-      <div class="topic-verse-text">${v.text}</div>
+  el.innerHTML = topic.verses.map(v => {
+    const text = verseText(v), ref = verseRef(v);
+    return `<div class="topic-verse">
+      <div class="topic-verse-text">${escHtml(text)}</div>
       <div class="topic-verse-row">
-        <div class="topic-verse-ref">${v.ref}</div>
-        ${favBtnHtml(v.text, v.ref, 'topic')}
+        <div class="topic-verse-ref">${escHtml(ref)}</div>
+        ${favBtnHtml(text, ref, 'topic')}
       </div>
-    </div>`
-  ).join('');
+    </div>`;
+  }).join('');
 }
 
 // ─── 좋아하는 말씀 ────────────────────────────────────────
@@ -370,7 +388,7 @@ function favBtnHtml(text, ref, kind) {
   const on = isFavorited(text, ref);
   return `<button class="fav-btn${on ? ' on' : ''}" data-kind="${escHtml(kind || '')}"
     data-fav-text="${escHtml(text)}" data-fav-ref="${escHtml(ref)}"
-    aria-label="${on ? '좋아하는 말씀에서 빼기' : '좋아하는 말씀에 담기'}"
+    aria-label="${escHtml(t(on ? 'favRemove' : 'favAdd'))}"
     aria-pressed="${on}">${on ? '♥' : '♡'}</button>`;
 }
 
@@ -389,10 +407,10 @@ function toggleFavVerse(text, ref) {
   const idx = favIndexOf(text, ref);
   if (idx >= 0) {
     State.memories.myVerses.splice(idx, 1);
-    showToast('좋아하는 말씀에서 뺐습니다');
+    showToast(t('favRemoved'));
   } else {
     State.memories.myVerses.push({ text: String(text || '').trim(), ref: String(ref || '').trim(), at: Date.now() });
-    showToast('좋아하는 말씀에 담았습니다 ♥');
+    showToast(t('favAdded'));
   }
   Store.save('memories', State.memories);
   cloudQueue();
@@ -413,7 +431,7 @@ function refreshFavButtons() {
     btn.classList.toggle('on', on);
     btn.textContent = on ? '♥' : '♡';
     btn.setAttribute('aria-pressed', String(on));
-    btn.setAttribute('aria-label', on ? '좋아하는 말씀에서 빼기' : '좋아하는 말씀에 담기');
+    btn.setAttribute('aria-label', t(on ? 'favRemove' : 'favAdd'));
   });
   updateFavDailyBtn();
 }
@@ -433,7 +451,7 @@ function updateFavDailyBtn() {
   if (!btn || !v) return;
   const on = isFavorited(v.text, v.ref);
   btn.classList.toggle('on', on);
-  btn.textContent = on ? '♥ 담아둔 말씀' : '♡ 이 말씀 담아두기';
+  btn.textContent = t(on ? 'favDailyOn' : 'favDailyOff');
   btn.setAttribute('aria-pressed', String(on));
 }
 
@@ -452,27 +470,32 @@ function switchWordSub(sub) {
 }
 
 // ─── 성경읽기 ────────────────────────────────────────────
-// 글씨 크기 3단계 — 어르신이 직접 키울 수 있게
+// 글씨 크기 3단계 — 어르신이 직접 키울 수 있게.
+// 단계 이름은 여기 적지 않는다 — fontSizeLabel() 이 말모음에서 가져온다
+// (여기 한글로 적어 두면 English 로 바꿔도 그대로 남는다).
 const BIBLE_SIZES = [
-  { v: '17px', label: '가' },
-  { v: '21px', label: '가' },
-  { v: '25px', label: '가' }
+  { v: '17px' },
+  { v: '21px' },
+  { v: '25px' }
 ];
 
 function renderBibleRead() {
-  // 책 선택
+  // 책 선택 — 언어를 바꾸면 66권 이름이 모두 달라지므로 다시 만든다.
+  // (예전에는 한 번 만들면 그대로 둬서 English 로 바꿔도 한글 이름이 남았다)
   const bookSel = document.getElementById('bible-book');
-  if (bookSel && !bookSel.options.length) {
+  if (bookSel && bookSel.dataset.lang !== State.lang) {
     // 구약/신약을 묶어 보여준다 (66권을 평평하게 늘어놓으면 찾기 어렵다)
     let html = '';
-    ['구약', '신약'].forEach(part => {
+    [['구약', 'bibleOT'], ['신약', 'bibleNT']].forEach(([part, key]) => {
       const gs = BIBLE.groups.filter(g => g.part === part).map(g => g.g);
       const books = BIBLE.books.filter(b => gs.includes(b.g));
-      html += `<optgroup label="${part} (${books.length}권)">` +
-        books.map(b => `<option value="${b.n}">${b.t}</option>`).join('') +
+      const label = `${t(key)} (${tf('bibleBooksUnit', { n: books.length })})`;
+      html += `<optgroup label="${escHtml(label)}">` +
+        books.map(b => `<option value="${b.n}">${escHtml(bibleBookTitle(b))}</option>`).join('') +
         `</optgroup>`;
     });
     bookSel.innerHTML = html;
+    bookSel.dataset.lang = State.lang;
   }
   if (bookSel) bookSel.value = String(State.bibleBook);
 
@@ -481,7 +504,8 @@ function renderBibleRead() {
   renderBibleResume();
 
   // 번역 출처 표기 — 퍼블릭 도메인이라도 어디서 왔는지 밝힌다
-  setEl('bible-credit', `${BIBLE.meta.fullName} · ${BIBLE.meta.license} · ${BIBLE.meta.source}`);
+  const meta = (State.lang === 'en' && BIBLE.metaEn) ? BIBLE.metaEn : BIBLE.meta;
+  setEl('bible-credit', `${meta.fullName} · ${meta.license} · ${meta.source}`);
   applyBibleFontSize();
 }
 
@@ -489,11 +513,12 @@ function renderBibleChapterOptions() {
   const sel = document.getElementById('bible-chapter');
   const book = BIBLE.books.find(b => b.n === State.bibleBook);
   if (!sel || !book) return;
-  // 책이 바뀌면 장 목록을 다시 만든다
-  if (sel.dataset.book !== String(book.n)) {
+  // 책이 바뀌거나 언어가 바뀌면 장 목록을 다시 만든다 ('3장' ↔ 'Chapter 3')
+  const stamp = book.n + ':' + State.lang;
+  if (sel.dataset.book !== stamp) {
     sel.innerHTML = Array.from({ length: book.c }, (_, i) =>
-      `<option value="${i + 1}">${i + 1}장</option>`).join('');
-    sel.dataset.book = String(book.n);
+      `<option value="${i + 1}">${escHtml(tf('bibleChapterUnit', { n: i + 1 }))}</option>`).join('');
+    sel.dataset.book = stamp;
   }
   sel.value = String(State.bibleChapter);
 }
@@ -501,9 +526,10 @@ function renderBibleChapterOptions() {
 function renderBibleStarters() {
   const el = document.getElementById('bible-starters');
   if (!el) return;
+  const en = State.lang === 'en';
   el.innerHTML = BIBLE.starters.map(s =>
     `<button class="bible-starter" onclick="openBible(${s.n}, ${s.c})">
-      ${s.label} <em>${s.why}</em>
+      ${escHtml(en && s.labelEn ? s.labelEn : s.label)} <em>${escHtml(en && s.whyEn ? s.whyEn : s.why)}</em>
     </button>`).join('');
 }
 
@@ -518,12 +544,13 @@ function renderBibleResume() {
   }
   const book = BIBLE.books.find(b => b.n === last.n);
   if (!book) { el.innerHTML = ''; return; }
+  const where = tf('bibleWhere', { book: bibleBookTitle(book), ch: last.c });
   el.innerHTML =
     `<button class="bible-resume-btn" onclick="openBible(${last.n}, ${last.c})">
       <div class="bible-resume-icon">📖</div>
       <div class="bible-resume-body">
-        <div class="bible-resume-label">이어서 읽기</div>
-        <div class="bible-resume-where">${book.t} ${last.c}장</div>
+        <div class="bible-resume-label">${escHtml(t('bibleResume'))}</div>
+        <div class="bible-resume-where">${escHtml(where)}</div>
       </div>
       <div class="bible-resume-arrow">→</div>
     </button>`;
@@ -566,7 +593,8 @@ async function loadBibleChapter() {
   const body = document.getElementById('bible-body');
   if (!book || !body) return;
 
-  setEl('bible-title', `${book.t} ${ch}장`);
+  const title = bibleBookTitle(book);
+  setEl('bible-title', tf('bibleWhere', { book: title, ch }));
   updateBibleNavBtns();
   renderBibleResume();
 
@@ -578,7 +606,7 @@ async function loadBibleChapter() {
 
   const cached = BibleFetch.cached(book.n, ch);
   if (!cached) {
-    body.innerHTML = `<div class="bible-state">${book.t} ${ch}장을 불러오는 중입니다…</div>`;
+    body.innerHTML = `<div class="bible-state">${escHtml(tf('bibleLoading', { book: title, ch }))}</div>`;
   }
 
   // 늦게 도착한 응답이 새로 고른 장을 덮어쓰지 않도록 요청에 번호를 매긴다
@@ -593,15 +621,15 @@ async function loadBibleChapter() {
       `<div class="bible-verse">
         <div class="bible-verse-num">${v.v}</div>
         <div class="bible-verse-text">${escHtml(v.t)}</div>
-        ${favBtnHtml(v.t, `${book.t} ${ch}:${v.v}`, 'bible')}
+        ${favBtnHtml(v.t, `${title} ${ch}:${v.v}`, 'bible')}
       </div>`).join('');
     document.getElementById('wordsub-read')?.scrollIntoView({ block: 'nearest' });
   } catch (e) {
     if (token !== State.bibleReqToken) return;
     body.innerHTML =
       `<div class="bible-state">
-        본문을 불러오지 못했습니다.<br>인터넷 연결을 확인해 주세요.
-        <br><button class="bible-retry" onclick="loadBibleChapter()">다시 시도</button>
+        ${t('bibleFailed')}
+        <br><button class="bible-retry" onclick="loadBibleChapter()">${escHtml(t('bibleRetry'))}</button>
       </div>`;
   }
 }
@@ -626,10 +654,65 @@ function renderBibleProgress() {
   if (!book) { el.textContent = ''; return; }
   const reads = Store.load('bibleReads', []);
   const done = reads.filter(r => r.n === book.n).length;
-  const total = reads.length;
+  const text = tf('bibleProgressText', {
+    book: bibleBookTitle(book), done, total: book.c, all: reads.length
+  });
   el.innerHTML =
     `<div class="bible-progress-bar"><span style="width:${Math.round(done / book.c * 100)}%"></span></div>
-     <div class="bible-progress-text">${book.t} ${done}/${book.c}장 읽음 · 전체 ${total}/1189장</div>`;
+     <div class="bible-progress-text">${escHtml(text)}</div>`;
+  renderReadProgress();
+}
+
+// ─── 권별 읽기 진도 (기억 탭) ────────────────────────────
+//
+// 성경읽기 카드의 진도는 '지금 보는 책' 하나만 알려 준다. 어머니 말씀:
+// "내가 어디까지 읽었는지 전체를 좀 보고 싶다." 그래서 읽은 장이 하나라도
+// 있는 책만 골라 분류(모세오경·복음서…)로 묶어 보여준다.
+//
+// 66권을 다 늘어놓지 않는다 — 아직 안 펼친 책 60권이 0장으로 줄줄이 있으면
+// 읽은 것보다 안 읽은 것이 먼저 보여서 마음이 무거워진다.
+function renderReadProgress() {
+  const el = document.getElementById('read-progress');
+  if (!el) return;
+  const reads = Store.load('bibleReads', []);
+
+  // 책마다 읽은 장 수
+  const byBook = {};
+  reads.forEach(r => { byBook[r.n] = (byBook[r.n] || 0) + 1; });
+  const opened = BIBLE.books.filter(b => byBook[b.n] > 0);
+
+  if (!opened.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📖</div>`
+      + `<div class="empty-text" id="read-progress-empty"></div></div>`;
+    // 낱말이 갈리지 않게 — \n 이 끊어도 되는 자리다
+    setPhrase('read-progress-empty', t('readProgressNone'));
+    return;
+  }
+
+  // 분류 순서대로 (BIBLE.groups 가 구약→신약 순서를 갖고 있다)
+  const en = State.lang === 'en';
+  const sections = BIBLE.groups.map(grp => {
+    const books = opened.filter(b => b.g === grp.g);
+    if (!books.length) return '';
+    const rows = books.map(b => {
+      const done = byBook[b.n];
+      const pct = Math.round(done / b.c * 100);
+      return `<div class="read-row${done >= b.c ? ' done' : ''}">
+        <div class="read-row-name">${escHtml(bibleBookTitle(b))}</div>
+        <div class="read-row-bar"><span style="width:${pct}%"></span></div>
+        <div class="read-row-num">${done}/${b.c}</div>
+      </div>`;
+    }).join('');
+    return `<div class="read-group">
+      <div class="read-group-label">${escHtml(en && grp.gEn ? grp.gEn : grp.g)}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="read-total">
+      <div class="read-total-num">${escHtml(tf('readProgressAll', { done: reads.length }))}</div>
+      <div class="read-total-books">${escHtml(tf('readProgressBooks', { n: opened.length }))}</div>
+    </div>${sections}`;
 }
 
 function updateBibleNavBtns() {
@@ -694,10 +777,15 @@ function applyBibleFontSize() {
   if (body) body.style.setProperty('--v', BIBLE_SIZES[idx].v);
   // 버튼에 지금 단계를 보여준다 — 글자 수로 크기를 짐작할 수 있게
   const btn = document.getElementById('bible-size-btn');
-  if (btn) {
-    const names = ['보통', '크게', '아주 크게'];
-    btn.textContent = '글씨 ' + names[idx];
-  }
+  if (btn) btn.textContent = fontSizeLabel(idx);
+}
+
+// 글씨 크기 버튼에 쓸 말 — '글씨 크게' / 'Text Large'
+// 단계 이름을 코드에 박아 두면 English 로 바꿔도 한글이 남는다
+const FONT_SIZE_KEYS = ['fontNormal', 'fontBig', 'fontHuge'];
+function fontSizeLabel(idx) {
+  const key = FONT_SIZE_KEYS[idx] || FONT_SIZE_KEYS[0];
+  return tf('fontSizeLabel', { size: t(key) });
 }
 
 function prevVerse() {
@@ -720,12 +808,19 @@ function filterHymns(filter) {
   renderHymnList();
 }
 
+// 찬송가 제목·가사·부른이는 한글로 둔다. 평생 그 제목으로 알고 계신 노래이고,
+// 유튜브도 한글 제목으로 찾아야 나온다. 대신 '언제 부르면 좋은지'(note) 는
+// 안내하는 말이라 영어로 바꿔 준다.
+function hymnNote(h) {
+  return (State.lang === 'en' && h.noteEn) ? h.noteEn : h.note;
+}
+
 function renderHymn() {
   const hymn = DATA.hymns[State.currentHymnIdx];
   setEl('hymn-title', hymn.title);
   setEl('hymn-artist', (hymn.tag ? '[' + hymn.tag + '] ' : '') + hymn.artist);
   setEl('hymn-lyrics', hymn.lyrics);
-  setEl('hymn-note', hymn.note);
+  setEl('hymn-note', hymnNote(hymn));
   updatePlayBtn();
   renderHymnList();
 }
@@ -745,7 +840,7 @@ function renderHymnList() {
       <div class="hymn-row-num">${realIdx + 1}</div>
       <div class="hymn-row-body">
         <div class="hymn-row-title">${h.title}</div>
-        <div class="hymn-row-note">${h.tag ? '[' + h.tag + '] ' : ''}${h.note}</div>
+        <div class="hymn-row-note">${h.tag ? '[' + h.tag + '] ' : ''}${escHtml(hymnNote(h))}</div>
       </div>
       <div class="hymn-row-badge">${playing ? '🎵' : ''}</div>
     </div>`;
@@ -771,7 +866,10 @@ function togglePlay() {
 
 function updatePlayBtn() {
   const btn = document.getElementById('play-btn');
-  if (btn) btn.textContent = State.isPlaying ? '⏸' : '▶';
+  if (!btn) return;
+  btn.textContent = State.isPlaying ? '⏸' : '▶';
+  // 그림만 있는 단추라 눈으로는 언어가 없지만, 읽어주는 기계에는 말이 필요하다
+  btn.setAttribute('aria-label', State.isPlaying ? t('hymnPause') : t('hymnPlay'));
 }
 
 // ─── Prayer ──────────────────────────────────────────────
@@ -781,7 +879,7 @@ function renderPrayer() {
     grid.innerHTML = DATA.prayerGuides.map(g =>
       `<div class="prayer-type-card ${State.selectedPrayerType === g.type ? 'selected' : ''}" onclick="selectPrayerType('${g.type}')">
         <div class="prayer-type-icon">${g.icon}</div>
-        <div class="prayer-type-label">${g.title}</div>
+        <div class="prayer-type-label">${escHtml(prayerTitle(g))}</div>
       </div>`
     ).join('');
   }
@@ -790,12 +888,12 @@ function renderPrayer() {
   const saved = document.getElementById('prayer-saved-list');
   if (saved) {
     if (!State.prayers.length) {
-      saved.innerHTML = '<div class="empty"><div class="empty-icon">🙏</div><div class="empty-text">아직 기도제목이 없어요</div></div>';
+      saved.innerHTML = `<div class="empty"><div class="empty-icon">🙏</div><div class="empty-text">${escHtml(t('noPrayer'))}</div></div>`;
     } else {
       saved.innerHTML = State.prayers.slice(-10).reverse().map(p => {
         const guide = DATA.prayerGuides.find(g => g.type === p.type);
         return `<div class="prayer-saved-row">
-          <div class="prayer-saved-meta">${formatDate(new Date(p.date))} · ${guide?.title || '기도'}</div>
+          <div class="prayer-saved-meta">${formatDate(new Date(p.date))} · ${escHtml(guide ? prayerTitle(guide) : t('prayerKindFree'))}</div>
           <div class="prayer-saved-text">${escHtml(p.text)}</div>
         </div>`;
       }).join('');
@@ -811,13 +909,21 @@ function selectPrayerType(type) {
   renderPrayerGuide();
 }
 
+// 기도 종류 이름과 안내 네 줄 — 영어가 없으면 한국어로 돌아간다
+function prayerTitle(g) {
+  return (State.lang === 'en' && g.titleEn) ? g.titleEn : g.title;
+}
+function prayerGuideLines(g) {
+  return (State.lang === 'en' && g.guideEn) ? g.guideEn : g.guide;
+}
+
 function renderPrayerGuide() {
   const el = document.getElementById('prayer-guide-box');
   if (!el) return;
   const guide = DATA.prayerGuides.find(g => g.type === State.selectedPrayerType);
   if (!guide) { el.innerHTML = ''; return; }
   el.innerHTML = `<div class="prayer-guide-box">
-    ${guide.guide.map(line => `<div class="prayer-guide-line">${line}</div>`).join('')}
+    ${prayerGuideLines(guide).map(line => `<div class="prayer-guide-line">${escHtml(line)}</div>`).join('')}
   </div>`;
 }
 
@@ -827,7 +933,7 @@ function savePrayer() {
   if (typeof Voice !== 'undefined' && Voice.listening()) Voice.stop();
   const ta = document.getElementById('prayer-textarea');
   const text = (ta?.value || '').trim();
-  if (!text) { showToast('기도 내용을 입력해 주세요 🙏'); return; }
+  if (!text) { showToast(t('prayerSaveEmpty')); return; }
   State.prayers.push({ cid: newClientId(), date: new Date().toISOString(), type: State.selectedPrayerType || 'free', text });
   Store.save('prayers', State.prayers);
   cloudQueue();
@@ -836,19 +942,19 @@ function savePrayer() {
   // 방금 저장한 기도가 접힌 카드에 가려지지 않도록 펼친다
   revealCard(document.getElementById('prayer-saved-list'));
   updateCollapseHints();
-  showToast('기도제목이 저장되었습니다 🙏');
+  showToast(t('prayerSaved2'));
 }
 
 // ─── Gratitude ───────────────────────────────────────────
 function renderGratitude() {
   const streak = calcStreak();
   setEl('streak-num', streak.toString());
-  setEl('streak-label', streak > 0 ? `일째 감사 중 🔥` : `오늘 첫 감사를 써볼까요?`);
+  setEl('streak-label', streak > 0 ? t('gratitudeStreak') : t('gratitudeStreakNone'));
 
   const history = document.getElementById('gratitude-history');
   if (!history) return;
   if (!State.gratitude.length) {
-    history.innerHTML = '<div class="empty"><div class="empty-icon">💛</div><div class="empty-text">감사한 일을 적어보세요<br>범사에 감사하라 · 살전 5:18</div></div>';
+    history.innerHTML = `<div class="empty"><div class="empty-icon">💛</div><div class="empty-text">${t('gratitudeEmpty')}</div></div>`;
   } else {
     history.innerHTML = State.gratitude.slice(-14).reverse().map(g =>
       `<div class="g-history-day">
@@ -864,7 +970,7 @@ function renderGratitude() {
 function saveGratitude() {
   if (typeof Voice !== 'undefined' && Voice.listening()) Voice.stop();
   const items = [1,2,3].map(n => (document.getElementById(`g-input-${n}`)?.value || '').trim()).filter(Boolean);
-  if (!items.length) { showToast('감사한 일을 하나라도 써주세요 💛'); return; }
+  if (!items.length) { showToast(t('gratitudeSaveEmpty')); return; }
   const today = todayKey();
   const idx = State.gratitude.findIndex(g => g.date === today);
   const entry = { date: today, items };
@@ -875,7 +981,7 @@ function saveGratitude() {
   renderGratitude(); renderHome();
   revealCard(document.getElementById('gratitude-history'));
   updateCollapseHints();
-  showToast('감사 일기를 저장했습니다 💛');
+  showToast(t('gratitudeSaved2'));
   setTimeout(() => showCompanionBanner('praise'), 1200);
 }
 
@@ -890,9 +996,9 @@ function saveGratitude() {
 // 임마누엘 일기 글씨 크기 — 역사 이야기와 같은 3단계.
 // 다섯 칸을 다 읽어야 하는 화면이라 어르신이 직접 키울 수 있어야 한다.
 const IMM_SIZES = [
-  { v: '14px', label: '보통' },
-  { v: '17px', label: '크게' },
-  { v: '20px', label: '아주 크게' }
+  { v: '14px' },
+  { v: '17px' },
+  { v: '20px' }
 ];
 
 function cycleImmFontSize() {
@@ -907,8 +1013,13 @@ function applyImmFontSize() {
   const pane = document.getElementById('tab-gratitude');
   if (pane) pane.style.setProperty('--imm-fs', size.v);
   const btn = document.getElementById('imm-size-btn');
-  if (btn) btn.textContent = '글씨 ' + size.label;
+  if (btn) btn.textContent = fontSizeLabel(State.immFontIdx || 0);
 }
+
+// 임마누엘 다섯 단계의 말 — 영어가 없으면 한국어로 돌아간다
+function immStepTitle(s) { return (State.lang === 'en' && s.titleEn) ? s.titleEn : s.title; }
+function immStepAsk(s) { return (State.lang === 'en' && s.askEn) ? s.askEn : s.ask; }
+function immStepHint(s) { return (State.lang === 'en' && s.hintEn) ? s.hintEn : s.hint; }
 
 // 오늘 이미 쓴 일기가 있으면 그것을 이어서 고칠 수 있게 불러온다
 function todayImmanuel() {
@@ -924,41 +1035,55 @@ function renderImmanuel() {
   const verses = DATA.immanuelVerses || [];
   if (verses.length) {
     const v = verses[getTodayVerseIdx() % verses.length];
-    setPhrase('imm-verse-text', '"' + v.text + '"');
-    setEl('imm-verse-ref', v.ref);
+    setPhrase('imm-verse-text', '"' + verseText(v) + '"');
+    setEl('imm-verse-ref', verseRef(v));
   }
 
   // 입력칸은 한 번만 그린다 — 다시 그리면 쓰던 글이 날아간다
   if (wrap && !wrap.dataset.built) {
     wrap.dataset.built = '1';
+    wrap.dataset.lang = State.lang;
     wrap.innerHTML = steps.map((s, i) => `
       <div class="imm-step">
         <div class="imm-step-head">
           <span class="imm-step-num">${i + 1}</span>
           <span class="imm-step-icon">${s.icon}</span>
-          <span class="imm-step-title">${escHtml(s.title)}</span>
+          <span class="imm-step-title">${escHtml(immStepTitle(s))}</span>
         </div>
-        <div class="imm-step-ask">${escHtml(s.ask)}</div>
+        <div class="imm-step-ask">${escHtml(immStepAsk(s))}</div>
         <textarea class="imm-input" id="imm-input-${s.key}" rows="2"
-          placeholder="${escHtml(s.hint)}"></textarea>
+          placeholder="${escHtml(immStepHint(s))}"></textarea>
       </div>`).join('');
 
     // 다섯 칸에 말로 쓰기를 붙인다 — 칸을 방금 만들었으니 여기서 해야 한다
     if (typeof attachAllMics === 'function') attachAllMics();
 
-    // 오늘 쓴 게 있으면 채워 둔다 (이어서 고쳐 쓰게)
+    // 오늘 붙여 둔 사진은 되살린다 — 빼기 단추가 이 목록을 보고 움직이므로,
+    // 앱을 다시 켠 뒤에도 오늘 사진을 뺄 수 있어야 한다.
+    //
+    // 글은 되살리지 않는다. 저장하면 칸을 비우기로 했으니(어르신이 남아
+    // 있는 글을 보고 저장이 안 된 줄 아셨다) 여기서 다시 채우면 앱을 켤
+    // 때마다 되살아나 같은 일이 벌어진다. 저장한 글은 아래 기록칸에 있고,
+    // 같은 날 다시 쓰면 그 하루에 이어 붙는다.
     const today = todayImmanuel();
-    if (today) {
-      steps.forEach(s => {
-        const el = document.getElementById('imm-input-' + s.key);
-        if (el && today.answers && today.answers[s.key]) el.value = today.answers[s.key];
-      });
-      // 오늘 붙여 둔 사진도 되살린다
-      if (today.photos && today.photos.length) {
-        immPendingPhotos = [...today.photos];
-        renderImmPhotoPreview().catch(() => {});
-      }
+    if (today && today.photos && today.photos.length) {
+      immPendingPhotos = [...today.photos];
+      renderImmPhotoPreview().catch(() => {});
     }
+  } else if (wrap && wrap.dataset.lang !== State.lang) {
+    // 언어가 바뀌었다. 다시 그리면 쓰고 있던 글이 날아가므로
+    // 제목·질문·예시만 제자리에서 바꿔 준다.
+    wrap.dataset.lang = State.lang;
+    steps.forEach((s, i) => {
+      const box = wrap.children[i];
+      if (!box) return;
+      const title = box.querySelector('.imm-step-title');
+      const ask = box.querySelector('.imm-step-ask');
+      const input = document.getElementById('imm-input-' + s.key);
+      if (title) title.textContent = immStepTitle(s);
+      if (ask) ask.textContent = immStepAsk(s);
+      if (input) input.placeholder = immStepHint(s);
+    });
   }
 
   // 사진을 못 쓰는 브라우저에서는 사진 칸을 아예 숨긴다 —
@@ -979,8 +1104,7 @@ function renderImmanuelHistory() {
 
   if (!State.immanuel.length) {
     hist.innerHTML = '<div class="empty"><div class="empty-icon">🌿</div>'
-      + '<div class="empty-text">주님과 함께한 하루를 적어보세요<br>'
-      + '임마누엘 · 하나님이 우리와 함께 계시다</div></div>';
+      + `<div class="empty-text">${t('immEmpty')}</div></div>`;
     return;
   }
 
@@ -993,7 +1117,7 @@ function renderImmanuelHistory() {
       .map(([k, v]) => {
         const s = byKey[k];
         return `<div class="imm-hist-row">
-          <div class="imm-hist-label">${s ? s.icon + ' ' + escHtml(s.title) : escHtml(k)}</div>
+          <div class="imm-hist-label">${s ? s.icon + ' ' + escHtml(immStepTitle(s)) : escHtml(k)}</div>
           <div class="imm-hist-text">${escHtml(v)}</div>
         </div>`;
       }).join('');
@@ -1029,7 +1153,7 @@ async function attachHistoryPhotos(hist) {
     const img = document.createElement('img');
     img.className = 'imm-photo';
     img.src = url;
-    img.alt = '그날의 사진';
+    img.alt = t('immPhotoAlt');
     img.loading = 'lazy';
     slot.appendChild(img);
   }
@@ -1056,22 +1180,24 @@ async function pickImmPhoto(input) {
   if (!files.length) return;
 
   if (!Photos.available()) {
-    showToast('이 브라우저에서는 사진을 넣을 수 없습니다');
+    showToast(t('immPhotoUnsupported'));
     return;
   }
 
   const room = IMM_PHOTO_MAX - immPendingPhotos.length;
   if (room <= 0) {
-    showToast(`사진은 ${IMM_PHOTO_MAX}장까지 넣을 수 있어요`);
+    showToast(tf('immPhotoOver', { max: IMM_PHOTO_MAX }));
     return;
   }
 
   // 한 번에 여러 장을 고를 수 있으니, 남은 자리만큼만 받는다
   const take = files.filter(f => /^image\//.test(f.type)).slice(0, room);
-  if (!take.length) { showToast('사진 파일만 넣을 수 있어요'); return; }
+  if (!take.length) { showToast(t('immPhotoOnlyImage')); return; }
   const overflow = files.length - take.length;
 
-  showToast(take.length > 1 ? `사진 ${take.length}장을 준비하고 있어요...` : '사진을 준비하고 있어요...');
+  showToast(take.length > 1
+    ? tf('immPhotoPreparingN', { n: take.length })
+    : t('immPhotoPreparing'));
 
   let added = 0, bytes = 0, tooBig = 0, failed = 0;
   for (const file of take) {
@@ -1089,14 +1215,14 @@ async function pickImmPhoto(input) {
   await renderImmPhotoPreview();
 
   if (added) {
-    let msg = `사진 ${added}장을 넣었어요 (${formatBytes(bytes)})`;
+    let msg = tf('immPhotoAdded', { n: added, size: formatBytes(bytes) });
     // 못 담은 게 있으면 조용히 넘기지 않고 알려준다
-    if (overflow) msg += ` · ${IMM_PHOTO_MAX}장까지만 담겨요`;
-    if (tooBig) msg += ` · ${tooBig}장은 너무 커요`;
-    if (failed) msg += ` · ${failed}장 실패`;
+    if (overflow) msg += ' · ' + tf('immPhotoOnlyMax', { max: IMM_PHOTO_MAX });
+    if (tooBig) msg += ' · ' + tf('immPhotoTooBigN', { n: tooBig });
+    if (failed) msg += ' · ' + tf('immPhotoFailedN', { n: failed });
     showToast(msg);
-  } else if (tooBig) showToast('사진이 너무 커요. 다른 사진을 골라주세요');
-  else showToast('사진을 넣지 못했어요');
+  } else if (tooBig) showToast(t('immPhotoTooBig'));
+  else showToast(t('immPhotoFailed'));
 }
 
 async function renderImmPhotoPreview() {
@@ -1111,7 +1237,7 @@ async function renderImmPhotoPreview() {
   const ids = immPendingPhotos;
   if (!ids.length) {
     box.innerHTML = '';
-    if (btn) btn.textContent = '📷 사진 고르기';
+    if (btn) { btn.textContent = t('immPhotoBtn'); btn.disabled = false; }
     return;
   }
 
@@ -1125,15 +1251,15 @@ async function renderImmPhotoPreview() {
 
   box.innerHTML = `<div class="imm-photo-grid">${items.map(it => `
     <div class="imm-photo-wrap">
-      <img class="imm-photo" src="${it.url}" alt="오늘의 사진"/>
+      <img class="imm-photo" src="${it.url}" alt="${escHtml(t('immPhotoAltToday'))}"/>
       <button class="imm-photo-del" onclick="removeImmPhoto('${it.id}')"
-        aria-label="이 사진 빼기">✕</button>
+        aria-label="${escHtml(t('immPhotoRemoveAria'))}">✕</button>
     </div>`).join('')}</div>
-    <div class="imm-photo-size">${items.length} / ${IMM_PHOTO_MAX}장</div>`;
+    <div class="imm-photo-size">${escHtml(tf('immPhotoCount', { n: items.length, max: IMM_PHOTO_MAX }))}</div>`;
 
   if (btn) {
     const full = items.length >= IMM_PHOTO_MAX;
-    btn.textContent = full ? `📷 ${IMM_PHOTO_MAX}장까지 넣었어요` : '📷 사진 더 고르기';
+    btn.textContent = full ? tf('immPhotoFull', { max: IMM_PHOTO_MAX }) : t('immPhotoMore');
     btn.disabled = full;
   }
 }
@@ -1148,28 +1274,39 @@ async function removeImmPhoto(id) {
 
   immPendingPhotos = immPendingPhotos.filter(p => p !== id);
   await renderImmPhotoPreview();
-  showToast('사진을 빼냈어요');
+  showToast(t('immPhotoRemoved'));
 }
 
 function saveImmanuel() {
   if (typeof Voice !== 'undefined' && Voice.listening()) Voice.stop();
   const steps = DATA.immanuelSteps || [];
-  const answers = {};
+  const written = {};
   steps.forEach(s => {
     const v = (document.getElementById('imm-input-' + s.key)?.value || '').trim();
-    if (v) answers[s.key] = v;
+    if (v) written[s.key] = v;
   });
 
   // 사진만 넣어도 하루가 남는다 — 글이 없어도 저장을 막지 않는다
-  if (!Object.keys(answers).length && !immPendingPhotos.length) {
-    showToast('한 칸이라도 적거나 사진을 넣어주세요 🌿');
+  if (!Object.keys(written).length && !immPendingPhotos.length) {
+    showToast(t('immSaveEmpty'));
     return;
   }
 
-  // 하루에 하나 — 같은 날 다시 쓰면 덮어쓴다 (감사일기와 같은 규칙)
+  // 하루에 하나 — 같은 날 다시 쓰면 그 하루에 이어 붙인다.
   const today = todayKey();
   const idx = State.immanuel.findIndex(e => e.date === today);
   const prev = idx >= 0 ? State.immanuel[idx] : null;
+
+  // ★ 아침에 적은 것을 저녁에 덧붙여도 잃지 않게 이어 붙인다.
+  //
+  // 저장하면 칸을 비우기 때문에(어르신이 "저장했는데 글이 그대로 있다" 고
+  // 하셨다) 이어 붙이지 않으면 큰일이 난다: 저녁에 한 칸만 적고 저장하시면
+  // 아침에 적은 넷이 빈 칸으로 덮여 사라진다. 비우기와 이어 붙이기는
+  // 둘이 함께여야 맞다 — 하나만 하면 안 된다.
+  //
+  // 같은 칸을 다시 적으셨으면 새로 적은 것이 이긴다 (고쳐 쓰신 것이다).
+  const answers = Object.assign({}, prev?.answers || {}, written);
+
   const entry = {
     date: today,
     cid: prev?.cid || newClientId(),
@@ -1184,18 +1321,142 @@ function saveImmanuel() {
 
   Store.save('immanuel', State.immanuel);
   cloudQueue();
+
+  // ★ 저장했으면 칸을 비운다.
+  //
+  // 어르신 말씀: "임마누엘일기를 저장했는데 질문들마다 내가 쓴 글들이
+  // 남아있어. 버그같아." 기도·감사는 저장하면 칸이 비는데 여기만 남아
+  // 있었으니, 저장이 안 된 것으로 보이신 것이다. 아래 기록칸에 저장된
+  // 글이 이미 보이므로 위에 또 남겨 둘 이유가 없다.
+  //
+  // 지운 글은 위 entry.answers 에 들어가 있고, 같은 날 또 쓰시면 이어
+  // 붙으므로 잃는 것이 없다.
+  steps.forEach(s => {
+    const el = document.getElementById('imm-input-' + s.key);
+    if (el) el.value = '';
+  });
+  // 사진은 비우지 않는다. 글과 사정이 다르다:
+  //  · 사진은 그 자리에 작게 보여서 "저장이 안 됐나" 하고 헷갈릴 일이 없다.
+  //  · 이 목록을 비우면 붙여 둔 사진을 빼낼 길이 없어진다 (빼기 단추가
+  //    이 목록을 보고 움직인다).
+  //  · 무엇보다, 비운 다음 저녁에 또 저장하시면 entry.photos 가 빈 채로
+  //    덮여서 아침에 넣은 사진이 폰에서 지워진다.
   renderImmanuelHistory();
   revealCard(document.getElementById('imm-history'));
   updateCollapseHints();
-  showToast('임마누엘 일기를 저장했습니다 🌿');
+  showToast(t('immSaved'));
 }
 
 // ─── Album ───────────────────────────────────────────────
 function renderAlbum() {
-  setEl('album-people-count', State.memories.people.length + '명');
-  setEl('album-verse-count', State.memories.myVerses.length + '개');
+  setEl('album-people-count', tf('albumPeopleCount', { n: State.memories.people.length }));
+  setEl('album-verse-count', tf('albumVerseCount', { n: State.memories.myVerses.length }));
+  renderReadProgress();
   // 추억의 게임 — games.js 가 없어도 앨범 탭은 그대로 열려야 한다
   if (typeof renderGames === 'function') renderGames();
+  renderLocalOnly();
+}
+
+// 기록이 이 폰에만 있다는 안내를 보여줄지 정한다.
+//
+// 언제 보여주나: 기록이 LOCAL_ONLY_MIN 개 넘게 쌓인 뒤부터.
+// 처음 켠 날 "사라질 수 있어요" 를 먼저 읽으면 쓰기도 전에 불안해진다.
+// 잃을 것이 생긴 다음에 알려야 뜻이 있는 말이다.
+//
+// 언제 감추나: 로그인해서 서버에 보관되고 있을 때. 그때는 사실이 아니다.
+const LOCAL_ONLY_MIN = 10;
+
+function countMyRecords() {
+  const m = State.memories || {};
+  return State.gratitude.length + State.prayers.length + State.immanuel.length
+       + (m.myVerses || []).length + (m.people || []).length;
+}
+
+function renderLocalOnly() {
+  const card = document.getElementById('localonly-card');
+  if (!card) return;
+
+  const loggedIn = typeof Cloud !== 'undefined' && Cloud.loggedIn && Cloud.loggedIn();
+  if (loggedIn || countMyRecords() < LOCAL_ONLY_MIN) {
+    card.style.display = 'none';
+    return;
+  }
+  card.style.display = '';
+  setEl('localonly-title', t('localOnlyTitle'));
+  // 낱말이 줄 끝에서 갈리지 않게 — \n 이 끊어도 되는 자리다
+  setPhrase('localonly-l1', t('localOnlyL1'));
+  setPhrase('localonly-l2', t('localOnlyL2'));
+  setPhrase('localonly-l3', t('localOnlyL3'));
+}
+
+// ─── 화면 밝기 (해가 지면 저절로 어두워지기) ──────────────
+//
+// 어느 CSS 를 얹을지는 index.html 의 맨 위에서 이미 정해졌다 — 첫 페인트
+// 전에 정해야 흰 화면이 번쩍이지 않기 때문이다. 여기서는 어머니가 고르신
+// 것을 저장하고, 지금 어느 것이 켜져 있는지 보여 주는 일만 한다.
+//
+// ⚠ 이 설정은 서버에 안 올린다. js/cloud.js 는 감사·기도·말씀·읽기진도만
+//   올린다 — 폰마다 밝기가 다를 수 있는데 서버가 덮어쓰면 안 된다.
+
+// 서울(북위 37.5도) 기준 월별 일몰·일출. index.html 의 표와 **같아야 한다**.
+// 왜 두 군데 있나: index.html 은 첫 페인트 전에 CSS 를 골라야 해서 app.js 를
+// 기다릴 수 없다. 시간대 테마(getTimeChar)도 같은 이유로 두 군데다.
+const SUNSET_H  = [17.3,18.0,18.5,19.0,19.5,19.9,19.9,19.4,18.7,18.0,17.4,17.3];
+const SUNRISE_H = [ 7.8, 7.3, 6.7, 5.9, 5.3, 5.2, 5.4, 5.8, 6.2, 6.7, 7.2, 7.7];
+
+// 지금이 밤인가 — '저절로' 일 때만 쓴다
+function isAfterSunset(d) {
+  const now = d.getHours() + d.getMinutes() / 60;
+  const m = d.getMonth();
+  return now >= SUNSET_H[m] || now < SUNRISE_H[m];
+}
+
+// 해 지는 시각을 '오후 7시 30분' 처럼 읽어 준다.
+// 숫자만 '19.5' 로 보여드리면 어머니가 못 읽으신다.
+function sunsetLabel(d) {
+  const v = SUNSET_H[d.getMonth()];
+  const h = Math.floor(v);
+  const mm = Math.round((v - h) * 60);
+  if (State.lang === 'en') {
+    const h12 = h > 12 ? h - 12 : h;
+    return `${h12}:${String(mm).padStart(2, '0')} pm`;
+  }
+  const h12 = h > 12 ? h - 12 : h;
+  return mm ? `오후 ${h12}시 ${mm}분` : `오후 ${h12}시`;
+}
+
+function setScreenMode(mode) {
+  Store.save('screenMode', mode);
+  renderScreenMode();
+  // CSS 는 문서를 다시 열 때 골라진다. 지금 화면에서 바로 바뀌게
+  // 하려면 밤 CSS 를 붙였다 뗐다 해야 하는데, 그러면 '지금 켜진 것'
+  // 과 '다시 열면 켜질 것' 이 어긋날 수 있다. 그냥 다시 그린다 —
+  // 어머니께는 '잠깐 깜빡였다' 로만 보인다.
+  const label = mode === 'night' ? t('screenModeNight')
+              : mode === 'day'   ? t('screenModeDay')
+              : t('screenModeAuto');
+  showToast(t('screenModeSaved').replace('{mode}', label));
+  setTimeout(() => {
+    // 고른 것을 주소에 남기지 않는다 — ?night=1 이 붙어 있으면
+    // 그게 저장한 것보다 세서, 다음에 고쳐도 안 바뀐다
+    const u = new URL(location.href);
+    u.searchParams.delete('night');
+    location.replace(u.toString());
+  }, 700);
+}
+
+function renderScreenMode() {
+  const card = document.getElementById('screenmode-card');
+  if (!card) return;
+  const mode = Store.load('screenMode', 'auto');
+  ['auto', 'day', 'night'].forEach(k => {
+    const b = document.getElementById('sm-' + k);
+    if (b) b.classList.toggle('on', mode === k);
+  });
+  // '저절로' 밑에 실제로 몇 시에 어두워지는지 적어 드린다 —
+  // 계절마다 달라지니까 (12월 5시 17분 · 6월 7시 56분)
+  const sub = document.getElementById('sm-auto-sub');
+  if (sub) setPhrase('sm-auto-sub', t('screenModeAutoSub').replace('{time}', sunsetLabel(new Date())));
 }
 
 function openMemoryModal(type) {
@@ -1205,52 +1466,52 @@ function openMemoryModal(type) {
   if (!overlay) return;
 
   if (type === 'people') {
-    title.textContent = '소중한 분들 👨‍👩‍👧';
+    title.textContent = t('modalPeople');
     body.innerHTML = `
-      <input class="modal-input" id="m-person-name" placeholder="이름 (예: 김철수)"/>
-      <input class="modal-input" id="m-person-rel" placeholder="관계 (예: 큰아들, 담임목사님)"/>
-      <textarea class="modal-input" id="m-person-note" placeholder="기도제목 또는 메모" rows="3" style="resize:none"></textarea>
-      <button class="btn-primary" style="margin-bottom:16px" onclick="savePersonMemory()">저장하기</button>
+      <input class="modal-input" id="m-person-name" placeholder="${escHtml(t('mPersonName'))}"/>
+      <input class="modal-input" id="m-person-rel" placeholder="${escHtml(t('mPersonRel'))}"/>
+      <textarea class="modal-input" id="m-person-note" placeholder="${escHtml(t('mPersonNote'))}" rows="3" style="resize:none"></textarea>
+      <button class="btn-primary" style="margin-bottom:16px" onclick="savePersonMemory()">${escHtml(t('saveBtn'))}</button>
       ${State.memories.people.length === 0
-        ? '<div class="empty"><div class="empty-icon">👨‍👩‍👧</div><div class="empty-text">소중한 분들의 이름을 기억해요</div></div>'
+        ? `<div class="empty"><div class="empty-icon">👨‍👩‍👧</div><div class="empty-text">${escHtml(t('mPeopleEmpty'))}</div></div>`
         : State.memories.people.map((p,i) =>
             `<div class="modal-saved-item">
               <div class="modal-saved-name">${escHtml(p.name)} <span style="color:var(--gold)">${escHtml(p.relation)}</span></div>
               ${p.note ? `<div class="modal-saved-sub">${escHtml(p.note)}</div>` : ''}
-              <button class="modal-del-btn" onclick="removePerson(${i})">삭제</button>
+              <button class="modal-del-btn" onclick="removePerson(${i})">${escHtml(t('deleteBtn'))}</button>
             </div>`
           ).join('')}`;
   } else if (type === 'verses') {
-    title.textContent = '내가 좋아하는 말씀 📖';
+    title.textContent = t('modalVerses');
     // 담아 둔 말씀은 여러 번 되읽는 글이라 글씨 크기를 고를 수 있어야 한다.
     // 목록이 비어 있을 때는 버튼을 숨긴다 — 키울 게 없으니 혼란만 준다.
     const hasVerses = State.memories.myVerses.length > 0;
     body.innerHTML = `
-      <textarea class="modal-input" id="m-verse-text" placeholder="말씀을 적어보세요" rows="3" style="resize:none"></textarea>
-      <input class="modal-input" id="m-verse-ref" placeholder="출처 (예: 요한복음 3:16)"/>
-      <button class="btn-primary" style="margin-bottom:16px" onclick="saveVerseMemory()">저장하기</button>
+      <textarea class="modal-input" id="m-verse-text" placeholder="${escHtml(t('mVerseText'))}" rows="3" style="resize:none"></textarea>
+      <input class="modal-input" id="m-verse-ref" placeholder="${escHtml(t('mVerseRef'))}"/>
+      <button class="btn-primary" style="margin-bottom:16px" onclick="saveVerseMemory()">${escHtml(t('saveBtn'))}</button>
       ${hasVerses ? `<div class="story-size-row">
-        <button class="bible-size-btn" id="fav-size-btn" onclick="cycleFavFontSize()">글씨 보통</button>
+        <button class="bible-size-btn" id="fav-size-btn" onclick="cycleFavFontSize()">${escHtml(fontSizeLabel(0))}</button>
       </div>` : ''}
       <div id="fav-verse-list">
       ${!hasVerses
-        ? '<div class="empty"><div class="empty-icon">📖</div><div class="empty-text">마음에 새긴 말씀을 기록해 두세요</div></div>'
+        ? `<div class="empty"><div class="empty-icon">📖</div><div class="empty-text">${escHtml(t('mVersesEmpty'))}</div></div>`
         : State.memories.myVerses.map((v,i) =>
             `<div class="modal-saved-item">
               <div class="fav-verse-text">${escHtml(v.text)}</div>
               <div class="fav-verse-ref">${escHtml(v.ref)}</div>
-              <button class="modal-del-btn" onclick="removeVerse(${i})">삭제</button>
+              <button class="modal-del-btn" onclick="removeVerse(${i})">${escHtml(t('deleteBtn'))}</button>
             </div>`
           ).join('')}
       </div>`;
     applyFavFontSize();
   } else if (type === 'faith') {
-    title.textContent = '나의 신앙 이야기 ✝️';
+    title.textContent = t('modalFaith');
     body.innerHTML = `
-      <input class="modal-input" id="m-faith-baptism" placeholder="세례일 (예: 1985년 봄)" value="${escHtml(State.memories.myFaith.baptism)}"/>
-      <input class="modal-input" id="m-faith-church" placeholder="교회 이름" value="${escHtml(State.memories.myFaith.church)}"/>
-      <textarea class="modal-input" id="m-faith-note" placeholder="나의 신앙 이야기, 감사한 기억들..." rows="5" style="resize:none">${escHtml(State.memories.myFaith.note)}</textarea>
-      <button class="btn-primary" onclick="saveFaithMemory()">저장하기</button>`;
+      <input class="modal-input" id="m-faith-baptism" placeholder="${escHtml(t('mFaithBaptism'))}" value="${escHtml(State.memories.myFaith.baptism)}"/>
+      <input class="modal-input" id="m-faith-church" placeholder="${escHtml(t('mFaithChurch'))}" value="${escHtml(State.memories.myFaith.church)}"/>
+      <textarea class="modal-input" id="m-faith-note" placeholder="${escHtml(t('mFaithNote'))}" rows="5" style="resize:none">${escHtml(State.memories.myFaith.note)}</textarea>
+      <button class="btn-primary" onclick="saveFaithMemory()">${escHtml(t('saveBtn'))}</button>`;
   }
   overlay.classList.add('open');
 }
@@ -1261,9 +1522,9 @@ function closeMemoryModal() { document.getElementById('memory-modal')?.classList
 // 담아 둔 말씀을 다시 읽는 곳이라 목록 글씨가 작으면 담아 둔 뜻이 없다.
 // 3단계는 다른 곳과 같게 맞췄다.
 const FAV_SIZES = [
-  { v: '14px', label: '보통' },
-  { v: '18px', label: '크게' },
-  { v: '22px', label: '아주 크게' }
+  { v: '14px' },
+  { v: '18px' },
+  { v: '22px' }
 ];
 
 function cycleFavFontSize() {
@@ -1278,19 +1539,19 @@ function applyFavFontSize() {
   const list = document.getElementById('fav-verse-list');
   if (list) list.style.setProperty('--fav-fs', size.v);
   const btn = document.getElementById('fav-size-btn');
-  if (btn) btn.textContent = '글씨 ' + size.label;
+  if (btn) btn.textContent = fontSizeLabel(State.favFontIdx || 0);
 }
 
 function savePersonMemory() {
   const name = (document.getElementById('m-person-name')?.value || '').trim();
   const relation = (document.getElementById('m-person-rel')?.value || '').trim();
   const note = (document.getElementById('m-person-note')?.value || '').trim();
-  if (!name) { showToast('이름을 입력해 주세요'); return; }
+  if (!name) { showToast(t('mNameRequired')); return; }
   State.memories.people.push({ name, relation, note });
   Store.save('memories', State.memories);
   cloudQueue();
   renderAlbum(); openMemoryModal('people');
-  showToast(name + '님을 기억에 저장했습니다 💛');
+  showToast(tf('mPersonSaved', { name }));
 }
 function removePerson(idx) {
   State.memories.people.splice(idx, 1);
@@ -1301,14 +1562,14 @@ function removePerson(idx) {
 function saveVerseMemory() {
   const text = (document.getElementById('m-verse-text')?.value || '').trim();
   const ref = (document.getElementById('m-verse-ref')?.value || '').trim();
-  if (!text) { showToast('말씀을 입력해 주세요'); return; }
+  if (!text) { showToast(t('mVerseRequired')); return; }
   State.memories.myVerses.push({ text, ref, at: Date.now() });
   Store.save('memories', State.memories);
   cloudQueue();
   renderAlbum(); openMemoryModal('verses');
   // 읽기 화면에 같은 구절의 하트가 떠 있으면 함께 켜준다
   refreshFavButtons();
-  showToast('말씀이 저장되었습니다 📖');
+  showToast(t('mVerseSaved'));
 }
 function removeVerse(idx) {
   State.memories.myVerses.splice(idx, 1);
@@ -1326,7 +1587,7 @@ function saveFaithMemory() {
   Store.save('memories', State.memories);
   cloudQueue();
   closeMemoryModal();
-  showToast('신앙 이야기가 저장되었습니다 ✝️');
+  showToast(t('mFaithSaved'));
 }
 
 // ─── Companion (동반자 시스템) ───────────────────────────
@@ -1355,30 +1616,44 @@ function startCompanion() {
 function showCompanionBanner(trigger) {
   const msg = DATA.companionMessages.find(m => m.trigger === trigger);
   if (!msg) return;
-  const text = msg.text.replace('{name}', State.user?.name || '');
+  const en = State.lang === 'en';
+  const raw = (en && msg.textEn) ? msg.textEn : msg.text;
+  const text = raw.replace('{name}', State.user?.name || '');
   const banner = document.getElementById('companion-banner');
   const bannerText = document.getElementById('companion-banner-text');
   const bannerAction = document.getElementById('companion-banner-action');
   if (!banner) return;
   bannerText.textContent = text;
-  if (bannerAction) bannerAction.textContent = msg.action;
+  if (bannerAction) {
+    bannerAction.textContent = (en && msg.actionEn) ? msg.actionEn : msg.action;
+    // 어느 탭으로 갈지는 버튼 글씨가 아니라 이 열쇠로 정한다 (아래 참고)
+    bannerAction.dataset.actionKey = msg.actionKey || '';
+  }
   banner.classList.add('show');
   setTimeout(() => banner.classList.remove('show'), 8000);
 }
 
 function dismissCompanion() { document.getElementById('companion-banner')?.classList.remove('show'); }
 
+// 버튼 글씨('말씀 보기')로 탭을 고르던 것을 열쇠(actionKey)로 바꿨다.
+// 글씨로 고르면 English 에서는 'Read the Word' 안에 '말씀' 이 없으니
+// 눌러도 아무 일이 없다 — 어르신에겐 고장난 단추로 보인다.
+const COMPANION_TABS = { word: 'word', prayer: 'prayer', hymn: 'hymn', gratitude: 'gratitude' };
+
 function doCompanionAction() {
-  const action = document.getElementById('companion-banner-action')?.textContent || '';
+  const btn = document.getElementById('companion-banner-action');
+  const key = btn?.dataset.actionKey || '';
   dismissCompanion();
-  if (action.includes('말씀')) switchTab('word');
-  else if (action.includes('기도')) switchTab('prayer');
-  else if (action.includes('찬양')) switchTab('hymn');
-  else if (action.includes('감사')) switchTab('gratitude');
+  const tab = COMPANION_TABS[key];
+  if (tab) switchTab(tab);
 }
 
 function showFullscreenVerse() {
-  const verse = DATA.dailyVerses[State.currentVerseIdx];
+  // 영어로 보고 계시면 영어 구절을 띄운다.
+  // 예전에는 DATA.dailyVerses 만 봐서 English 로 두고 5분 쉬면
+  // 갑자기 한글 구절이 화면을 덮었다. (두 목록은 같은 순서·같은 개수다)
+  const list = State.lang === 'en' ? DATA.dailyVersesEn : DATA.dailyVerses;
+  const verse = list[State.currentVerseIdx] || DATA.dailyVerses[State.currentVerseIdx];
   setEl('fullscreen-verse-text', verse.text);
   setEl('fullscreen-verse-ref', verse.ref);
   document.getElementById('fullscreen-verse')?.classList.add('show');
@@ -1401,6 +1676,28 @@ function t(key) {
   return (DATA.ui[State.lang] || DATA.ui.ko)[key] || key;
 }
 
+// 자리를 채운 문구를 돌려준다 — tf('bibleWhere', {book:'요한복음', ch:3})
+//
+// 문구를 코드에서 이어 붙이면(`${book} ${ch}장`) 언어마다 어순이 달라 못 쓴다.
+// 영어는 'John 3', 한국어는 '요한복음 3장' 이라 붙이는 자리가 다르다.
+// 문구 전체를 ui 표에 두고 {이름} 만 갈아 끼우면 어순이 그 표에 담긴다.
+function tf(key, vals) {
+  let s = t(key);
+  Object.entries(vals || {}).forEach(([k, v]) => {
+    s = s.split('{' + k + '}').join(String(v));
+  });
+  return s;
+}
+
+// 그림글자 span 을 남기고 글자만 바꾼다.
+// '<span>📖</span>매일 말씀으로...' 처럼 그림글자가 형제 노드로 있는 곳에서
+// textContent 로 덮으면 그림글자까지 사라진다.
+function setI18nText(el, text) {
+  const last = el.lastChild;
+  if (last && last.nodeType === 3 && el.childNodes.length > 1) last.nodeValue = text;
+  else el.textContent = text;
+}
+
 function toggleLang() {
   State.lang = State.lang === 'ko' ? 'en' : 'ko';
   Store.save('lang', State.lang);
@@ -1408,21 +1705,63 @@ function toggleLang() {
   renderAll();
 }
 
+// index.html 에 박힌 글을 언어에 맞게 갈아 끼운다.
+//
+// 예전에는 이 함수가 온보딩과 탭 이름만 건드려서, English 를 눌러도 화면
+// 대부분이 한국어로 남았다. 이제 HTML 쪽에 data-i18n="열쇠말" 을 달아 두고
+// 여기서 한 번에 훑는다 — 새 글을 넣을 때 코드를 고칠 일이 없다.
+//
+//   data-i18n       글자를 바꾼다 (그림글자 형제는 남긴다)
+//   data-i18n-html  <b> · <br> 이 든 문구 (innerHTML)
+//   data-i18n-ph    입력칸의 placeholder
+//   data-i18n-aria  aria-label (눈으로 안 보이지만 읽어주는 글)
+function applyI18nAttrs() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    setI18nText(el, t(el.dataset.i18n));
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    el.innerHTML = t(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPh);
+  });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    el.setAttribute('aria-label', t(el.dataset.i18nAria));
+  });
+}
+
 function applyLangUI() {
   const ui = DATA.ui[State.lang];
+  // HTML 에 표시해 둔 곳을 먼저 한 번에 (아래 손으로 챙기는 곳은 그 예외들)
+  applyI18nAttrs();
+  document.documentElement.setAttribute('lang', State.lang === 'en' ? 'en' : 'ko');
+
   // 언어 토글 버튼 텍스트
   const btn = document.getElementById('lang-toggle-btn');
   if (btn) btn.textContent = ui.langToggle;
   const obBtn = document.getElementById('ob-lang-btn');
   if (obBtn) obBtn.textContent = ui.langToggle;
 
-  // 탭 라벨
-  const tabLabels = ['home','word','hymn','prayer','gratitude','album'];
-  const uiKeys = ['tabHome','tabWord','tabHymn','tabPrayer','tabGratitude','tabAlbum'];
-  tabLabels.forEach((tab, i) => {
+  // 탭 라벨 — 일곱 개 모두. 예전엔 '역사' 가 빠져 영어에서도 한글로 남았다
+  const tabKeys = {
+    home: 'tabHome', word: 'tabWord', story: 'tabStory', hymn: 'tabHymn',
+    prayer: 'tabPrayer', gratitude: 'tabGratitude', album: 'tabAlbum'
+  };
+  Object.entries(tabKeys).forEach(([tab, key]) => {
     const el = document.querySelector(`.tab-btn[data-tab="${tab}"] .tab-label`);
-    if (el) el.textContent = ui[uiKeys[i]];
+    if (el) el.textContent = ui[key];
   });
+
+  // 글씨 크기 버튼들 — 라벨이 언어에 따라 달라진다
+  applyBibleFontSize();
+  applyImmFontSize();
+  applyStoryFontSize();
+  if (typeof applyGameFontSize === 'function') applyGameFontSize();
+  // 말로 쓰기·읽어주기 버튼도 언어를 따라간다
+  if (typeof Voice !== 'undefined' && Voice.relabel) Voice.relabel();
+  // 그림의 대체글(alt) — 예전에는 시작할 때 한 번만 정해서, English 로
+  // 바꿔도 읽어주는 기계에는 '예수님' 이라고 그대로 남아 있었다
+  applyCharacter();
 
   // 온보딩 텍스트
   setEl('ob-title-el', ui.appName);
@@ -1437,17 +1776,11 @@ function applyLangUI() {
   const startBtn = document.getElementById('btn-start');
   if (startBtn) startBtn.textContent = ui.obStartBtn;
 
-  // 연령대 라벨 + 4개 버튼
-  setEl('ob-age-label-el', ui.obAgeLabel);
-  const ageKeys = { youth: 'obAgeYouth', young: 'obAgeYoung', middle: 'obAgeMiddle', senior: 'obAgeSenior' };
-  Object.entries(ageKeys).forEach(([age, key]) => {
-    const btn = document.querySelector(`.ob-age-btn[data-age="${age}"]`);
-    if (!btn) return;
-    const nameEl = btn.querySelector('.ob-age-name');
-    const rangeEl = btn.querySelector('.ob-age-range');
-    if (nameEl) nameEl.textContent = ui[key];
-    if (rangeEl) rangeEl.textContent = ui[key + 'Range'];
-  });
+  // 연령대 칸이 있던 자리 — 이제 어린아이와 같이 들어가는 말씀 한 줄이다.
+  // 낱말이 줄 끝에서 갈리지 않게 setPhrase 로 넣는다
+  // ('하나님의 나라를 받아들이지 않는' 이 갈리면 뜻이 흔들린다)
+  setPhrase('ob-welcome-verse', ui.obWelcomeVerse);
+  setEl('ob-welcome-ref', ui.obWelcomeRef);
 }
 
 // ─── Utils ───────────────────────────────────────────────
@@ -1459,10 +1792,21 @@ function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+// 날짜 — 언어에 따라 어순이 다르다.
+// 한국어: 2026년 7월 30일 (목) / 영어: Thu, July 30, 2026
+// 틀은 ui 표의 dateFmt 에 있고 여기서는 자리만 채운다.
 function formatDate(d) {
   if (!(d instanceof Date) || isNaN(d)) return '';
-  const days = ['일','월','화','수','목','금','토'];
-  return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  const ui = DATA.ui[State.lang] || DATA.ui.ko;
+  const days = ui.weekdays || ['일','월','화','수','목','금','토'];
+  const months = ui.months || [];
+  return tf('dateFmt', {
+    y: d.getFullYear(),
+    m: d.getMonth() + 1,
+    mn: months[d.getMonth()] || String(d.getMonth() + 1),
+    d: d.getDate(),
+    w: days[d.getDay()]
+  });
 }
 function calcStreak() {
   if (!State.gratitude.length) return 0;
@@ -1545,6 +1889,42 @@ function renderStory() {
   updateStoryProgress();
 }
 
+// ─── 시대 이름·연대 ───────────────────────────────────────
+// 연대는 데이터에 한글로만 있다 ('기원전 2100–1700'). 숫자는 그대로 두고
+// 앞머리만 바꿔 쓴다 — 시대마다 영어 연대를 또 적어 두면 숫자가 어긋날 수 있다.
+function eraName(era) { return (State.lang === 'en' && era.eraEn) ? era.eraEn : era.era; }
+function eraBooks(era) { return (State.lang === 'en' && era.booksEn) ? era.booksEn : era.books; }
+function eraPeriodShort(era) {
+  // '기원전 4 – 기원후 30년' → 'BC 4 – AD 30'
+  // '년' 을 지우는 것도 잊지 말 것 — 예전에는 'AD 30년' 이 그대로 남아서
+  // English 화면 시대 칩에 한글 한 자가 붙어 있었다.
+  return String(era.period || '')
+    .replace(/기원전\s*/g, 'BC ')
+    .replace(/기원후\s*/g, 'AD ')
+    .replace(/년/g, '')
+    .trim();
+}
+function eraPeriod(era) {
+  // 칩은 좁아서 언제나 짧게 쓰고, 타임라인은 한국어일 때만 원문을 쓴다
+  return State.lang === 'en' ? eraPeriodShort(era) : era.period;
+}
+
+// 핵심 구절 출처를 지금 언어로 — '창세기 1:1' → 'Genesis 1:1'
+//
+// 시대마다 영어 출처를 또 적어 두지 않는다. 성경읽기가 이미 66권의 한글·영어
+// 이름을 갖고 있으니 그것을 쓴다 — 한 곳에만 적어 두면 어긋날 일이 없다.
+// 한글 책 이름에는 숫자가 없어서 첫 숫자 앞까지를 책 이름으로 본다.
+// (띄어쓰기는 무시한다: 이야기 쪽은 '예레미야애가', 성경읽기는 '예레미야 애가')
+function storyVerseRef(ref) {
+  const raw = String(ref || '');
+  if (State.lang !== 'en' || typeof BIBLE === 'undefined') return raw;
+  const m = raw.match(/^([^\d]+)(.*)$/);
+  if (!m) return raw;
+  const flat = m[1].replace(/\s+/g, '');
+  const book = BIBLE.books.find(b => b.t.replace(/\s+/g, '') === flat);
+  return (book && book.e) ? (book.e + ' ' + m[2].trim()) : raw;
+}
+
 // ─── 시대 칩 (가로 스크롤) ───────────────────────────────
 function renderEraChips() {
   const el = document.getElementById('era-scroll');
@@ -1553,8 +1933,8 @@ function renderEraChips() {
     <button class="era-chip ${i === StoryState.currentEraIdx ? 'active' : ''}"
       onclick="selectEra(${i})">
       <div class="era-chip-icon">${era.icon}</div>
-      <div class="era-chip-label">${era.era}</div>
-      <div class="era-chip-period">${era.period.replace('기원전 ','BC ').replace('기원후 ','AD ')}</div>
+      <div class="era-chip-label">${escHtml(eraName(era))}</div>
+      <div class="era-chip-period">${escHtml(eraPeriodShort(era))}</div>
     </button>
   `).join('');
   // 활성 칩 스크롤 중앙으로
@@ -1580,9 +1960,9 @@ function renderTimelineNav() {
       <div class="timeline-line"></div>
       <div class="timeline-dot">${StoryState.readEras.has(i) ? '✓' : era.icon}</div>
       <div class="timeline-info">
-        <div class="timeline-era">${era.era}</div>
-        <div class="timeline-books">${era.books}</div>
-        <div class="timeline-period">${era.period}</div>
+        <div class="timeline-era">${escHtml(eraName(era))}</div>
+        <div class="timeline-books">${escHtml(eraBooks(era))}</div>
+        <div class="timeline-period">${escHtml(eraPeriod(era))}</div>
       </div>
     </div>
   `).join('');
@@ -1599,9 +1979,9 @@ function renderEraContent(idx) {
   if (heroContainer) {
     heroContainer.innerHTML = `
       <div class="story-hero" style="background:${era.color}" data-icon="${era.icon}">
-        <div class="story-hero-period">${era.period} · ${lang === 'en' ? era.booksEn : era.books}</div>
-        <div class="story-hero-era">${lang === 'en' ? era.eraEn : era.era}</div>
-        <div class="story-hero-tagline">${lang === 'en' ? era.taglineEn : era.tagline}</div>
+        <div class="story-hero-period">${escHtml(eraPeriod(era))} · ${escHtml(eraBooks(era))}</div>
+        <div class="story-hero-era">${escHtml(eraName(era))}</div>
+        <div class="story-hero-tagline">${escHtml(lang === 'en' ? (era.taglineEn || era.tagline) : era.tagline)}</div>
       </div>`;
   }
 
@@ -1619,9 +1999,9 @@ function renderEraContent(idx) {
   if (versesEl) {
     versesEl.innerHTML = era.keyVerses.map(v => `
       <div class="story-verse-item">
-        <div class="story-verse-text">${lang === 'en' ? v.textEn : v.text}</div>
-        <div class="story-verse-ref">${v.ref}</div>
-        ${lang === 'ko' ? `<div class="story-verse-en">${v.textEn}</div>` : ''}
+        <div class="story-verse-text">${escHtml(lang === 'en' ? (v.textEn || v.text) : v.text)}</div>
+        <div class="story-verse-ref">${escHtml(storyVerseRef(v.ref))}</div>
+        ${lang === 'ko' ? `<div class="story-verse-en">${escHtml(v.textEn)}</div>` : ''}
       </div>
     `).join('');
   }
@@ -1633,8 +2013,8 @@ function renderEraContent(idx) {
       <div class="modern-card">
         <div class="modern-card-emoji">${m.emoji}</div>
         <div class="modern-card-body">
-          <div class="modern-card-title">${m.title}</div>
-          <div class="modern-card-text">${m.body}</div>
+          <div class="modern-card-title">${escHtml(lang === 'en' && m.titleEn ? m.titleEn : m.title)}</div>
+          <div class="modern-card-text">${escHtml(lang === 'en' && m.bodyEn ? m.bodyEn : m.body)}</div>
         </div>
       </div>
     `).join('');
@@ -1642,7 +2022,7 @@ function renderEraContent(idx) {
 
   // TTS 라벨
   const ttsLabel = document.getElementById('tts-label');
-  if (ttsLabel) ttsLabel.textContent = `🔊 ${lang === 'en' ? 'Read aloud' : '읽어주기'} — ${lang === 'en' ? era.eraEn : era.era}`;
+  if (ttsLabel) ttsLabel.textContent = `🔊 ${t('ttsRead')} — ${eraName(era)}`;
 
   // 본문을 새로 그렸으니 골라 둔 글씨 크기를 다시 입힌다
   // (innerHTML 로 갈아끼우면 인라인 스타일이 함께 사라진다)
@@ -1680,9 +2060,9 @@ function selectEra(idx) {
 // ─── 역사 이야기 글씨 크기 ───────────────────────────────
 // 성경읽기와 같은 3단계. 이야기 본문이 길어서 어르신이 직접 키울 수 있어야 한다.
 const STORY_SIZES = [
-  { v: '14px', lh: '1.9', label: '보통' },
-  { v: '18px', lh: '1.85', label: '크게' },
-  { v: '22px', lh: '1.8', label: '아주 크게' }
+  { v: '14px', lh: '1.9' },
+  { v: '18px', lh: '1.85' },
+  { v: '22px', lh: '1.8' }
 ];
 
 function cycleStoryFontSize() {
@@ -1704,7 +2084,7 @@ function applyStoryFontSize() {
   if (pane) pane.style.setProperty('--story-fs', size.v);
 
   const btn = document.getElementById('story-size-btn');
-  if (btn) btn.textContent = '글씨 ' + size.label;
+  if (btn) btn.textContent = fontSizeLabel(idx);
 }
 
 // ─── 진도 업데이트 ───────────────────────────────────────
@@ -1715,7 +2095,7 @@ function updateStoryProgress() {
   const bar = document.getElementById('story-progress-bar');
   const label = document.getElementById('story-progress-label');
   if (bar) bar.style.width = pct + '%';
-  if (label) label.textContent = `${done} / ${total} 시대 읽음`;
+  if (label) label.textContent = tf('storyProgress', { done, total });
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1729,9 +2109,9 @@ function getTtsText() {
   // ** 마크다운 제거
   const clean = story.replace(/\*\*/g, '');
   const verseText = era.keyVerses.map(v =>
-    `${v.ref}. ${lang === 'en' ? v.textEn : v.text}`
+    `${storyVerseRef(v.ref)}. ${lang === 'en' ? (v.textEn || v.text) : v.text}`
   ).join('. ');
-  return `${lang === 'en' ? era.eraEn : era.era}. ${clean} 핵심 구절. ${verseText}`;
+  return `${eraName(era)}. ${clean} ${t('ttsKeyVerses')}. ${verseText}`;
 }
 
 // 읽어주기를 쓸 수 있는 브라우저인지 — 카카오톡 인앱 브라우저처럼
@@ -1787,7 +2167,7 @@ function toggleTts() {
   if (StoryState.ttsPaused && StoryState.ttsQueue && StoryState.ttsQueue.length
       && StoryState.ttsIndex < StoryState.ttsQueue.length) {
     if (!ttsAvailable() || typeof SpeechSynthesisUtterance === 'undefined') {
-      showToast('이 브라우저는 읽어주기 기능을 지원하지 않습니다');
+      showToast(t('ttsUnsupported'));
       return;
     }
     StoryState.ttsPaused = false;
@@ -1812,7 +2192,7 @@ function pickTtsVoice() {
 
 function startTts() {
   if (!ttsAvailable() || typeof SpeechSynthesisUtterance === 'undefined') {
-    showToast('이 브라우저는 읽어주기 기능을 지원하지 않습니다');
+    showToast(t('ttsUnsupported'));
     return;
   }
   stopTts();
@@ -1823,7 +2203,7 @@ function startTts() {
 
   StoryState.ttsActive = true;
   updateTtsBtn();
-  showToast(State.lang === 'en' ? '▶ Reading...' : '▶ 읽는 중...');
+  showToast(t('ttsReading'));
   speakTtsChunk();
 }
 
@@ -1836,7 +2216,7 @@ function speakTtsChunk() {
     StoryState.ttsActive = false;
     StoryState.ttsUtterance = null;
     updateTtsBtn();
-    showToast(State.lang === 'en' ? '✓ Done reading' : '✓ 읽기 완료');
+    showToast(t('ttsDone'));
     return;
   }
 
@@ -1859,7 +2239,7 @@ function speakTtsChunk() {
     StoryState.ttsActive = false;
     StoryState.ttsUtterance = null;
     updateTtsBtn();
-    showToast(State.lang === 'en' ? 'Could not read aloud' : '읽어주기를 시작할 수 없습니다');
+    showToast(t('ttsFailed'));
   };
 
   StoryState.ttsUtterance = utter;
@@ -1868,7 +2248,7 @@ function speakTtsChunk() {
   } catch (e) {
     StoryState.ttsActive = false;
     updateTtsBtn();
-    showToast('읽어주기를 시작할 수 없습니다');
+    showToast(t('ttsFailed'));
   }
 }
 
@@ -1920,7 +2300,9 @@ function setTtsSpeed(speed) {
 
 function updateTtsBtn() {
   const btn = document.getElementById('tts-play-btn');
-  if (btn) btn.textContent = StoryState.ttsActive ? '⏸' : '▶';
+  if (!btn) return;
+  btn.textContent = StoryState.ttsActive ? '⏸' : '▶';
+  btn.setAttribute('aria-label', StoryState.ttsActive ? t('ttsPauseAria') : t('ttsPlayAria'));
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2005,7 +2387,7 @@ function updateCollapseHints() {
     const n = body
       ? body.querySelectorAll('.g-history-day, .imm-hist-day, .prayer-saved-row, .video-item, .hymn-row, .story-verse-item, .modern-card, .timeline-item, .prayer-type-card, .topic-verse-text').length
       : 0;
-    hint.textContent = n ? `${n}개` : '';
+    hint.textContent = n ? tf('countUnit', { n }) : '';
   });
 }
 

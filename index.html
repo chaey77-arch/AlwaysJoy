@@ -13,6 +13,9 @@
   <link rel="apple-touch-icon" href="icons/icon.svg"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <!-- 본문 글꼴(Pretendard)이 오는 곳 — style.css 안에서 @import 하므로
+       미리 연결해 두지 않으면 CSS 를 다 읽은 뒤에야 접속을 시작한다 -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/style.css"/>
   <!-- 시간대별 색 테마 — 아침 스카이 · 점심 민트 · 저녁 피치
@@ -24,7 +27,9 @@
       var q = new URLSearchParams(location.search).get('theme') || '';
       var theme;
       if (q === 'none') { theme = ''; }
-      else if (/^(mint|sky|peach)$/.test(q)) { theme = q; }
+      // glass = 유리 시안(F). 아직 시안이라 ?theme=glass 로만 켜집니다 —
+      // 평소에 켜려면 아래 시간대 계산을 'glass' 하나로 바꾸면 됩니다.
+      else if (/^(mint|sky|peach|glass)$/.test(q)) { theme = q; }
       else {
         var h = new Date().getHours();
         theme = (h >= 5 && h < 11) ? 'sky'        // 아침 = 햇살이
@@ -33,9 +38,48 @@
       }
       if (theme) {
         document.write('<link rel="stylesheet" href="css/theme-' + theme + '.css"/>');
-        var bar = { sky: '#F8FBFF', mint: '#F7FBF9', peach: '#FFFAF7' }[theme];
+        var bar = { sky: '#F8FBFF', mint: '#F7FBF9', peach: '#FFFAF7',
+                    glass: '#EEF4FC' }[theme];
         var meta = document.querySelector('meta[name="theme-color"]');
         if (meta && bar) meta.setAttribute('content', bar);
+      }
+
+      // ── 해가 지면 저절로 어두워지기 (유리 테마에서만) ──
+      //
+      // 왜 '17시부터 밤' 이 아닌가: 서울은 12월엔 5시 17분에 해가 지고
+      // 6월엔 7시 56분에 집니다. 17시로 못박으면 여름 저녁엔 아직
+      // 환한데 화면이 캄캄해지고, 겨울엔 이미 어두운데 화면이
+      // 하얗게 눈을 찌릅니다. 그래서 달마다 해 지는 시각을 씁니다.
+      //
+      // 아래 표는 서울(북위 37.5도) 기준 월별 대략적인 일몰·일출 시각입니다.
+      // 분 단위로 맞출 일이 아니라 '지금 창밖이 밝은가' 만 알면 되므로
+      // 30분 단위로 반올림해 두었습니다. 어머니가 어디 계셔도
+      // 우리나라 안이면 15분 안쪽으로 맞습니다.
+      var SUNSET = [17.3,18.0,18.5,19.0,19.5,19.9,19.9,19.4,18.7,18.0,17.4,17.3];
+      var SUNRISE= [ 7.8, 7.3, 6.7, 5.9, 5.3, 5.2, 5.4, 5.8, 6.2, 6.7, 7.2, 7.7];
+
+      // 밤인지 낮인지 — 어머니가 손으로 정해 두셨으면 그걸 먼저 따릅니다.
+      // ('auto' 가 아니라 'day'/'night' 로 저장되어 있으면 그것으로 고정)
+      function isNight() {
+        var pick = '';
+        try { pick = JSON.parse(localStorage.getItem('ajoy_screenMode') || '""'); } catch (e) {}
+        var f = new URLSearchParams(location.search).get('night');   // 미리보기용
+        if (f === '1') return true;
+        if (f === '0') return false;
+        if (pick === 'night') return true;
+        if (pick === 'day')   return false;
+        var d = new Date();
+        var now = d.getHours() + d.getMinutes() / 60;
+        return now >= SUNSET[d.getMonth()] || now < SUNRISE[d.getMonth()];
+      }
+
+      if (theme === 'glass' && isNight()) {
+        document.write('<link rel="stylesheet" href="css/theme-glass-night.css"/>');
+        var m2 = document.querySelector('meta[name="theme-color"]');
+        if (m2) m2.setAttribute('content', '#0B1220');
+        // 첫 페인트가 흰색으로 한 번 번쩍이는 것을 막습니다 — CSS 를
+        // 다 읽기 전에 <html> 이 흰 바탕으로 그려지기 때문입니다
+        document.documentElement.style.background = '#0B1220';
       }
     })();
   </script>
@@ -63,12 +107,21 @@
     <label class="ob-label" id="ob-name-label-el" for="onboard-name">이름이 어떻게 되세요?</label>
     <input class="ob-input" id="onboard-name" type="text" placeholder="홍길동" maxlength="20" autocomplete="name"/>
 
-    <label class="ob-label" id="ob-age-label-el">연령대</label>
-    <div class="ob-age-grid">
-      <button class="ob-age-btn" data-age="youth"><span class="ob-age-name">청소년</span><span class="ob-age-range">10–19세</span></button>
-      <button class="ob-age-btn" data-age="young"><span class="ob-age-name">청년</span><span class="ob-age-range">20–40대</span></button>
-      <button class="ob-age-btn" data-age="middle"><span class="ob-age-name">중년</span><span class="ob-age-range">50–60대</span></button>
-      <button class="ob-age-btn selected" data-age="senior"><span class="ob-age-name">어르신</span><span class="ob-age-range">70대 이상</span></button>
+    <!-- 연령대를 고르는 칸이 여기 있었다. 없앴다.
+         어머니께 권했더니 "이런건 어릴때 하는 거야, 난 하기 싫어" 하셨다.
+         '어르신 · 70대 이상' 이 미리 골라져 있는 것을 보시고, 앱이
+         당신을 그렇게 부른다고 느끼신 것이다. 나이를 묻는 순간
+         '이건 내 것이 아니다' 가 된다.
+         게다가 이 값은 저장만 하고 아무 데도 쓰지 않았다 —
+         내용이 달라지지도 않는 것을 물어서 마음만 상하게 한 셈이다.
+         이제는 나이 대신 이 말씀 한 줄로 함께 들어간다. -->
+    <div class="ob-welcome">
+      <!-- <br> 을 쓰지 않는다. applyLangUI() 가 setPhrase 로 다시 넣으면서
+           줄바꿈 없는 공백으로 바꾸는데, 여기에 <br> 을 박아 두면 앱이 뜨는
+           순간 석 줄이 두 줄로 튀어 화면이 한 번 덜컥한다. 처음부터 같은
+           모양으로 둔다 — 낱말이 갈리지 않게 묶는 자리만 &nbsp; 로 표시. -->
+      <div class="ob-welcome-verse" id="ob-welcome-verse">어린&nbsp;아이들의&nbsp;내게&nbsp;오는&nbsp;것을 용납하고&nbsp;금하지&nbsp;말라 하나님의&nbsp;나라가&nbsp;이런&nbsp;자의&nbsp;것이니라</div>
+      <div class="ob-welcome-ref" id="ob-welcome-ref">마가복음 10:14 (개역한글)</div>
     </div>
 
     <button class="ob-start-btn" id="btn-start">주님 안에서 시작하기 →</button>
@@ -106,12 +159,12 @@
 
     <!-- 오늘의 말씀 (다크 히어로) -->
     <div class="hero-card">
-      <div class="hero-label">오늘의 말씀</div>
+      <div class="hero-label" data-i18n="today">오늘의 말씀</div>
       <div class="hero-verse" id="home-verse-text">항상 기뻐하라 쉬지 말고 기도하라 범사에 감사하라</div>
       <div class="hero-ref" id="home-verse-ref">데살로니가전서 5:16–18</div>
       <div class="hero-actions">
-        <button class="hero-btn primary" onclick="switchTab('word')">말씀 더 보기</button>
-        <button class="hero-btn" onclick="showFullscreenVerse()">크게 보기</button>
+        <button class="hero-btn primary" onclick="switchTab('word')" data-i18n="moreVerse">말씀 더 보기</button>
+        <button class="hero-btn" onclick="showFullscreenVerse()" data-i18n="bigView">크게 보기</button>
       </div>
     </div>
 
@@ -138,7 +191,7 @@
     <!-- 세 가지 명령 카드 -->
     <div class="card">
       <div class="card-inner">
-        <div class="card-label">오늘의 세 가지</div>
+        <div class="card-label" data-i18n="threeToday">오늘의 세 가지</div>
         <div class="cmd-row">
           <div class="cmd-dot" style="background:#FBF5E6">😊</div>
           <div class="cmd-body">
@@ -178,13 +231,13 @@
 
     <!-- 오늘의 말씀 (다크) -->
     <div class="verse-hero">
-      <div class="hero-label" style="color:rgba(255,255,255,0.45);font-size:11px;letter-spacing:1.5px;margin-bottom:12px">오늘의 말씀</div>
+      <div class="hero-label" style="color:rgba(255,255,255,0.45);font-size:11px;letter-spacing:1.5px;margin-bottom:12px" data-i18n="today">오늘의 말씀</div>
       <div class="verse-hero-text" id="word-verse-text"></div>
       <div class="verse-hero-ref" id="word-verse-ref"></div>
       <div class="verse-nav">
-        <button class="verse-nav-btn" onclick="prevVerse()">← 이전</button>
-        <button class="verse-nav-btn accent" onclick="showFullscreenVerse()">크게 보기</button>
-        <button class="verse-nav-btn" onclick="nextVerse()">다음 →</button>
+        <button class="verse-nav-btn" onclick="prevVerse()" data-i18n="prevVerse">← 이전</button>
+        <button class="verse-nav-btn accent" onclick="showFullscreenVerse()" data-i18n="bigView">크게 보기</button>
+        <button class="verse-nav-btn" onclick="nextVerse()" data-i18n="nextVerse">다음 →</button>
       </div>
       <!-- 오늘의 말씀을 앨범에 담기 -->
       <button class="fav-hero-btn" id="fav-daily-btn" onclick="favDailyVerse()"></button>
@@ -192,9 +245,9 @@
 
     <!-- 말씀 안의 세 갈래 — 주제별 말씀 · 성경읽기 · 설교 유튜브 -->
     <div class="subtabs" id="word-subtabs">
-      <button class="subtab active" data-sub="topic" onclick="switchWordSub('topic')">주제별 말씀</button>
-      <button class="subtab" data-sub="read" onclick="switchWordSub('read')">성경읽기</button>
-      <button class="subtab" data-sub="video" onclick="switchWordSub('video')">설교 유튜브</button>
+      <button class="subtab active" data-sub="topic" onclick="switchWordSub('topic')" data-i18n="wordSubTopic">주제별 말씀</button>
+      <button class="subtab" data-sub="read" onclick="switchWordSub('read')" data-i18n="wordSubRead">성경읽기</button>
+      <button class="subtab" data-sub="video" onclick="switchWordSub('video')" data-i18n="wordSubVideo">설교 유튜브</button>
     </div>
 
     <!-- 주제별 말씀 -->
@@ -213,14 +266,18 @@
       <!-- 지금 읽는 곳 + 이어읽기 -->
       <div class="card">
         <div class="card-inner">
-          <div class="card-label">성경읽기</div>
+          <div class="card-label" data-i18n="bibleRead">성경읽기</div>
           <div id="bible-resume"></div>
           <div class="bible-picker">
-            <select class="bible-select" id="bible-book" onchange="onBibleBookChange()" aria-label="성경 책 선택"></select>
-            <select class="bible-select" id="bible-chapter" onchange="onBibleChapterChange()" aria-label="장 선택"></select>
+            <select class="bible-select" id="bible-book" onchange="onBibleBookChange()" data-i18n-aria="bibleBookAria" aria-label="성경 책 선택"></select>
+            <select class="bible-select" id="bible-chapter" onchange="onBibleChapterChange()" data-i18n-aria="bibleChapterAria" aria-label="장 선택"></select>
           </div>
-          <div class="bible-progress" id="bible-progress"></div>
           <div class="bible-starters" id="bible-starters"></div>
+          <!-- 진도는 고르는 칸과 권하는 곳 아래, 카드 맨 끝에 둔다.
+               어머니 말씀: "읽기 진도가 위에 있으니 책을 고르기 전에
+               숫자가 먼저 보여서 무슨 말인지 모르겠다." 고를 것을 먼저
+               보여드리고, 진도는 그 결과로 아래에 남긴다. -->
+          <div class="bible-progress" id="bible-progress"></div>
         </div>
       </div>
 
@@ -228,14 +285,14 @@
       <div class="card">
         <div class="card-inner">
           <div class="bible-head">
-            <div class="bible-title" id="bible-title">성경읽기</div>
-            <button class="bible-size-btn" id="bible-size-btn" onclick="cycleBibleFontSize()">글씨 크기 가</button>
+            <div class="bible-title" id="bible-title" data-i18n="bibleRead">성경읽기</div>
+            <button class="bible-size-btn" id="bible-size-btn" onclick="cycleBibleFontSize()" data-i18n="bibleSizeBtn">글씨 크기 가</button>
           </div>
           <div class="bible-body" id="bible-body"></div>
           <div class="bible-nav">
-            <button class="bible-nav-btn" id="bible-prev" onclick="biblePrevChapter()">← 이전 장</button>
-            <button class="bible-nav-btn bible-top-btn" id="bible-top" onclick="bibleScrollTop()" aria-label="본문 맨 위로">↑ 맨 위로</button>
-            <button class="bible-nav-btn" id="bible-next" onclick="bibleNextChapter()">다음 장 →</button>
+            <button class="bible-nav-btn" id="bible-prev" onclick="biblePrevChapter()" data-i18n="biblePrevCh">← 이전 장</button>
+            <button class="bible-nav-btn bible-top-btn" id="bible-top" onclick="bibleScrollTop()" data-i18n-aria="bibleTopAria" aria-label="본문 맨 위로" data-i18n="bibleToTop">↑ 맨 위로</button>
+            <button class="bible-nav-btn" id="bible-next" onclick="bibleNextChapter()" data-i18n="bibleNextCh">다음 장 →</button>
           </div>
           <div class="bible-credit" id="bible-credit"></div>
         </div>
@@ -246,7 +303,7 @@
     <div class="subpanel" id="wordsub-video">
       <div class="card">
         <div class="card-inner">
-          <p style="font-size:11px;color:var(--ink3);margin-bottom:12px">탭하면 유튜브 검색으로 연결됩니다</p>
+          <p style="font-size:11px;color:var(--ink3);margin-bottom:12px" data-i18n="sermonsNote">탭하면 유튜브 검색으로 연결됩니다</p>
           <div id="video-list"></div>
         </div>
       </div>
@@ -258,16 +315,16 @@
 
     <!-- 현재 재생 카드 (다크) -->
     <div class="now-playing">
-      <div class="np-label">NOW PLAYING</div>
+      <div class="np-label" data-i18n="hymnNowPlaying">NOW PLAYING</div>
       <div class="np-title" id="hymn-title">항상 기뻐하라</div>
       <div class="np-artist" id="hymn-artist">CCM</div>
       <div class="np-lyrics">
         <div class="np-lyrics-text" id="hymn-lyrics"></div>
       </div>
       <div class="np-controls">
-        <button class="np-ctrl" onclick="prevHymn()">⏮</button>
-        <button class="np-play" id="play-btn" onclick="togglePlay()">▶</button>
-        <button class="np-ctrl" onclick="nextHymn()">⏭</button>
+        <button class="np-ctrl" onclick="prevHymn()" data-i18n-aria="hymnPrevAria" aria-label="앞 찬양">⏮</button>
+        <button class="np-play" id="play-btn" onclick="togglePlay()" data-i18n-aria="hymnPlay" aria-label="찬양 듣기">▶</button>
+        <button class="np-ctrl" onclick="nextHymn()" data-i18n-aria="hymnNextAria" aria-label="다음 찬양">⏭</button>
       </div>
       <div class="np-note" id="hymn-note"></div>
     </div>
@@ -275,14 +332,16 @@
     <!-- 찬양 필터 chips -->
     <div class="card collapsible">
       <div class="card-inner">
-        <div class="card-label">찬양 목록</div>
+        <div class="card-label" data-i18n="allHymns">찬양 목록</div>
         <div class="card-body">
+          <!-- 만든 이 이름(손경민 · 예람워십)은 영어로 바꾸지 않는다.
+               사람 이름이고, 유튜브 검색도 이 이름으로 찾는다. -->
           <div class="chip-scroll" id="hymn-filter-chips">
-            <button class="chip active" data-filter="all" onclick="filterHymns('all')">전체</button>
+            <button class="chip active" data-filter="all" onclick="filterHymns('all')" data-i18n="filterAll">전체</button>
             <button class="chip" data-filter="손경민" onclick="filterHymns('손경민')">손경민</button>
             <button class="chip" data-filter="예람워십" onclick="filterHymns('예람워십')">예람워십</button>
-            <button class="chip" data-filter="CCM" onclick="filterHymns('CCM')">현대 CCM</button>
-            <button class="chip" data-filter="찬송가" onclick="filterHymns('찬송가')">전통 찬송가</button>
+            <button class="chip" data-filter="CCM" onclick="filterHymns('CCM')" data-i18n="filterCCM">현대 CCM</button>
+            <button class="chip" data-filter="찬송가" onclick="filterHymns('찬송가')" data-i18n="filterHymnal">전통 찬송가</button>
           </div>
           <div id="hymn-list"></div>
         </div>
@@ -296,7 +355,7 @@
     <!-- 기도 종류 -->
     <div class="card collapsible">
       <div class="card-inner">
-        <div class="card-label">기도 종류</div>
+        <div class="card-label" data-i18n="prayerType">기도 종류</div>
         <div class="card-body">
           <div class="prayer-type-grid" id="prayer-type-grid"></div>
         </div>
@@ -309,17 +368,18 @@
     <!-- 기도 입력 -->
     <div class="card">
       <div class="card-inner">
-        <div class="card-label">기도 쓰기</div>
+        <div class="card-label" data-i18n="prayerWrite">기도 쓰기</div>
         <textarea class="prayer-textarea" id="prayer-textarea" rows="5"
+          data-i18n-ph="prayerPlaceholder"
           placeholder="주님께 드리고 싶은 말씀을 자유롭게 적어보세요..."></textarea>
-        <button class="btn-primary" onclick="savePrayer()">🙏 저장하기</button>
+        <button class="btn-primary" onclick="savePrayer()" data-i18n="prayerSave">🙏 저장하기</button>
       </div>
     </div>
 
     <!-- 이전 기도 -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="card-label">이전 기도제목</div>
+        <div class="card-label" data-i18n="prayerSaved">이전 기도제목</div>
         <div class="card-body">
           <div id="prayer-saved-list"></div>
         </div>
@@ -335,30 +395,32 @@
       <div class="streak-big" id="streak-num">0</div>
       <div class="streak-right">
         <div class="streak-main" id="streak-label">일째 감사 중</div>
-        <div class="streak-sub">범사에 감사하라 · 살전 5:18</div>
+        <div class="streak-sub" data-i18n="streakSub">범사에 감사하라 · 살전 5:18</div>
       </div>
     </div>
 
     <!-- 오늘 감사 입력 -->
     <div class="card">
       <div class="card-inner">
-        <div class="card-label">오늘 감사한 일</div>
-        <p style="font-size:12px;color:var(--ink3);margin-bottom:12px;line-height:1.6">
+        <div class="card-label" data-i18n="gratitudeToday">오늘 감사한 일</div>
+        <p style="font-size:12px;color:var(--ink3);margin-bottom:12px;line-height:1.6" data-i18n="gNote">
           작은 것이라도 괜찮아요. 하나씩 적어보세요 🌿
         </p>
-        <div class="g-input-row"><div class="g-badge">1</div><input class="g-input" id="g-input-1" placeholder="오늘 감사한 일..."/></div>
-        <div class="g-input-row"><div class="g-badge">2</div><input class="g-input" id="g-input-2" placeholder="또 하나..."/></div>
-        <div class="g-input-row" style="margin-bottom:14px"><div class="g-badge">3</div><input class="g-input" id="g-input-3" placeholder="마지막으로..."/></div>
-        <button class="btn-primary" onclick="saveGratitude()">💛 감사 저장하기</button>
+        <div class="g-input-row"><div class="g-badge">1</div><input class="g-input" id="g-input-1" data-i18n-ph="gPlaceholder1" placeholder="오늘 감사한 일..."/></div>
+        <div class="g-input-row"><div class="g-badge">2</div><input class="g-input" id="g-input-2" data-i18n-ph="gPlaceholder2" placeholder="또 하나..."/></div>
+        <div class="g-input-row" style="margin-bottom:14px"><div class="g-badge">3</div><input class="g-input" id="g-input-3" data-i18n-ph="gPlaceholder3" placeholder="마지막으로..."/></div>
+        <button class="btn-primary" onclick="saveGratitude()" data-i18n="gratitudeSave">💛 감사 저장하기</button>
       </div>
     </div>
 
     <!-- 임마누엘 일기 — 주님이 나를 어떻게 보고 계신지 순서대로 적는다 -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="card-label">임마누엘 일기</div>
+        <div class="card-label" data-i18n="immTitle">임마누엘 일기</div>
         <div class="card-body">
-          <p class="imm-intro">
+          <!-- 여기에는 <b> 가 들어 있어 글자만 바꿀 수 없다 —
+               data-i18n-html 로 표시해 innerHTML 로 넣는다 -->
+          <p class="imm-intro" data-i18n-html="immIntro">
             임마누엘은 <b>하나님이 우리와 함께 계시다</b>는 뜻이에요.<br>
             주님이 지금 나를 어떻게 보고 계신지 천천히 적어보세요 🌿
           </p>
@@ -371,7 +433,7 @@
 
           <!-- 글씨 크기 -->
           <div class="story-size-row">
-            <button class="bible-size-btn" id="imm-size-btn" onclick="cycleImmFontSize()">글씨 보통</button>
+            <button class="bible-size-btn" id="imm-size-btn" onclick="cycleImmFontSize()">글씨 보통</button><!-- 글자는 applyXxxFontSize() 가 매번 다시 쓴다 -->
           </div>
 
           <!-- 5단계 입력칸은 JS 가 그린다 -->
@@ -381,22 +443,22 @@
           <div class="imm-photo-box" id="imm-photo-box">
             <div class="imm-step-head">
               <span class="imm-step-icon">📷</span>
-              <span class="imm-step-title">오늘의 사진 (없어도 괜찮아요)</span>
+              <span class="imm-step-title" data-i18n="immPhotoTitle">오늘의 사진 (없어도 괜찮아요)</span>
             </div>
-            <div class="imm-step-ask">글로 적기 어려우면 사진만 남겨도 좋아요 (최대 5장)</div>
+            <div class="imm-step-ask" data-i18n="immPhotoAsk">글로 적기 어려우면 사진만 남겨도 좋아요 (최대 5장)</div>
             <!-- capture 없이 두면 카메라와 앨범을 둘 다 고를 수 있다.
                  multiple 로 한 번에 여러 장을 고를 수 있게 했다 -->
             <input type="file" id="imm-photo-input" accept="image/*" multiple hidden
               onchange="pickImmPhoto(this)"/>
             <div id="imm-photo-preview"></div>
-            <button class="btn-secondary" id="imm-photo-btn"
+            <button class="btn-secondary" id="imm-photo-btn" data-i18n="immPhotoBtn"
               onclick="document.getElementById('imm-photo-input').click()">
               📷 사진 고르기
             </button>
           </div>
 
-          <p class="imm-note">한 칸만 적어도 괜찮아요. 순서를 건너뛰어도 됩니다.</p>
-          <button class="btn-primary" onclick="saveImmanuel()">🌿 임마누엘 일기 저장하기</button>
+          <p class="imm-note" data-i18n="immNote">한 칸만 적어도 괜찮아요. 순서를 건너뛰어도 됩니다.</p>
+          <button class="btn-primary" onclick="saveImmanuel()" data-i18n="immSaveBtn">🌿 임마누엘 일기 저장하기</button>
         </div>
       </div>
     </div>
@@ -404,7 +466,7 @@
     <!-- 임마누엘 일기 기록 -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="card-label">임마누엘 일기 기록</div>
+        <div class="card-label" data-i18n="immHistTitle">임마누엘 일기 기록</div>
         <div class="card-body">
           <div id="imm-history"></div>
         </div>
@@ -414,7 +476,7 @@
     <!-- 감사 기록 -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="card-label">감사 기록</div>
+        <div class="card-label" data-i18n="gratitudeHistory">감사 기록</div>
         <div class="card-body">
           <div id="gratitude-history"></div>
         </div>
@@ -427,40 +489,65 @@
 
     <!-- 배너 -->
     <div class="album-banner">
-      <div class="album-banner-verse">"내가 너를 잊지 아니하리라"</div>
-      <div class="album-banner-ref">이사야 49:15</div>
+      <div class="album-banner-verse" data-i18n="albumBannerVerse">"내가 너를 잊지 아니하리라"</div>
+      <div class="album-banner-ref" data-i18n="albumBannerRef">이사야 49:15</div>
     </div>
 
     <!-- 4 카드 그리드 -->
     <div class="album-grid">
       <div class="album-card" onclick="openMemoryModal('people')">
         <div class="album-card-icon">👨‍👩‍👧</div>
-        <div class="album-card-label">소중한 분들</div>
+        <div class="album-card-label" data-i18n="people">소중한 분들</div>
         <div class="album-card-count" id="album-people-count">0명</div>
       </div>
       <div class="album-card" onclick="openMemoryModal('verses')">
         <div class="album-card-icon">📖</div>
-        <div class="album-card-label">내 말씀</div>
+        <div class="album-card-label" data-i18n="verses">내 말씀</div>
         <div class="album-card-count" id="album-verse-count">0개</div>
       </div>
       <div class="album-card" onclick="openMemoryModal('faith')">
         <div class="album-card-icon">✝️</div>
-        <div class="album-card-label">신앙 이야기</div>
-        <div class="album-card-count">세례 · 교회</div>
+        <div class="album-card-label" data-i18n="faith">신앙 이야기</div>
+        <div class="album-card-count" data-i18n="albumFaithSub">세례 · 교회</div>
       </div>
       <div class="album-card" onclick="switchTab('gratitude')">
         <div class="album-card-icon">💛</div>
-        <div class="album-card-label">감사 기록</div>
-        <div class="album-card-count">감사일기 보기</div>
+        <div class="album-card-label" data-i18n="diary">감사 기록</div>
+        <div class="album-card-count" data-i18n="albumDiarySub">감사일기 보기</div>
+      </div>
+    </div>
+
+    <!-- 읽기 진도 — 66권을 얼마나 펼쳐 보셨는지.
+         성경읽기 카드의 진도는 '지금 보는 책' 하나만 알려 주므로,
+         전체 그림은 기억 탭에서 한눈에 보여드린다. -->
+    <div class="card collapsible collapsed">
+      <div class="card-inner">
+        <div class="card-label" data-i18n="readProgress">읽기 진도</div>
+        <div class="card-body">
+          <div id="read-progress"></div>
+        </div>
       </div>
     </div>
 
     <!-- 추억의 게임 — 시간도 점수도 없다. 아시는 것을 물어 맞히는 기쁨만 남긴다 -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="card-label">추억의 게임</div>
+        <div class="card-label" data-i18n="gamesTitle">추억의 게임</div>
         <div class="card-body">
           <div id="game-menu"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 기록이 있는 곳 — 이 폰에만 있다는 안내.
+         기록이 어느 정도 쌓인 뒤에만 보인다 (js/app.js 의 renderLocalOnly). -->
+    <div class="card" id="localonly-card" style="display:none">
+      <div class="card-inner">
+        <div class="card-label" id="localonly-title">기록이 있는 곳</div>
+        <div class="localonly-body">
+          <div class="localonly-line" id="localonly-l1"></div>
+          <div class="localonly-line dim" id="localonly-l2"></div>
+          <div class="localonly-line dim" id="localonly-l3"></div>
         </div>
       </div>
     </div>
@@ -468,19 +555,42 @@
     <!-- 내 기록 이어가기 — 로그인하면 폰을 바꿔도 남는다 -->
     <div class="card" id="cloud-card" style="display:none">
       <div class="card-inner">
-        <div class="card-label">내 기록 이어가기</div>
+        <div class="card-label" data-i18n="cloudTitle">내 기록 이어가기</div>
         <div class="cloud-who" id="cloud-who"></div>
         <div class="cloud-status" id="cloud-status" style="display:none"></div>
-        <button class="cloud-btn kakao" id="cloud-signin" onclick="Cloud.signInKakao()">
+        <button class="cloud-btn kakao" id="cloud-signin" onclick="Cloud.signInKakao()" data-i18n="cloudSignin">
           카카오로 시작하기
         </button>
         <div class="cloud-row">
-          <button class="cloud-btn ghost" id="cloud-sync" style="display:none" onclick="Cloud.syncAll()">지금 맞추기</button>
-          <button class="cloud-btn ghost" id="cloud-signout" style="display:none" onclick="Cloud.signOut()">로그아웃</button>
+          <button class="cloud-btn ghost" id="cloud-sync" style="display:none" onclick="Cloud.syncAll()" data-i18n="cloudSync">지금 맞추기</button>
+          <button class="cloud-btn ghost" id="cloud-signout" style="display:none" onclick="Cloud.signOut()" data-i18n="cloudSignout">로그아웃</button>
         </div>
-        <div class="cloud-note">
+        <div class="cloud-note" data-i18n-html="cloudNote">
           감사일기 · 기도 · 좋아하는 말씀 · 읽기 진도가 함께 보관됩니다.<br>
           로그인하지 않아도 이 폰에는 그대로 남아 있습니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- 화면 밝기 — 해가 지면 저절로 어두워진다. 마음에 안 드시면 손으로 고정.
+         '저절로' 가 기본이고, 손으로 고르신 것은 이 폰에만 남는다
+         (설정은 서버에 안 올린다 — js/cloud.js 는 감사·기도·말씀·진도만 올린다). -->
+    <div class="card" id="screenmode-card">
+      <div class="card-inner">
+        <div class="card-label" data-i18n="screenModeTitle">화면 밝기</div>
+        <div class="screenmode-row">
+          <button class="screenmode-btn" id="sm-auto" onclick="setScreenMode('auto')">
+            <span data-i18n="screenModeAuto">저절로</span>
+            <span class="sm-sub" id="sm-auto-sub">해가 지면 어두워져요</span>
+          </button>
+          <button class="screenmode-btn" id="sm-day" onclick="setScreenMode('day')">
+            <span data-i18n="screenModeDay">밝게</span>
+            <span class="sm-sub" data-i18n="screenModeDaySub">늘 밝은 화면</span>
+          </button>
+          <button class="screenmode-btn" id="sm-night" onclick="setScreenMode('night')">
+            <span data-i18n="screenModeNight">어둡게</span>
+            <span class="sm-sub" data-i18n="screenModeNightSub">늘 어두운 화면</span>
+          </button>
         </div>
       </div>
     </div>
@@ -488,13 +598,15 @@
     <!-- 이 앱에 대해 -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="card-label">이 앱이 도와드리는 것</div>
+        <div class="card-label" data-i18n="aboutTitle">이 앱이 도와드리는 것</div>
         <div class="card-body about-list">
-          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">📖</span>매일 말씀으로 하나님을 만나게</div>
-          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">🎵</span>찬양으로 기쁨을 회복하게</div>
-          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">🙏</span>기도로 주님과 연결되게</div>
-          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">💛</span>감사로 마음이 밝아지게</div>
-          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">💚</span>소중한 분들을 기억하게</div>
+          <!-- 그림글자는 span 안에 따로 있어서 글만 바꿔도 남는다.
+               data-i18n 은 마지막 글자 노드만 갈아 끼운다 (아래 setI18nText) -->
+          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">📖</span><span data-i18n="about1">매일 말씀으로 하나님을 만나게</span></div>
+          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">🎵</span><span data-i18n="about2">찬양으로 기쁨을 회복하게</span></div>
+          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">🙏</span><span data-i18n="about3">기도로 주님과 연결되게</span></div>
+          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">💛</span><span data-i18n="about4">감사로 마음이 밝아지게</span></div>
+          <div style="display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink2)"><span style="font-size:18px">💚</span><span data-i18n="about5">소중한 분들을 기억하게</span></div>
         </div>
       </div>
     </div>
@@ -506,7 +618,7 @@
     <!-- 진도 표시 -->
     <div class="card">
       <div class="card-inner">
-        <div class="card-label">성경 역사 흐름 읽기</div>
+        <div class="card-label" data-i18n="storyTitle">성경 역사 흐름 읽기</div>
         <div class="progress-bar-wrap"><div class="progress-bar-fill" id="story-progress-bar" style="width:0%"></div></div>
         <div class="progress-label" id="story-progress-label">0 / 8 시대</div>
       </div>
@@ -515,7 +627,7 @@
     <!-- 시대 타임라인 칩 (가로 스크롤) -->
     <div class="card collapsible">
       <div class="card-inner" style="padding-bottom:10px">
-        <div class="card-label">시대 선택</div>
+        <div class="card-label" data-i18n="storyEraPick">시대 선택</div>
         <div class="card-body">
           <div class="era-scroll" id="era-scroll"></div>
         </div>
@@ -525,11 +637,11 @@
     <!-- TTS 컨트롤 바 -->
     <div class="tts-bar" id="tts-bar">
       <div class="tts-label" id="tts-label">🔊 읽어주기</div>
-      <button class="tts-speed-btn active" data-speed="0.8" onclick="setTtsSpeed(0.8)">느리게</button>
-      <button class="tts-speed-btn" data-speed="1.0" onclick="setTtsSpeed(1.0)">보통</button>
-      <button class="tts-speed-btn" data-speed="1.3" onclick="setTtsSpeed(1.3)">빠르게</button>
-      <button class="tts-btn play" id="tts-play-btn" onclick="toggleTts()">▶</button>
-      <button class="tts-btn stop" onclick="stopTts()">■</button>
+      <button class="tts-speed-btn active" data-speed="0.8" onclick="setTtsSpeed(0.8)" data-i18n="ttsSlow">느리게</button>
+      <button class="tts-speed-btn" data-speed="1.0" onclick="setTtsSpeed(1.0)" data-i18n="ttsNormal">보통</button>
+      <button class="tts-speed-btn" data-speed="1.3" onclick="setTtsSpeed(1.3)" data-i18n="ttsFast">빠르게</button>
+      <button class="tts-btn play" id="tts-play-btn" onclick="toggleTts()" data-i18n-aria="ttsPlayAria" aria-label="읽어주기 시작">▶</button>
+      <button class="tts-btn stop" onclick="stopTts()" data-i18n-aria="ttsStopAria" aria-label="읽어주기 그만">■</button>
     </div>
 
     <!-- 시대 히어로 -->
@@ -538,12 +650,12 @@
     <!-- 스토리 본문 -->
     <div class="card collapsible">
       <div class="card-inner">
-        <div class="story-section-header">역사 이야기</div>
+        <div class="story-section-header" data-i18n="storySection">역사 이야기</div>
         <div class="card-body">
           <!-- 글씨 크기 버튼은 헤더가 아니라 본문 안에 둔다. 헤더에 두면
                접기/펴기 클릭과 겹치고, 접힘 상태 저장 키에 버튼 글자가 섞인다 -->
           <div class="story-size-row">
-            <button class="bible-size-btn" id="story-size-btn" onclick="cycleStoryFontSize()">글씨 보통</button>
+            <button class="bible-size-btn" id="story-size-btn" onclick="cycleStoryFontSize()">글씨 보통</button><!-- 글자는 applyXxxFontSize() 가 매번 다시 쓴다 -->
           </div>
           <div class="story-body" id="story-body-text"></div>
         </div>
@@ -553,7 +665,7 @@
     <!-- 핵심 구절 -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="story-section-header">핵심 구절</div>
+        <div class="story-section-header" data-i18n="storyKeyVerses">핵심 구절</div>
         <div class="card-body">
           <div id="story-key-verses"></div>
         </div>
@@ -563,7 +675,7 @@
     <!-- 오늘날과의 연결 -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="story-section-header">오늘 나의 삶과 연결</div>
+        <div class="story-section-header" data-i18n="storyModern">오늘 나의 삶과 연결</div>
         <div class="card-body">
           <div id="story-modern"></div>
         </div>
@@ -573,7 +685,7 @@
     <!-- 전체 시대 목록 (세로 타임라인) -->
     <div class="card collapsible collapsed">
       <div class="card-inner">
-        <div class="card-label">전체 성경 역사 흐름</div>
+        <div class="card-label" data-i18n="storyAll">전체 성경 역사 흐름</div>
         <div class="card-body">
           <div class="timeline-nav" id="timeline-nav"></div>
         </div>
@@ -598,10 +710,10 @@
 
 <!-- 동반자 배너 -->
 <div class="companion-banner" id="companion-banner">
-  <div class="cb-text" id="companion-banner-text">😊 주님이 오늘도 함께하십니다!</div>
+  <div class="cb-text" id="companion-banner-text" data-i18n="cbDefault">😊 주님이 오늘도 함께하십니다!</div>
   <div class="cb-actions">
-    <button class="cb-btn primary" id="companion-banner-action" onclick="doCompanionAction()">열기</button>
-    <button class="cb-btn secondary" onclick="dismissCompanion()">닫기</button>
+    <button class="cb-btn primary" id="companion-banner-action" onclick="doCompanionAction()" data-i18n="cbOpen">열기</button>
+    <button class="cb-btn secondary" onclick="dismissCompanion()" data-i18n="cbClose">닫기</button>
   </div>
 </div>
 
@@ -610,7 +722,7 @@
   <div class="fsv-cross">✝</div>
   <div class="fsv-text" id="fullscreen-verse-text"></div>
   <div class="fsv-ref" id="fullscreen-verse-ref"></div>
-  <button class="fsv-close" onclick="closeFullscreen()">괜찮아요, 계속할게요</button>
+  <button class="fsv-close" onclick="closeFullscreen()" data-i18n="fsvClose">괜찮아요, 계속할게요</button>
 </div>
 
 <!-- 기억앨범 모달 -->
@@ -620,7 +732,7 @@
     <div class="modal-title" id="memory-modal-title">기억앨범</div>
     <div id="memory-modal-body"></div>
     <div style="height:10px"></div>
-    <button class="btn-secondary" onclick="closeMemoryModal()">닫기</button>
+    <button class="btn-secondary" onclick="closeMemoryModal()" data-i18n="closeBtn">닫기</button>
   </div>
 </div>
 
@@ -631,11 +743,11 @@
     <div class="modal-title" id="game-modal-title">추억의 게임</div>
     <!-- 글씨 크기는 보기 칸의 글을 읽어야 하니 게임 안에도 둔다 -->
     <div class="story-size-row">
-      <button class="bible-size-btn" id="game-size-btn" onclick="cycleGameFontSize()">글씨 보통</button>
+      <button class="bible-size-btn" id="game-size-btn" onclick="cycleGameFontSize()">글씨 보통</button><!-- 글자는 applyXxxFontSize() 가 매번 다시 쓴다 -->
     </div>
     <div id="game-body"></div>
     <div style="height:10px"></div>
-    <button class="btn-secondary" onclick="closeGame()">그만하고 나가기</button>
+    <button class="btn-secondary" onclick="closeGame()" data-i18n="gameExit">그만하고 나가기</button>
   </div>
 </div>
 

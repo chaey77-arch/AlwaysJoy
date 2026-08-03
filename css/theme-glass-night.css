@@ -1,0 +1,176 @@
+/* ═══════════════════════════════════════════════════════════════
+   시안 F — 유리 (Glass) · 밤
+
+   해가 지면 theme-glass.css **뒤에** 이 한 장이 더 얹힙니다.
+   화면 짜임새는 낮과 똑같고 색만 밤빛으로 바뀝니다 — 어머니가
+   저녁에 켜셨을 때 화면이 눈을 찌르지 않게.
+
+   ⚠ 그래서 이 파일에는 크기·자리·짚는 자리 이야기가 없습니다.
+     그건 낮 파일 하나에만 적어 둡니다. 두 군데 적으면 한쪽만
+     고치는 일이 반드시 생깁니다.
+
+   ── 밤빛은 E(밤하늘) 안의 색을 그대로 씁니다 ──
+   시안 E 를 만들 때 이미 재서 맞춰 둔 색입니다.
+   글씨는 반투명을 쓰지 않습니다 (#F2F7FF 로 꽉 채웁니다) —
+   어두운 바탕에서 반투명 글씨는 테두리가 물러져 안 읽힙니다.
+
+   ── 낮과 뒤집히는 것 하나 ──
+   포인트색이 어두운 파랑(#2C63BF)에서 밝은 하늘색(#3DDCF5)으로
+   바뀝니다. 그래서 그 위에 얹는 글씨도 흰색이 아니라 짙은 남색
+   (--on-accent: #06202A) 이 됩니다. 밝은 하늘색 위 흰 글씨는
+   1.7:1 밖에 안 나옵니다 — 낮 파일에서 그 글씨색을 변수로
+   빼 둔 이유가 이것입니다.
+═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── 유리판 다섯 단계 — 밤에는 '흰 유리' 가 아니라 '옅게 빛나는 유리' ──
+     어두운 바탕에 흰색을 아주 조금 섞으면 유리 느낌은 남고 눈은 편합니다 */
+  --gl-thin:  rgba(255,255,255,0.04);
+  --gl:       rgba(255,255,255,0.07);
+  --gl-mid:   rgba(255,255,255,0.10);
+  --gl-solid: rgba(19,28,46,0.92);   /* 창처럼 뒤를 가려야 하는 것은 남색으로 */
+  --gl-hi:    rgba(255,255,255,0.16);
+  --gl-line:  rgba(139,163,199,0.30);
+
+  /* ── 바탕 ── E 안의 밤하늘 */
+  --bg:  #0B1220;
+  --bg2: #131C2E;
+  /* 파스텔 세 덩이 대신 아주 옅은 빛 세 덩이. 낮보다 훨씬 묽게 —
+     밤에 색이 진하면 글씨 뒤가 얼룩덜룩해집니다 */
+  --wash:
+    radial-gradient(680px 460px at 12% -6%,  rgba(61,220,245,0.10), transparent 62%),
+    radial-gradient(620px 500px at 100% 8%,  rgba(167,139,250,0.10), transparent 60%),
+    radial-gradient(560px 460px at 50% 108%, rgba(94,234,212,0.07), transparent 64%);
+
+  --surface:  var(--gl);
+  --surface2: var(--gl-mid);
+  --surface3: var(--gl-thin);
+
+  /* ── 포인트색 — 밝은 하늘색. 어두운 바탕에서는 밝은 색이 포인트가 됩니다 ── */
+  --gold:        #3DDCF5;
+  --gold-bright: #5B9DFF;
+  --gold-pale:   var(--gl-mid);
+  --gold-line:   var(--gl-line);
+  --on-accent:   #06202A;   /* ⚠ 낮과 뒤집힘 — 위 설명 참고 */
+
+  --green:      #5EEAD4;
+  --green-pale: var(--gl);
+  --green-line: var(--gl-line);
+
+  /* ── 글씨 ── 반투명 안 씁니다.
+     낮보다 단계 폭이 좁습니다. 어두운 바탕에서 회색을 낮처럼 벌려 놓으면
+     연한 쪽이 곧바로 기준 밑으로 떨어집니다 — 재 보니 #A7B6CC 는
+     유리판이 두 겹 겹친 자리에서 4.24:1 이었습니다(필요 4.5). */
+  --ink:  #F2F7FF;
+  --ink2: #DCE6F5;
+  --ink3: #C6D2E4;
+  --ink4: #C6D2E4;   /* 밤에는 --ink3 와 같게. 더 어두우면 안 읽힙니다 */
+
+  --red: #FF8A84;    /* 어두운 바탕에서는 빨강도 밝혀야 보입니다 */
+
+  --track: rgba(255,255,255,0.14);
+  --scrim: rgba(4,7,14,0.66);
+  --deco:  rgba(61,220,245,0.12);
+
+  /* 그림자 — 어두운 바탕에서는 '떠 있는 느낌' 이 그림자로는 안 납니다.
+     그래서 거의 없애고, 대신 테두리로 판을 구분합니다 */
+  --shadow-xs: 0 1px 6px rgba(0,0,0,0.30);
+  --shadow-sm: 0 4px 16px rgba(0,0,0,0.36);
+  --shadow-md: 0 10px 28px rgba(0,0,0,0.44);
+  --shadow-gold: 0 4px 18px rgba(61,220,245,0.26);
+
+  --glass-line: 1px solid var(--gl-line);
+}
+
+/* ── 유리판이 겹칠 때 ──
+   유리판 안에 유리판이 들어가는 자리가 있습니다 (카드 > 안내상자,
+   카드 > 시대알약, 카드 > 타임라인 …). 흰색을 조금씩 섞은 판이
+   두세 겹 겹치면 그 자리만 회색으로 떠올라, 밤인데 밤 같지 않고
+   글씨 대비도 함께 무너집니다 — 재 보니 4.24:1 까지 내려갔습니다.
+   그래서 판 속의 판은 흰색을 섞지 않고 오히려 어둡게 눌러 줍니다.
+   (낮에는 흰 유리가 겹쳐도 밝은 쪽으로만 가므로 이런 일이 없습니다) */
+.card .era-chip:not(.active),
+.card .timeline-nav,
+.card .story-verse-item,
+.card .imm-step,
+.card .read-group,
+.card .prayer-saved-row,
+.card .modal-saved-item,
+.card .hymn-row,
+.card .video-item,
+.card .g-history-day,
+.card .imm-hist-day,
+.card .prayer-guide-box,
+.card .imm-verse,
+.card .imm-intro,
+.card .bible-starter,
+.card .game-note,
+.card .cloud-note,
+.card .about-list,
+.card .empty,
+.card .localonly-body {
+  background: rgba(4,8,16,0.30);
+  border-color: rgba(139,163,199,0.22);
+}
+
+/* 폰 껍데기(스크롤 튕김·주소창 색)도 어둡게 — 안 하면 화면 위아래에
+   흰 띠가 남아 그것만 번쩍입니다 */
+html { background: var(--bg); }
+body { background: var(--bg); color: var(--ink); }
+:root { color-scheme: dark; }
+
+/* 고른 메뉴 칸 — 낮에는 옅은 흰 알약이었는데 밤에는 포인트색을 옅게 */
+.tab-btn.active { background: rgba(61,220,245,0.12); }
+
+/* 입력칸 — 밤에는 눌러 쓰는 칸이 어디인지 더 분명해야 합니다.
+   낮보다 살짝 밝혀 '여기 쓰세요' 가 보이게 */
+.prayer-textarea, .imm-input, .g-input, .modal-input,
+.ob-input, .bible-select {
+  background: rgba(255,255,255,0.06);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.30);
+}
+.prayer-textarea:focus, .imm-input:focus, .g-input:focus,
+.modal-input:focus, .ob-input:focus {
+  background: rgba(255,255,255,0.12);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(61,220,245,0.22);
+}
+
+/* 알림 쪽지 — 낮에는 어두운 알약이었습니다. 밤에는 그대로 두면
+   바탕에 묻히니 반대로 밝게 */
+.toast {
+  background: rgba(226,236,250,0.94);
+  color: #0B1220;
+}
+
+/* 창 뒤 그늘 · 창 자체 */
+.modal-sheet, .game-sheet {
+  background: var(--gl-solid);
+  border-top: var(--glass-line);
+}
+.fullscreen-verse { background: var(--wash), var(--bg); }
+#screen-onboard   { background: var(--wash), var(--bg); }
+
+/* 뒤집힌 카드 앞면 — 낮에는 거의 흰 판이었습니다 */
+.pair-face { background: rgba(255,255,255,0.14); }
+
+/* 맞은 답 — 밤에는 밝은 민트+하늘. 위에 얹는 글씨는 짙은 남색 */
+.game-choice.right {
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  color: var(--on-accent) !important;
+}
+
+/* 유리가 안 되는 옛 폰 — 밤에도 반투명이 뭉개지면 안 읽힙니다.
+   불투명한 남색 판으로 떨어집니다 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --gl-thin:  #101A2B;
+    --gl:       #131C2E;
+    --gl-mid:   #182338;
+    --gl-solid: #131C2E;
+    --gl-hi:    #1D2942;
+    --gl-line:  #2A3A56;
+  }
+  body::before { display: none; }
+  body { background: var(--bg); }
+}

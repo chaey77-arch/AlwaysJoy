@@ -20,51 +20,88 @@
 
 // ─── 성경 인물 문제 ───────────────────────────────────────
 // 주일학교부터 들어 온 이야기들만 골랐다. 어려운 인물은 넣지 않았다.
+//
+// 영어로 보실 때는 nameEn/hintEn/whoEn 을 쓴다. 이름까지 영어로 두는 이유:
+// 보기 셋이 'Noah · Moses · 다윗' 처럼 섞이면 어느 것이 답인지 고르기 전에
+// 글자 모양부터 헷갈린다.
 const GAME_PEOPLE = [
-  { name: '노아',     hint: '방주를 지어 홍수에서 가족과 짐승을 구했어요',        who: '창세기 · 무지개 언약' },
-  { name: '아브라함', hint: '믿음의 조상, 백 세에 아들 이삭을 얻었어요',          who: '창세기 · 믿음의 조상' },
-  { name: '요셉',     hint: '형들에게 팔려 갔지만 애굽의 총리가 되었어요',        who: '창세기 · 꿈을 꾼 사람' },
-  { name: '모세',     hint: '홍해를 갈라 이스라엘을 애굽에서 이끌어 냈어요',      who: '출애굽기 · 십계명' },
-  { name: '다윗',     hint: '물맷돌로 골리앗을 이긴 목동, 뒤에 왕이 되었어요',    who: '사무엘상 · 시편을 지은 왕' },
-  { name: '솔로몬',   hint: '지혜를 구해 성전을 지은 왕이에요',                  who: '열왕기상 · 지혜의 왕' },
-  { name: '다니엘',   hint: '사자 굴에 들어갔지만 하나님이 지켜 주셨어요',        who: '다니엘서 · 하루 세 번 기도' },
-  { name: '요나',     hint: '큰 물고기 배 속에서 사흘을 지냈어요',               who: '요나서 · 니느웨' },
-  { name: '엘리야',   hint: '까마귀가 먹여 주었고 불수레로 하늘에 올라갔어요',    who: '열왕기상 · 갈멜산' },
-  { name: '룻',       hint: '"어머니의 하나님이 나의 하나님" 이라 한 효부예요',   who: '룻기 · 보아스의 아내' },
-  { name: '사무엘',   hint: '어릴 때 "주여 말씀하소서" 하고 응답했어요',          who: '사무엘상 · 마지막 사사' },
-  { name: '베드로',   hint: '어부였다가 제자가 되었고, 세 번 부인했다 회복됐어요', who: '복음서 · 반석' },
-  { name: '바울',     hint: '다마스쿠스 길에서 예수님을 만나 완전히 변했어요',    who: '사도행전 · 이방인의 사도' },
-  { name: '마리아',   hint: '천사의 말을 듣고 예수님을 낳은 어머니예요',          who: '누가복음 · 나사렛' },
-  { name: '삭개오',   hint: '키가 작아 뽕나무에 올라가 예수님을 보았어요',        who: '누가복음 · 세리장' },
-  { name: '아담',     hint: '하나님이 흙으로 지으신 첫 사람이에요',              who: '창세기 · 에덴동산' },
-  { name: '여호수아', hint: '여리고 성을 돌아 무너뜨리고 가나안에 들어갔어요',    who: '여호수아 · 모세의 후계자' },
-  { name: '에스더',   hint: '"죽으면 죽으리라" 하고 왕에게 나아가 백성을 구했어요', who: '에스더서 · 왕비' },
+  { name: '노아',     hint: '방주를 지어 홍수에서 가족과 짐승을 구했어요',        who: '창세기 · 무지개 언약',
+    nameEn: 'Noah', hintEn: 'He built an ark and saved his family and the animals from the flood', whoEn: 'Genesis · the rainbow covenant' },
+  { name: '아브라함', hint: '믿음의 조상, 백 세에 아들 이삭을 얻었어요',          who: '창세기 · 믿음의 조상',
+    nameEn: 'Abraham', hintEn: 'Father of faith, who received his son Isaac at a hundred years old', whoEn: 'Genesis · father of faith' },
+  { name: '요셉',     hint: '형들에게 팔려 갔지만 애굽의 총리가 되었어요',        who: '창세기 · 꿈을 꾼 사람',
+    nameEn: 'Joseph', hintEn: 'Sold by his brothers, he became governor of Egypt', whoEn: 'Genesis · the dreamer' },
+  { name: '모세',     hint: '홍해를 갈라 이스라엘을 애굽에서 이끌어 냈어요',      who: '출애굽기 · 십계명',
+    nameEn: 'Moses', hintEn: 'He parted the Red Sea and led Israel out of Egypt', whoEn: 'Exodus · the Ten Commandments' },
+  { name: '다윗',     hint: '물맷돌로 골리앗을 이긴 목동, 뒤에 왕이 되었어요',    who: '사무엘상 · 시편을 지은 왕',
+    nameEn: 'David', hintEn: 'A shepherd who beat Goliath with a sling stone, and later became king', whoEn: '1 Samuel · the king who wrote psalms' },
+  { name: '솔로몬',   hint: '지혜를 구해 성전을 지은 왕이에요',                  who: '열왕기상 · 지혜의 왕',
+    nameEn: 'Solomon', hintEn: 'The king who asked for wisdom and built the temple', whoEn: '1 Kings · the wise king' },
+  { name: '다니엘',   hint: '사자 굴에 들어갔지만 하나님이 지켜 주셨어요',        who: '다니엘서 · 하루 세 번 기도',
+    nameEn: 'Daniel', hintEn: 'He was thrown into the lions’ den, but God kept him safe', whoEn: 'Daniel · prayed three times a day' },
+  { name: '요나',     hint: '큰 물고기 배 속에서 사흘을 지냈어요',               who: '요나서 · 니느웨',
+    nameEn: 'Jonah', hintEn: 'He spent three days inside a great fish', whoEn: 'Jonah · Nineveh' },
+  { name: '엘리야',   hint: '까마귀가 먹여 주었고 불수레로 하늘에 올라갔어요',    who: '열왕기상 · 갈멜산',
+    nameEn: 'Elijah', hintEn: 'Ravens fed him, and he went up to heaven in a chariot of fire', whoEn: '1 Kings · Mount Carmel' },
+  { name: '룻',       hint: '"어머니의 하나님이 나의 하나님" 이라 한 효부예요',   who: '룻기 · 보아스의 아내',
+    nameEn: 'Ruth', hintEn: 'The devoted daughter-in-law who said "your God will be my God"', whoEn: 'Ruth · the wife of Boaz' },
+  { name: '사무엘',   hint: '어릴 때 "주여 말씀하소서" 하고 응답했어요',          who: '사무엘상 · 마지막 사사',
+    nameEn: 'Samuel', hintEn: 'As a boy he answered, "Speak, Lord"', whoEn: '1 Samuel · the last judge' },
+  { name: '베드로',   hint: '어부였다가 제자가 되었고, 세 번 부인했다 회복됐어요', who: '복음서 · 반석',
+    nameEn: 'Peter', hintEn: 'A fisherman turned disciple who denied Jesus three times and was restored', whoEn: 'The Gospels · the rock' },
+  { name: '바울',     hint: '다마스쿠스 길에서 예수님을 만나 완전히 변했어요',    who: '사도행전 · 이방인의 사도',
+    nameEn: 'Paul', hintEn: 'He met Jesus on the road to Damascus and was completely changed', whoEn: 'Acts · apostle to the nations' },
+  { name: '마리아',   hint: '천사의 말을 듣고 예수님을 낳은 어머니예요',          who: '누가복음 · 나사렛',
+    nameEn: 'Mary', hintEn: 'She heard the angel’s word and gave birth to Jesus', whoEn: 'Luke · Nazareth' },
+  { name: '삭개오',   hint: '키가 작아 뽕나무에 올라가 예수님을 보았어요',        who: '누가복음 · 세리장',
+    nameEn: 'Zacchaeus', hintEn: 'Being short, he climbed a sycamore tree to see Jesus', whoEn: 'Luke · chief tax collector' },
+  { name: '아담',     hint: '하나님이 흙으로 지으신 첫 사람이에요',              who: '창세기 · 에덴동산',
+    nameEn: 'Adam', hintEn: 'The first man, whom God formed from the dust', whoEn: 'Genesis · the garden of Eden' },
+  { name: '여호수아', hint: '여리고 성을 돌아 무너뜨리고 가나안에 들어갔어요',    who: '여호수아 · 모세의 후계자',
+    nameEn: 'Joshua', hintEn: 'He marched around Jericho, its walls fell, and he entered Canaan', whoEn: 'Joshua · successor to Moses' },
+  { name: '에스더',   hint: '"죽으면 죽으리라" 하고 왕에게 나아가 백성을 구했어요', who: '에스더서 · 왕비',
+    nameEn: 'Esther', hintEn: 'Saying "if I perish, I perish," she went to the king and saved her people', whoEn: 'Esther · the queen' },
 ];
 
 // ─── 짝 맞추기 카드 ───────────────────────────────────────
 // 그림글자와 이름을 같이 두어, 눈이 침침해도 형태로 구별되게 했다.
 // 여섯 짝(카드 12장, 3×4)이면 화면에 한 번에 들어가고 부담이 적다.
 const GAME_PAIRS = [
-  { icon: '🕊️', name: '비둘기' },
-  { icon: '🐟', name: '물고기' },
-  { icon: '🌿', name: '올리브' },
-  { icon: '✝️', name: '십자가' },
-  { icon: '👑', name: '왕관' },
-  { icon: '🍇', name: '포도' },
-  { icon: '🐑', name: '어린 양' },
-  { icon: '⛵', name: '배' },
-  { icon: '🔥', name: '불' },
-  { icon: '💧', name: '물' },
+  { icon: '🕊️', name: '비둘기',  nameEn: 'Dove' },
+  { icon: '🐟', name: '물고기',  nameEn: 'Fish' },
+  { icon: '🌿', name: '올리브',  nameEn: 'Olive' },
+  { icon: '✝️', name: '십자가',  nameEn: 'Cross' },
+  { icon: '👑', name: '왕관',    nameEn: 'Crown' },
+  { icon: '🍇', name: '포도',    nameEn: 'Grapes' },
+  { icon: '🐑', name: '어린 양', nameEn: 'Lamb' },
+  { icon: '⛵', name: '배',      nameEn: 'Boat' },
+  { icon: '🔥', name: '불',      nameEn: 'Fire' },
+  { icon: '💧', name: '물',      nameEn: 'Water' },
 ];
 
 // ─── 게임을 마칠 때 드리는 말씀 ───────────────────────────
+// 영어는 저작권이 풀린 World English Bible 을 옮겨 적었다
+// (성경읽기가 쓰는 것과 같은 번역이라 화면마다 말이 달라지지 않는다).
 const GAME_BLESSINGS = [
-  { text: '이것이 그리스도 예수 안에서 너희를 향하신 하나님의 뜻이니라', ref: '데살로니가전서 5:18' },
-  { text: '여호와를 기뻐하는 것이 너희의 힘이니라', ref: '느헤미야 8:10' },
-  { text: '내가 너를 잊지 아니하리라', ref: '이사야 49:15' },
-  { text: '주의 앞에는 기쁨이 충만하고', ref: '시편 16:11' },
-  { text: '항상 기뻐하라', ref: '데살로니가전서 5:16' },
+  { text: '이것이 그리스도 예수 안에서 너희를 향하신 하나님의 뜻이니라', ref: '데살로니가전서 5:18',
+    textEn: 'For this is the will of God in Christ Jesus toward you', refEn: '1 Thessalonians 5:18' },
+  { text: '여호와를 기뻐하는 것이 너희의 힘이니라', ref: '느헤미야 8:10',
+    textEn: 'The joy of Yahweh is your strength', refEn: 'Nehemiah 8:10' },
+  { text: '내가 너를 잊지 아니하리라', ref: '이사야 49:15',
+    textEn: 'Yet I will not forget you', refEn: 'Isaiah 49:15' },
+  { text: '주의 앞에는 기쁨이 충만하고', ref: '시편 16:11',
+    textEn: 'In your presence is fullness of joy', refEn: 'Psalms 16:11' },
+  { text: '항상 기뻐하라', ref: '데살로니가전서 5:16',
+    textEn: 'Always rejoice', refEn: '1 Thessalonians 5:16' },
 ];
+
+// ─── 지금 언어로 고르기 ───────────────────────────────────
+// 영어 자리가 비어 있으면 한국어를 쓴다 — 빈 화면보다 낫다
+function gameEn() { return typeof State !== 'undefined' && State.lang === 'en'; }
+function gamePick(obj, key) {
+  const en = obj[key + 'En'];
+  return (gameEn() && en) ? en : obj[key];
+}
 
 const GameState = {
   kind: null,        // 'hymn' | 'people' | 'pair'
@@ -101,27 +138,27 @@ function renderGames() {
     <div class="game-card" onclick="openGame('hymn')">
       <div class="game-card-icon">🎵</div>
       <div class="game-card-body">
-        <div class="game-card-title">찬송가 이어 부르기</div>
-        <div class="game-card-sub">다음 줄이 뭘까요? 평생 부르신 노래예요</div>
+        <div class="game-card-title">${escHtml(t('gameHymnTitle'))}</div>
+        <div class="game-card-sub">${escHtml(t('gameHymnSub'))}</div>
       </div>
     </div>
     <div class="game-card" onclick="openGame('people')">
       <div class="game-card-icon">👤</div>
       <div class="game-card-body">
-        <div class="game-card-title">성경 인물 맞추기</div>
-        <div class="game-card-sub">설명을 보고 누구인지 골라보세요</div>
+        <div class="game-card-title">${escHtml(t('gamePeopleTitle'))}</div>
+        <div class="game-card-sub">${escHtml(t('gamePeopleSub'))}</div>
       </div>
     </div>
     <div class="game-card" onclick="openGame('pair')">
       <div class="game-card-icon">🃏</div>
       <div class="game-card-body">
-        <div class="game-card-title">짝 맞추기</div>
-        <div class="game-card-sub">같은 그림 두 장을 찾아보세요</div>
+        <div class="game-card-title">${escHtml(t('gamePairTitle'))}</div>
+        <div class="game-card-sub">${escHtml(t('gamePairSub'))}</div>
       </div>
     </div>
     <div class="game-note">
-      시간을 재지 않아요. 천천히 하셔도 됩니다 🌿
-      ${best > 0 ? `<br>지금까지 ${best}번 즐기셨어요` : ''}
+      ${escHtml(t('gameNote'))}
+      ${best > 0 ? `<br>${escHtml(tf('gamePlays', { n: best }))}` : ''}
     </div>`;
 }
 
@@ -138,7 +175,7 @@ function openGame(kind) {
 
   // 문제를 못 만들었으면(자료가 모자라면) 조용히 알려 드리고 만다
   if (kind !== 'pair' && !GameState.quiz.length) {
-    showToast('지금은 문제를 준비할 수 없어요');
+    showToast(t('gameNoQuiz'));
     return;
   }
   GameState.total = kind === 'pair' ? 1 : GameState.quiz.length;
@@ -181,10 +218,28 @@ function makeHymnQuiz() {
   const quiz = [];
   for (const h of pool) {
     const lines = h.lyrics.split('\n').map(s => s.trim()).filter(Boolean);
-    // 첫 줄을 문제로 내면 곡 제목과 같아 너무 쉽다. 두 번째 줄부터 고른다.
-    const maxStart = lines.length - 2;
-    if (maxStart < 0) continue;
-    const i = Math.min(Math.floor(Math.random() * (maxStart + 1)), Math.max(0, lines.length - 2));
+    if (lines.length < 2) continue;
+
+    // 문제로 낼 수 있는 줄만 고른다. 찬송가 가사에는 같은 줄이 되풀이되는
+    // 곳이 많아서(후렴), 아무 줄이나 내면 어르신이 답할 수 없는 문제가 된다:
+    //
+    //  · '예수 사랑하심은' 은 '날 사랑하심' 이 잇달아 두 번 나온다. 그 줄을
+    //    내면 문제와 정답이 똑같아진다 ("다음 줄은?" → 같은 줄).
+    //  · '주님 한 분만으로' 는 같은 줄이 0번째와 2번째에 있다. 뒤따르는 줄이
+    //    서로 다르면 어느 쪽을 답해야 하는지 알 길이 없다. 맞는 답을 골라도
+    //    아니라고 나오면 어르신은 자기가 틀린 줄 아신다.
+    //
+    // 그래서 (1) 곡 안에 딱 한 번만 나오는 줄이고, (2) 다음 줄이 자기와
+    // 다른 줄만 쓴다. 마지막 줄은 다음 줄이 없으니 뺀다.
+    const spots = [];
+    for (let k = 0; k < lines.length - 1; k++) {
+      if (lines[k] === lines[k + 1]) continue;                 // 문제 = 정답
+      if (lines.indexOf(lines[k]) !== lines.lastIndexOf(lines[k])) continue;  // 같은 줄이 여러 번
+      spots.push(k);
+    }
+    if (!spots.length) continue;
+
+    const i = spots[Math.floor(Math.random() * spots.length)];
     const ask = lines[i];
     const answer = lines[i + 1];
     if (!ask || !answer) continue;
@@ -212,14 +267,16 @@ function makeHymnQuiz() {
 function makePeopleQuiz() {
   const picked = gameShuffle(GAME_PEOPLE).slice(0, 5);
   return picked.map(p => {
+    // 오답을 고를 때는 한글 이름으로 견준다 — 자료의 이름은 이것이 본이다
     const wrongs = gameShuffle(GAME_PEOPLE.filter(x => x.name !== p.name))
-      .slice(0, 2).map(x => x.name);
+      .slice(0, 2).map(x => gamePick(x, 'name'));
+    const answer = gamePick(p, 'name');
     return {
-      title: '이분은 누구실까요?',
-      ask: p.hint,
-      answer: p.name,
-      choices: gameShuffle([p.name, ...wrongs]),
-      note: p.who,
+      title: t('gameWhoIs'),
+      ask: gamePick(p, 'hint'),
+      answer: answer,
+      choices: gameShuffle([answer, ...wrongs]),
+      note: gamePick(p, 'who'),
     };
   });
 }
@@ -236,7 +293,7 @@ function renderQuizRound() {
 
   if (title) {
     title.textContent = GameState.kind === 'hymn'
-      ? '찬송가 이어 부르기 🎵' : '성경 인물 맞추기 👤';
+      ? t('gameHymnHead') : t('gamePeopleHead');
   }
 
   // 몇 번째인지 점으로 — 숫자보다 부담이 적다
@@ -245,7 +302,7 @@ function renderQuizRound() {
   ).join('');
 
   const askLabel = GameState.kind === 'hymn'
-    ? '다음 줄은 무엇일까요?' : '설명을 읽어 보세요';
+    ? t('gameAskHymn') : t('gameAskPeople');
 
   body.innerHTML = `
     <div class="game-dots">${dots}</div>
@@ -282,7 +339,7 @@ function answerQuiz(i) {
     if (b) { b.classList.add('dim'); b.disabled = true; }
     if (fb) {
       fb.className = 'game-feedback show soft';
-      fb.textContent = '다시 한번 보실래요? 천천히요 🌿';
+      fb.textContent = t('gameSoft');
     }
     return;
   }
@@ -296,10 +353,10 @@ function answerQuiz(i) {
   });
   if (fb) {
     fb.className = 'game-feedback show good';
-    fb.innerHTML = `<div class="game-fb-big">잘하셨어요! 🎉</div>`
+    fb.innerHTML = `<div class="game-fb-big">${escHtml(t('gameGood'))}</div>`
       + (q.note ? `<div class="game-fb-sub">${escHtml(q.note)}</div>` : '')
       + `<button type="button" class="btn-primary game-next" onclick="nextQuizRound()">
-           ${GameState.round + 1 >= GameState.quiz.length ? '다 했어요' : '다음 문제 →'}
+           ${escHtml(GameState.round + 1 >= GameState.quiz.length ? t('gameLast') : t('gameNext'))}
          </button>`;
   }
 }
@@ -316,8 +373,9 @@ function startPairGame() {
   // 같은 짝은 pid 로 묶는다 (그림글자로 비교하면 같은 그림이 겹칠 때 헷갈린다)
   const deck = [];
   pairs.forEach((p, pid) => {
-    deck.push({ pid, icon: p.icon, name: p.name });
-    deck.push({ pid, icon: p.icon, name: p.name });
+    const name = gamePick(p, 'name');
+    deck.push({ pid, icon: p.icon, name });
+    deck.push({ pid, icon: p.icon, name });
   });
   GameState.cards = gameShuffle(deck).map((c, i) =>
     ({ ...c, id: i, open: false, done: false }));
@@ -326,7 +384,7 @@ function startPairGame() {
   GameState.found = 0;
 
   const title = document.getElementById('game-modal-title');
-  if (title) title.textContent = '짝 맞추기 🃏';
+  if (title) title.textContent = t('gamePairHead');
   renderPairBoard();
 }
 
@@ -335,7 +393,7 @@ function renderPairBoard() {
   if (!body) return;
   body.innerHTML = `
     <div class="game-q">
-      <div class="game-q-ask">같은 그림 두 장을 찾아 눌러 보세요</div>
+      <div class="game-q-ask">${escHtml(t('gameAskPair'))}</div>
     </div>
     <div class="pair-grid" id="pair-grid"></div>
     <div class="game-feedback" id="game-feedback"></div>`;
@@ -351,7 +409,7 @@ function paintPairCards() {
   if (!grid.children.length) {
     grid.innerHTML = GameState.cards.map(c =>
       `<button type="button" class="pair-card" data-id="${c.id}"
-         onclick="flipPair(${c.id})" aria-label="카드">
+         onclick="flipPair(${c.id})" aria-label="${escHtml(t('gameCardAria'))}">
          <span class="pair-back">✝</span>
          <span class="pair-face"><span class="pair-icon">${c.icon}</span>
          <span class="pair-name">${escHtml(c.name)}</span></span>
@@ -393,7 +451,7 @@ function flipPair(id) {
       setTimeout(() => renderGameEnd(), 900);
     } else if (fb) {
       fb.className = 'game-feedback show good';
-      fb.textContent = '짝을 찾으셨어요! 🎉 (' + GameState.found + ' / 6)';
+      fb.textContent = tf('gamePairFound', { n: GameState.found });
     }
     return;
   }
@@ -402,7 +460,7 @@ function flipPair(id) {
   // 눈으로 확인하기에 충분하고, 기다리기 답답하지 않은 정도다.
   GameState.locking = true;
   const fb = document.getElementById('game-feedback');
-  if (fb) { fb.className = 'game-feedback show soft'; fb.textContent = '다른 짝이네요. 다시 볼까요? 🌿'; }
+  if (fb) { fb.className = 'game-feedback show soft'; fb.textContent = t('gamePairMiss'); }
   setTimeout(() => {
     first.open = false; c.open = false;
     GameState.locking = false;
@@ -418,7 +476,7 @@ function renderGameEnd() {
   const body = document.getElementById('game-body');
   const title = document.getElementById('game-modal-title');
   if (!body) return;
-  if (title) title.textContent = '오늘도 잘하셨어요 🌿';
+  if (title) title.textContent = t('gameEndHead');
 
   // 몇 번 즐기셨는지만 세어 둔다 (기록은 이것뿐 — 성적은 남기지 않는다)
   const plays = Store.load('gamePlays', 0) + 1;
@@ -433,25 +491,23 @@ function renderGameEnd() {
       <div class="game-end-sub" id="game-end-sub"></div>
       <div class="game-end-verse">
         <div class="game-end-verse-text" id="game-end-verse-text"></div>
-        <div class="game-end-verse-ref">${escHtml(b.ref)}</div>
+        <div class="game-end-verse-ref">${escHtml(gamePick(b, 'ref'))}</div>
       </div>
-      <button type="button" class="btn-primary" onclick="openGame('${again}')">한 번 더 할까요</button>
-      <button type="button" class="btn-secondary" onclick="closeGame()">그만할래요</button>
+      <button type="button" class="btn-primary" onclick="openGame('${again}')">${escHtml(t('gameAgain'))}</button>
+      <button type="button" class="btn-secondary" onclick="closeGame()">${escHtml(t('gameQuit'))}</button>
     </div>`;
   // 문구는 낱말이 갈리지 않게 넣는다
-  setPhrase('game-end-title', '끝까지 하셨어요');
-  setPhrase('game-end-sub', '하나님이 주신 기쁨이\n오늘도 함께합니다');
-  setPhrase('game-end-verse-text', '"' + b.text + '"');
+  setPhrase('game-end-title', t('gameEndTitle'));
+  setPhrase('game-end-sub', t('gameEndSub'));
+  setPhrase('game-end-verse-text', '"' + gamePick(b, 'text') + '"');
   applyGameFontSize();
 }
 
 // ─── 게임 글씨 크기 ───────────────────────────────────────
 // 다른 곳과 같은 3단계. 게임은 보기 칸의 글을 읽어야 하니 더 중요하다.
-const GAME_SIZES = [
-  { v: '16px', label: '보통' },
-  { v: '20px', label: '크게' },
-  { v: '24px', label: '아주 크게' }
-];
+// 단계 이름은 여기 적지 않는다 — fontSizeLabel() 이 말모음에서 가져온다
+// (여기 한글로 적어 두면 English 로 바꿔도 그대로 남는다).
+const GAME_SIZES = [{ v: '16px' }, { v: '20px' }, { v: '24px' }];
 
 function cycleGameFontSize() {
   State.gameFontIdx = ((State.gameFontIdx || 0) + 1) % GAME_SIZES.length;
@@ -464,5 +520,5 @@ function applyGameFontSize() {
   const sheet = document.getElementById('game-modal');
   if (sheet) sheet.style.setProperty('--game-fs', size.v);
   const btn = document.getElementById('game-size-btn');
-  if (btn) btn.textContent = '글씨 ' + size.label;
+  if (btn) btn.textContent = fontSizeLabel(State.gameFontIdx || 0);
 }

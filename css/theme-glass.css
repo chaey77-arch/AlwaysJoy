@@ -1,0 +1,659 @@
+/* ═══════════════════════════════════════════════════════════════
+   시안 F — 유리 (Glass) · 낮
+
+   어머니가 고르신 안입니다. 밝은 미래 느낌 — 흰 유리판이 떠 있고
+   글씨는 진한 먹색.
+
+   ⚠ 이 파일은 style.css **뒤에** 얹히는 덧칠입니다.
+     `?theme=glass` 로만 켜집니다.
+     해가 지면 이 뒤에 `theme-glass-night.css` 가 한 장 더 얹혀
+     같은 화면이 밤빛으로 바뀝니다 (index.html 에서 고릅니다).
+
+   ── 유리판의 진하기는 다섯 단계뿐입니다 ──
+   전에는 0.5·0.55·0.62·0.66·0.68·0.7·0.72·0.75·0.78·0.8·0.86·0.9…
+   열두 가지 진하기를 손으로 적어 두었습니다. 눈에는 구분도 안 되면서
+   밤 모드를 만들려면 그 열두 개를 다 다시 적어야 했습니다.
+   그래서 다섯 단계로 줄였습니다 — 화면도 더 정돈되고, 밤빛은
+   이 다섯 개만 바꾸면 앱 전체가 따라옵니다.
+
+     --gl-thin   묽게   (안내 상자처럼 살짝 떠 있는 것)
+     --gl        기본   (카드 · 유리판)
+     --gl-mid    조금 진하게 (머리글 · 단추)
+     --gl-solid  진하게 (창 · 눌러야 하는 것)
+     --gl-hi     눌렀을 때
+
+   ── 세 가지를 지키며 만들었습니다 ──
+   ① 멋있게  — 유리판 · 부드러운 빛번짐 · 파스텔 하늘빛 바탕
+   ② 심플하게 — 색을 셋으로 줄였습니다 (하늘빛 하나 · 먹색 하나 · 흰 유리 하나).
+                예전 화면의 진한 초록·금색 카드는 다 유리판으로 바꿨습니다.
+   ③ 쉬워보이게 — 짚는 자리는 모두 44px 이상. 대비는 4.5:1 이상(큰 글씨 3:1).
+                  눈대중이 아니라 재서 맞췄습니다.
+
+   ⚠ 유리(backdrop-filter)는 옛 폰에서 안 먹을 수 있습니다. 그때는
+     불투명한 흰 판으로 얌전히 떨어집니다 — 글씨가 안 보이는 일은 없습니다.
+     (맨 아래 '유리가 안 될 때' 칸)
+═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── 유리판 다섯 단계 ── */
+  --gl-thin:  rgba(255,255,255,0.52);
+  --gl:       rgba(255,255,255,0.66);
+  --gl-mid:   rgba(255,255,255,0.76);
+  --gl-solid: rgba(255,255,255,0.86);
+  --gl-hi:    #FFFFFF;
+  --gl-line:  rgba(255,255,255,0.78);
+
+  /* ── 바탕 ── */
+  --bg:  #EEF4FC;   /* 옅은 하늘 화이트 */
+  --bg2: #DCE7F5;
+  /* 바탕에 번지는 파스텔 세 덩이 — 밤에는 이 세 줄만 갈립니다 */
+  --wash:
+    radial-gradient(680px 460px at 12% -6%,  #CFE4FF, transparent 60%),
+    radial-gradient(620px 500px at 100% 8%,  #E6DCFF, transparent 58%),
+    radial-gradient(560px 460px at 50% 108%, #D6F5EC, transparent 62%);
+
+  /* style.css 가 쓰는 이름들도 같은 유리로 맞춥니다 */
+  --surface:  var(--gl);
+  --surface2: var(--gl-mid);
+  --surface3: var(--gl-thin);
+
+  /* ── 포인트 한 색 ── 시원한 파랑.
+     단추의 글씨가 4.5:1 을 넘도록 충분히 어둡게 잡았습니다.
+     (밝은 파랑 #4A8BE8 로 뒀다가 3.41:1 로 걸린 적이 있습니다) */
+  --gold:       #2C63BF;
+  --gold-bright:#4A47C4;
+  --gold-pale:  var(--gl-mid);
+  --gold-line:  var(--gl-line);
+  /* 포인트색 위에 얹는 글씨. 낮에는 흰색, 밤에는 짙은 남색이 됩니다 —
+     밤에는 포인트색이 밝은 하늘색이라 흰 글씨면 안 보입니다 */
+  --on-accent:  #FFFFFF;
+
+  /* 보조색도 같은 계열로 — 색이 적을수록 심플해 보입니다 */
+  --green:      #1F7A6B;
+  --green-pale: var(--gl);
+  --green-line: var(--gl-line);
+
+  /* ── 글씨 ── 진한 먹색. 유리판 위에서 또렷하게 */
+  --ink:  #1B2430;
+  --ink2: #3E4B5C;   /* 4.5:1 넘김 */
+  --ink3: #5A6878;   /* 작은 글씨도 기준을 넘도록 예전보다 어둡게 */
+  /* --ink4 는 예전에 '거의 안 보여도 되는 회색' 이었지만, 실제로는
+     찬송가 번호·연대(기원전 1446) 처럼 읽어야 하는 글씨에 쓰이고 있었다.
+     2.89:1 로 걸려서 본문으로 쓸 수 있는 만큼 어둡게 내렸다 */
+  --ink4: #566373;
+
+  --red: #C2413C;
+
+  /* 진도 막대·점의 빈 칸 */
+  --track: rgba(27,36,48,0.12);
+  /* 창 뒤를 덮는 그늘 */
+  --scrim: rgba(27,36,48,0.30);
+  /* 큰 카드 속 장식 글자(따옴표 등) — 있는 듯 없는 듯 */
+  --deco: rgba(44,99,191,0.10);
+
+  /* 모서리를 크게 — 유리판은 둥글수록 부드럽습니다 */
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 30px;
+
+  /* 그림자는 '떠 있는 느낌' 하나만. 여러 겹 쓰면 지저분해집니다 */
+  --shadow-xs: 0 2px 10px rgba(27,36,48,0.06);
+  --shadow-sm: 0 6px 20px rgba(27,36,48,0.08);
+  --shadow-md: 0 12px 34px rgba(27,36,48,0.11);
+  --shadow-gold: 0 6px 20px rgba(44,99,191,0.28);
+
+  --glass-line: 1px solid var(--gl-line);
+  --blur: blur(16px) saturate(1.25);
+}
+
+/* ── 바탕 — 파스텔 빛이 세 군데서 번집니다.
+      fixed 로 두어 스크롤해도 따라오지 않게 (따라오면 어지럽습니다) ── */
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--wash);
+}
+
+/* ═══ 유리판 공통 ═══
+   .card 를 유리로 바꾸면 앱 안의 카드 대부분이 한 번에 따라옵니다 */
+.card,
+.greet-card,
+.quick-card,
+.album-card,
+.prayer-type-card,
+.modern-card,
+.era-chip,
+.game-choice,
+.hymn-row,
+.video-item,
+.modal-sheet,
+.game-sheet,
+.bible-resume-btn,
+.g-history-day,
+.imm-hist-day,
+.prayer-saved-row,
+.modal-saved-item,
+.read-group,
+.imm-step,
+.story-verse-item,
+.timeline-nav,
+.localonly-body {
+  background: var(--gl);
+  border: var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── 머리글·아래메뉴 — 반투명 유리. 뒤 내용이 흐릿하게 지나갑니다 ── */
+.app-header {
+  background: var(--gl-mid);
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  border-bottom: var(--glass-line);
+}
+.hdr-name { color: var(--ink); }
+.hdr-date { color: var(--ink2); }
+/* 종 단추 — 짚는 자리 44px */
+.hdr-bell {
+  min-width: 44px; min-height: 44px;
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  border-radius: 50%;
+  box-shadow: var(--shadow-xs);
+}
+.tab-nav {
+  background: var(--gl-solid);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-top: var(--glass-line);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(27,36,48,0.07);
+}
+.tab-label { color: var(--ink2); }
+.tab-btn.active .tab-label { color: var(--gold); }
+/* 고른 칸에만 옅은 유리 알약 — 어디 있는지 한눈에 */
+.tab-btn.active {
+  background: var(--gl-thin);
+  border-radius: 16px;
+}
+
+/* ═══ 진한 카드들을 유리로 ═══
+   예전에는 짙은 초록·금색·갈색 카드가 여섯 군데 있었습니다.
+   색이 여러 개면 화면이 복잡해 보여서, 다 같은 유리판으로 맞췄습니다.
+   글씨는 흰색이 아니라 먹색이 됩니다 — 그래서 색을 따로 되돌립니다. */
+.hero-card,
+.verse-hero,
+.album-banner,
+.now-playing,
+.story-hero {
+  background: var(--gl);
+  border: var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-md);
+  color: var(--ink);
+}
+/* ⚠ 역사 탭의 큰 카드는 바탕색을 js/app.js:1912 에서 style="background:…"
+   으로 직접 박는다 (시대마다 색이 다르다). 박은 것이 CSS 보다 세서 위
+   규칙이 지고, 그 바람에 어두운 바탕에 먹색 글씨가 얹혀 1.2:1 까지
+   떨어졌다 — 재보고 알았다. !important 로 되찾는다.
+   (js 를 고쳐 색을 없애는 게 더 깔끔하지만, 그러면 테마를 껐을 때
+    예전 화면이 무채색이 된다. 덧칠은 덧칠에서 끝내는 편이 안전하다) */
+.story-hero { background: var(--gl) !important; }
+/* 유리판 위 장식 글자(큰 따옴표 등)는 흰 판에서 잘 안 보이니 옅게 */
+.hero-card::before, .verse-hero::before,
+.album-banner::before, .now-playing::before,
+.story-hero::before, .story-hero::after {
+  color: var(--deco) !important;
+  background: none !important;
+}
+
+/* 그 카드들 속 글씨 — 흰색이던 것을 먹색으로 */
+.hero-label     { color: var(--gold) !important; letter-spacing: 1px; }
+.hero-verse     { color: var(--ink) !important; }
+.hero-ref       { color: var(--ink2) !important; }
+.verse-hero-text{ color: var(--ink) !important; }
+.verse-hero-ref { color: var(--ink2) !important; }
+.album-banner-verse { color: var(--ink) !important; }
+.album-banner-ref   { color: var(--ink2) !important; }
+.np-label  { color: var(--gold) !important; }
+.np-title  { color: var(--ink) !important; }
+.np-artist { color: var(--ink2) !important; }
+.np-note   { color: var(--ink2) !important; }
+.np-lyrics { background: var(--gl-mid) !important; }
+.np-lyrics-text { color: var(--ink) !important; }
+.story-hero-period  { color: var(--gold) !important; }
+.story-hero-era     { color: var(--ink) !important; }
+.story-hero-books   { color: var(--ink2) !important; }
+.story-hero-tagline { color: var(--ink2) !important; }
+
+/* 그 카드들 속 단추 — 반투명 알약. 44px 로 키웁니다 */
+.hero-btn, .verse-nav-btn {
+  min-height: 44px; padding: 0 16px;
+  background: var(--gl-solid);
+  border: var(--glass-line);
+  color: var(--ink) !important;
+  font-size: 14px;
+  box-shadow: var(--shadow-xs);
+}
+.hero-btn:active, .verse-nav-btn:active { background: var(--gl-hi); }
+.verse-nav-btn.accent {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent) !important; border-color: transparent;
+  box-shadow: var(--shadow-gold);
+}
+/* '말씀 더 보기' — .hero-btn.primary 가 --gold 바탕을 다시 칠하는데
+   위 .hero-btn 규칙이 글씨를 먹색으로 만들어 2.72:1 이 됐다.
+   포인트색 바탕에는 --on-accent 가 맞다 */
+.hero-btn.primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  border-color: transparent;
+  color: var(--on-accent) !important;
+  box-shadow: var(--shadow-gold);
+}
+/* '이 말씀 담아두기' — 예전엔 짙은 카드 위 흰 글씨였다.
+   유리판이 되었으니 먹색으로 (1.02:1 → 통과) */
+.fav-hero-btn {
+  min-height: 44px; padding: 0 20px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--gl-solid);
+  border: var(--glass-line);
+  color: var(--ink) !important;
+  font-size: 13px;
+  box-shadow: var(--shadow-xs);
+}
+.fav-hero-btn.on { color: var(--red) !important; }
+
+/* ═══ 단추 ═══ */
+.btn-primary {
+  min-height: 52px;                      /* 쉬워보이게 — 큼직하게 */
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent); font-size: 16px;
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-gold);
+}
+.btn-secondary {
+  min-height: 52px;
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  color: var(--ink);
+}
+.ob-start-btn {
+  min-height: 56px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent);
+  box-shadow: var(--shadow-gold);
+}
+
+/* ── 작은 알약 단추들 — 다 44px 이상으로 ── */
+.chip, .subtab, .bible-size-btn, .tts-speed-btn,
+.cloud-btn, .cb-btn, .fav-hero-btn, .story-size-row button {
+  min-height: 44px;
+}
+.chip {
+  padding: 0 16px;
+  display: inline-flex; align-items: center;
+  background: var(--gl);
+  border: var(--glass-line);
+  color: var(--ink2); font-size: 13px;
+  box-shadow: var(--shadow-xs);
+}
+.chip.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent); border-color: transparent;
+  box-shadow: var(--shadow-gold);
+}
+.subtabs {
+  background: var(--gl-thin);
+  border: var(--glass-line);
+  border-radius: 50px; padding: 4px;
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+.subtab { color: var(--ink2); }
+/* 고른 칸은 포인트색으로 꽉 채웁니다. 예전에는 흰 판에 파란 글씨였는데,
+   그러면 '고른 것' 과 '안 고른 것' 차이가 색 하나뿐이라 어르신은 잘
+   모르십니다. 위쪽 chip 과 같은 모양으로 맞추면 규칙이 하나가 됩니다.
+   (밤에는 파란 글씨가 4.38:1 로 걸리기도 했습니다) */
+.subtab.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent);
+  box-shadow: var(--shadow-gold);
+}
+
+/* ── 성경 넘기기 단추 — 어머니가 짚으신 곳. 크고 또렷하게 ── */
+.bible-nav-btn {
+  min-height: 52px;
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  color: var(--ink);
+  font-size: 15px;
+  box-shadow: var(--shadow-xs);
+}
+.bible-nav-btn:active { background: var(--gl-hi); }
+.bible-top-btn {
+  min-height: 44px;
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  color: var(--ink2);
+}
+
+/* ── 말로 쓰기·읽어주기 ── */
+.mic-btn {
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+.mic-btn.on {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent); border-color: transparent;
+  box-shadow: var(--shadow-gold);
+}
+.mic-btn.on .mic-btn-label { color: var(--on-accent); }
+.tts-btn {
+  width: 44px; height: 44px;            /* 36px 이었습니다 — 짚기 어려웠습니다 */
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+.tts-btn.play {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent); border-color: transparent;
+}
+.tts-btn.stop { background: var(--gl-solid); color: var(--red); }
+.np-ctrl {
+  min-width: 48px; min-height: 48px;
+  background: var(--gl-solid) !important;
+  border: var(--glass-line);
+  color: var(--ink) !important;
+  box-shadow: var(--shadow-xs);
+}
+.np-play {
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright)) !important;
+  color: var(--on-accent) !important;
+  box-shadow: var(--shadow-gold);
+}
+
+/* ── 입력칸 — 유리판 안쪽처럼 ── */
+.prayer-textarea, .imm-input, .g-input, .modal-input,
+.ob-input, .bible-select {
+  background: var(--gl);
+  border: var(--glass-line);
+  color: var(--ink);
+  box-shadow: inset 0 1px 3px rgba(27,36,48,0.04);
+}
+.prayer-textarea:focus, .imm-input:focus, .g-input:focus,
+.modal-input:focus, .ob-input:focus {
+  background: var(--gl-hi);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(44,99,191,0.14);
+}
+.prayer-textarea::placeholder, .imm-input::placeholder,
+.g-input::placeholder, .modal-input::placeholder,
+.ob-input::placeholder { color: var(--ink4); }
+
+/* ── 감사 스트릭 · 알약 ── */
+.streak-card {
+  background: var(--gl);
+  border: var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-md);
+}
+.streak-big  { color: var(--gold) !important; }
+.streak-main { color: var(--ink) !important; }
+.streak-sub  { color: var(--ink2) !important; }
+.streak-pill {
+  background: var(--gl);
+  border: var(--glass-line);
+  min-height: 44px;
+}
+.streak-num  { color: var(--gold); }
+.streak-text { color: var(--ink2); }
+
+/* ── 게임 ── */
+.game-choice {
+  min-height: 62px;
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  color: var(--ink);
+}
+.game-choice.right {
+  background: linear-gradient(135deg, var(--green), var(--gold));
+  color: var(--on-accent) !important; border-color: transparent;
+  box-shadow: var(--shadow-gold);
+}
+.game-dot { background: var(--track); }
+.game-dot.done { background: var(--gold); }
+.game-dot.now  { background: var(--gold-bright); }
+.pair-card { border-radius: var(--r-md); }
+.pair-back {
+  background: var(--gl);
+  border: var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+.pair-face {
+  background: var(--gl-solid);
+  border: var(--glass-line);
+}
+.game-end-verse {
+  background: var(--gl-thin);
+  border: var(--glass-line);
+}
+
+/* ── 창(모달)·전체화면 ── */
+.modal-sheet {
+  background: var(--gl-solid);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border-radius: 28px 28px 0 0;
+  border-top: var(--glass-line);
+}
+.modal-overlay { background: var(--scrim); }
+.fullscreen-verse { background: var(--wash), var(--bg); }
+.fsv-cross { color: var(--gold) !important; }
+.fsv-text  { color: var(--ink) !important; }
+.fsv-ref   { color: var(--ink2) !important; }
+.fsv-close {
+  min-width: 48px; min-height: 48px;
+  background: var(--gl-solid) !important;
+  border: var(--glass-line);
+  color: var(--ink) !important;
+}
+
+/* ── 진도 막대 · 타임라인 ── */
+.progress-bar-wrap, .bible-progress-bar, .read-row-bar {
+  background: var(--track);
+}
+.progress-bar-fill, .bible-progress-bar > span, .read-row-bar > span {
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+}
+.timeline-dot { background: var(--gl-mid); border: var(--glass-line); }
+.timeline-item.active .timeline-dot {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent);
+}
+.timeline-line { background: var(--track); }
+
+/* ── 온보딩 — 첫 화면. 여기서 첫인상이 정해집니다 ── */
+#screen-onboard { background: var(--wash), var(--bg); }
+#screen-onboard::before, #screen-onboard::after { background: none; }
+.ob-verse-card {
+  background: var(--gl);
+  border: var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-sm);
+}
+.ob-title { color: var(--ink); }
+.ob-sub, .ob-label, .ob-verse-ref { color: var(--ink2); }
+.ob-verse-line { color: var(--ink); }
+/* 나이를 고르던 네 칸이 있던 자리 — 말씀 한 줄로 바뀌었습니다.
+   눌러야 하는 것이 아니므로 유리판을 얹지 않습니다. 짚을 곳이 아닌데
+   판을 얹으면 어머니가 눌러 보시다가 아무 일도 안 일어나 당황하십니다.
+   실선 한 줄만 밤빛까지 따라오게 --gl-line 으로 둡니다 */
+.ob-welcome { border-top: 1px solid var(--gl-line); }
+.ob-welcome-verse { color: var(--ink2); }
+/* 출처는 --ink3(옅은 회색)로 두었더니 12px 에서 4.35:1 이었습니다 (필요 4.5).
+   위쪽 .ob-verse-ref 와 같은 --ink2 로 올립니다 — 첫 화면을 재는 자리에
+   넣고 나서야 걸린 것입니다. 12px 을 키우는 대신 진하기를 올렸습니다.
+   출처가 말씀보다 눈에 띄면 안 되므로 크기는 그대로 둡니다. */
+.ob-welcome-ref   { color: var(--ink2); }
+/* 언어 단추 두 개(온보딩·머리글) — index.html 안에 style="…" 로 박혀 있어
+   덧칠이 지므로 !important 로 되찾는다. 둘 다 28px 이라 짚기 어려웠다 */
+#ob-lang-btn, #lang-toggle-btn {
+  min-height: 44px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important; align-items: center !important;
+  background: var(--gl-solid) !important;
+  border: var(--glass-line) !important;
+  border-radius: 22px !important;
+  font-size: 13px !important;
+  color: var(--ink) !important;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ── 화면 밝기 고르는 칸 (해질 때 저절로 어두워지는 것) ── */
+.screenmode-row { display: flex; gap: 8px; }
+.screenmode-btn {
+  flex: 1; min-height: 56px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border-radius: var(--r-md);
+  background: var(--gl);
+  border: var(--glass-line);
+  color: var(--ink2);
+  font-size: 14px; font-weight: 600;
+  box-shadow: var(--shadow-xs);
+}
+.screenmode-btn .sm-sub { font-size: 11px; font-weight: 400; color: var(--ink3); }
+.screenmode-btn.on {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  border-color: transparent;
+  color: var(--on-accent);
+  box-shadow: var(--shadow-gold);
+}
+.screenmode-btn.on .sm-sub { color: var(--on-accent); opacity: 0.88; }
+
+/* ── 나머지 잔손질 ── */
+.toast {
+  background: rgba(27,36,48,0.92);
+  color: #fff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.companion-banner {
+  background: var(--gl-solid);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: var(--glass-line);
+}
+.cb-btn { min-height: 44px; }
+.cb-btn.primary {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent);
+}
+.cloud-btn {
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  color: var(--ink);
+}
+/* 카카오 노란색은 그 회사 색이라 밤에도 그대로 둡니다 — 어머니가
+   '카카오 그 노란 거' 로 알아보십니다 */
+.cloud-btn.kakao { background: #FEE500; color: #191600; border-color: transparent; }
+.prayer-guide-box, .imm-verse, .imm-intro, .bible-starter,
+.game-note, .cloud-note, .about-list, .empty {
+  background: var(--gl-thin);
+  border: var(--glass-line);
+}
+.bible-verse-num { color: var(--gold); }
+
+/* ── 시대 고르는 알약 (역사 탭) ──
+   ⚠ style.css 는 고른 알약의 **바탕**에 --ink 를 쓴다. --ink 는 글씨색인데
+     바탕으로 쓴 것이다. 낮에는 먹색이라 우연히 맞았지만, 밤에는 --ink 가
+     거의 흰색이 되므로 흰 알약에 흰 글씨가 얹혀 1.08:1 이 됐다.
+     글씨색을 바탕에 쓰면 밝기를 뒤집는 순간 반드시 무너진다 —
+     여기서는 포인트색으로 바꿔 낮·밤 모두 성립하게 한다. */
+.era-chip.active, .era-chip:active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  border-color: transparent;
+}
+.era-chip-label { color: var(--ink2); }
+.era-chip-period { color: var(--ink3); }
+.era-chip.active .era-chip-label  { color: var(--on-accent); }
+/* 반투명 흰색(0.55)이었다 — 어두운 글씨색으로 뒤집힐 때 같이 따라와야 한다 */
+.era-chip.active .era-chip-period { color: var(--on-accent); opacity: 0.85; }
+
+/* ── 타임라인 · 작은 표식들 ──
+   포인트색 바탕에 얹히는 것들. 낮에는 #fff 가 박혀 있어 밤에 안 보인다 */
+.timeline-item.active, .timeline-item:active { background: var(--gl-mid); }
+.timeline-books  { color: var(--ink3); }
+.timeline-period { color: var(--ink3); }
+.timeline-item.done .timeline-dot { background: var(--green); color: var(--on-accent); }
+/* 작은 동그라미·알약에 든 번호와 표식 — style.css 가 다 `color:#fff` 로
+   박아 두었다. 낮에는 맞지만 밤에는 바탕이 밝은 색이 되어 안 보인다 */
+.g-badge, .bible-retry, .g-check, .imm-step-num {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent);
+}
+.bible-retry { min-height: 44px; }
+.tts-speed-btn { background: var(--gl); color: var(--ink2); }
+.tts-speed-btn.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: var(--on-accent);
+}
+/* 영어 구절은 곁글이지만 읽는 글이다 — 가장 연한 회색으로 두면 안 된다 */
+.story-verse-en { color: var(--ink3); }
+.tts-reading { background: var(--gl-hi); color: var(--ink); }
+.fav-btn.on, .fav-hero-btn.on { color: var(--red); }
+.modal-del-btn { min-width: 44px; min-height: 44px; }
+
+/* ── 접히는 카드의 머리 — 손가락으로 짚는 곳입니다.
+      style.css 에 min-height:30px 로 되어 있었습니다. 손끝이 닿는 넓이가
+      44px 은 되어야 하는데 30px 이면 어르신은 두세 번 헛짚으십니다.
+      역사·찬양·기도·감사·기억 탭에 열네 군데 있었습니다 (재서 찾았습니다). */
+.card.collapsible > .card-inner > .card-label,
+.card.collapsible > .card-inner > .story-section-header {
+  min-height: 44px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+/* 글씨도 조금 키웁니다 — 11px 은 제목치고 작습니다 */
+.card-label, .story-section-header {
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  color: var(--ink2);
+}
+
+/* ═══ 유리가 안 될 때 (옛 폰) ═══
+   backdrop-filter 를 모르는 브라우저에서는 반투명이 그냥 '흐린 판' 이
+   되어 뒤 글씨와 겹쳐 보일 수 있습니다. 그래서 유리를 못 쓰면
+   불투명한 판으로 바꿔 줍니다 — 멋은 조금 덜하지만 잘 읽힙니다.
+   (다섯 단계를 변수로 묶어 둔 덕에 이 칸도 다섯 줄로 끝납니다) */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --gl-thin:  #F4F8FD;
+    --gl:       #FFFFFF;
+    --gl-mid:   #FFFFFF;
+    --gl-solid: #FFFFFF;
+    --gl-hi:    #FFFFFF;
+    --gl-line:  #DCE7F5;
+  }
+  body::before { display: none; }
+  body { background: var(--bg); }
+}
+
+/* ── 눈이 피로할 때는 움직임을 끕니다 ── */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

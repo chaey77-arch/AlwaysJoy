@@ -24,10 +24,50 @@ const Voice = {
   restartAt: 0,       // 마지막으로 다시 켠 시각
   undoText: null,     // '다듬기' 되돌리기용 — 다듬기 직전의 글
   undoTarget: null,
+  hold: null,         // 붙잡아 둔 마이크 스트림 (아래 _holdMic 설명)
+  starting: false,    // 마이크 허용을 기다리는 중 (두 번 켜지는 걸 막는다)
+  gen: 0,             // 켠 차례 번호 — 기다리는 사이에 딴 칸을 누르셨는지 안다
 
   // 스스로 다시 켤 수 있는 한도. 넉넉히 두되 무한은 아니다 —
   // 권한이 막힌 폰에서는 켜기/끝나기가 순식간에 반복될 수 있다.
   MAX_RESTARTS: 60,
+
+  // ── 마이크를 붙잡아 둔다 (허용 창이 문장마다 뜨는 것을 막는다) ──
+  //
+  // 증상: 한 문장 말씀하고 쉬면 브라우저가 인식을 끝내고, _onEnd() 가 다시
+  // 켠다. 그런데 다시 켤 때마다 새 녹음이 시작되므로 브라우저가 "마이크를
+  // 쓰겠습니까" 를 또 묻는다. 어르신은 문장마다 허용을 누르셔야 했다.
+  //
+  // 고치는 법: 받아쓰기를 켤 때 getUserMedia 로 마이크를 한 번 열고 그
+  // 스트림을 **말씀이 끝날 때까지 놓지 않는다**. 브라우저는 "지금 쓰고 있는
+  // 중" 으로 보아 다시 묻지 않는다. 그만 누르시면 그때 놓는다.
+  //
+  // getUserMedia 가 없는 폰에서도 받아쓰기 자체는 되어야 하므로,
+  // 실패하면 붙잡기만 건너뛰고 그대로 진행한다.
+  //
+  // 돌려주는 값: 'ok' 붙잡았다 · 'none' 이 브라우저엔 그 기능이 없다
+  //              · 'denied' 어르신이 허용을 안 하셨다
+  // 셋을 구분하는 이유는 'denied' 일 때만 지금 바로 말씀드려야 하기 때문이다.
+  // 'none' 은 아무 말도 하지 않는다 — 잘 될 수도 있는데 겁을 줄 일이 아니다.
+  async _holdMic() {
+    if (this.hold) return 'ok';                    // 이미 붙잡고 있다
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return 'none';
+      this.hold = await navigator.mediaDevices.getUserMedia({ audio: true });
+      return 'ok';
+    } catch (e) {
+      this.hold = null;
+      const kind = (e && e.name) || '';
+      return (kind === 'NotAllowedError' || kind === 'SecurityError') ? 'denied' : 'none';
+    }
+  },
+
+  _releaseMic() {
+    const s = this.hold;
+    this.hold = null;
+    if (!s) return;
+    try { s.getTracks().forEach(t => t.stop()); } catch (e) {}
+  },
 
   // ── 쓸 수 있는 폰인지 ──
   // 카카오톡 인앱 브라우저처럼 음성인식이 아예 없는 곳이 있다.
@@ -53,6 +93,9 @@ const Voice = {
   // ── 켜기 / 끄기 ──────────────────────────────────────────
   // el: 받아쓸 입력칸. 같은 칸을 다시 누르면 끈다 (토글).
   toggle(el) {
+    // 허용 창이 떠 있는 사이에 또 누르셨으면 아무 일도 하지 않는다.
+    // 그렇지 않으면 켜기가 둘 겹쳐 하나가 미아가 된다.
+    if (this.starting) return;
     if (this.rec) {
       const same = this.target === el;
       this.stop();
@@ -61,15 +104,47 @@ const Voice = {
     this.start(el);
   },
 
+  // ★ 인식을 켜기 **전에** 마이크를 붙잡는다. 순서가 뒤바뀌면 허용 창이
+  // 두 번 뜨고, 쉴 때마다 또 뜬다 (어르신이 문장마다 허용을 누르셔야 했다).
+  //
+  // 붙잡기는 기다려야 하는 일이라 여기서 한 박자 늦어진다. 그래서 붙잡을
+  // 것이 없을 때(getUserMedia 가 없는 브라우저, 또는 이미 붙잡아 둔 때)는
+  // 기다리지 않고 곧바로 켠다 — 괜히 늦추면 버튼이 늦게 빨개져서
+  // 어르신은 "안 눌렸나?" 하고 또 누르신다.
   start(el) {
     if (!el) return;
+    if (!this.ctor()) { this._say(t('micUnsupported')); return; }
+    if (!this.secure()) { this._say(t('micInsecure')); return; }
+    if (!navigator.onLine) { this._say(t('micOffline')); return; }
+
+    const canHold = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    // 붙잡을 것이 없거나 이미 붙잡고 있으면 기다릴 이유가 없다.
+    // 붙잡기에 실패하는 폰(아이폰 사파리 등)에서도 받아쓰기 자체는 되므로
+    // 그대로 켠다 — 그 폰에서는 예전처럼 문장마다 물을 수 있지만,
+    // 아예 안 되는 것보다는 낫다.
+    if (!canHold || this.hold) { this._begin(el); return; }
+
+    const mine = ++this.gen;
+    this.starting = true;
+    this.wantStop = false;
+    this._holdMic().then(held => {
+      if (this.gen === mine) this.starting = false;
+      // 기다리는 사이에 '그만' 을 누르거나 딴 칸을 누르셨으면 여기서 접는다
+      if (this.gen !== mine || this.wantStop) { if (!this.rec) this._releaseMic(); return; }
+      // 허용을 안 하셨으면 인식을 켜지 않는다. 켜 봐도 같은 오류가 날 뿐이고,
+      // 그 사이 버튼이 잠깐 빨개져서 "켜졌나?" 하고 헷갈리신다.
+      if (held === 'denied') { this._say(t('micDenied')); return; }
+      this._begin(el);
+    });
+  },
+
+  // 실제로 인식을 켠다. start() 가 마이크를 챙긴 뒤에만 불린다.
+  _begin(el) {
     const Ctor = this.ctor();
-    if (!Ctor) { this._say('이 브라우저에서는 말로 쓰기를 쓸 수 없어요'); return; }
-    if (!this.secure()) { this._say('안전한 연결(https)에서만 마이크를 쓸 수 있어요'); return; }
-    if (!navigator.onLine) { this._say('말로 쓰기는 인터넷이 있어야 해요'); return; }
+    if (!Ctor) return;
 
     let rec;
-    try { rec = new Ctor(); } catch (e) { this._say('마이크를 켤 수 없어요'); return; }
+    try { rec = new Ctor(); } catch (e) { this._releaseMic(); this._say(t('micNoStart')); return; }
 
     this.rec = rec;
     this.target = el;
@@ -96,15 +171,19 @@ const Voice = {
     catch (e) {
       // 이미 켜져 있을 때 start() 를 부르면 예외가 난다
       this.rec = null; this.target = null;
-      this._say('마이크가 이미 켜져 있어요');
+      this._releaseMic();
+      this._say(t('micAlreadyOn'));
       return;
     }
     this._paint();
-    this._say('말씀하세요. 천천히 하셔도 됩니다 🎤');
+    this._say(t('micSpeak'));
   },
 
   stop() {
     this.wantStop = true;
+    // 차례를 올려 두면, 허용을 기다리는 중인 start() 가 깨어나서 스스로 접는다
+    this.gen++;
+    this.starting = false;
     const rec = this.rec;
     this.rec = null;
     if (rec) {
@@ -113,6 +192,9 @@ const Voice = {
       // 여기서는 이미 받은 글을 칸에 넣어 둔 상태라 즉시 끊어도 손실이 없다.
       try { rec.stop(); } catch (e) { try { rec.abort(); } catch (e2) {} }
     }
+    // 붙잡아 둔 마이크를 여기서 놓는다. 안 놓으면 녹음 표시가 계속 켜져 있고
+    // 어르신은 앱이 몰래 듣는 줄 아신다.
+    this._releaseMic();
     this._clearInterim();
     this._paint();
   },
@@ -169,13 +251,13 @@ const Voice = {
     if (kind === 'no-speech' || kind === 'aborted') return;
     if (kind === 'not-allowed' || kind === 'service-not-allowed') {
       this.wantStop = true;
-      this._say('마이크 사용을 허용해 주세요');
+      this._say(t('micDenied'));
     } else if (kind === 'network') {
       this.wantStop = true;
-      this._say('인터넷이 끊겨서 받아쓰기를 멈췄어요');
+      this._say(t('micNetLost'));
     } else if (kind === 'audio-capture') {
       this.wantStop = true;
-      this._say('마이크를 찾지 못했어요');
+      this._say(t('micNoDevice'));
     }
   },
 
@@ -190,7 +272,7 @@ const Voice = {
     if (this.restarts >= this.MAX_RESTARTS) {
       this.wantStop = true; this.rec = null;
       this._clearInterim(); this._paint();
-      this._say('받아쓰기를 잠시 멈췄어요. 다시 눌러 주세요');
+      this._say(t('micPaused'));
       return;
     }
     this.restarts++;
@@ -214,12 +296,15 @@ const Voice = {
   _paint() {
     const on = this.listening();
     document.querySelectorAll('.mic-btn').forEach(b => {
+      // 다듬기 버튼도 .mic-btn 이라 여기 걸린다 — 그 버튼은 건드리지 않는다
+      if (!b.dataset.mic) return;
       const mine = on && b.dataset.mic === (this.target && this.target.id);
       b.classList.toggle('on', mine);
       b.setAttribute('aria-pressed', mine ? 'true' : 'false');
+      const word = mine ? t('micStop') : t('micWrite');
       const lab = b.querySelector('.mic-btn-label');
-      if (lab) lab.textContent = mine ? '그만 말하기' : '말로 쓰기';
-      if (!b.querySelector('.mic-btn-label')) b.title = mine ? '그만 말하기' : '말로 쓰기';
+      if (lab) lab.textContent = word; else b.title = word;
+      b.setAttribute('aria-label', word);
     });
     document.querySelectorAll('.mic-live').forEach(d => {
       const mine = on && d.dataset.mic === (this.target && this.target.id);
@@ -231,7 +316,21 @@ const Voice = {
   _showInterim(text) {
     const el = this._liveBox();
     if (!el) return;
-    el.textContent = text ? text : '듣고 있어요...';
+    el.textContent = text ? text : t('micListening');
+  },
+
+  // ── 언어를 바꿨을 때 ────────────────────────────────────
+  // 마이크 · 다듬기 · 읽어주기 단추는 JS 가 만들어 붙인 것이라
+  // data-i18n 이 없다. applyLangUI() 가 이것을 불러 준다.
+  // 다시 만들지 않고 글씨만 바꾼다 — 다시 만들면 쓰고 있던 글이 날아간다.
+  relabel() {
+    this._paint();
+    document.querySelectorAll('.mic-btn.tidy').forEach(b => {
+      const lab = b.querySelector('.mic-btn-label');
+      if (lab) lab.textContent = t('tidyBtn');
+      b.setAttribute('aria-label', t('tidyAria'));
+    });
+    if (typeof PrayerVoice !== 'undefined') PrayerVoice._paint();
   },
 
   _clearInterim() {
@@ -325,22 +424,22 @@ function tidyPrayerInput(id) {
   const el = document.getElementById(id);
   if (!el) return;
   const before = el.value || '';
-  if (!before.trim()) { showToast('먼저 기도를 적어 주세요 🙏'); return; }
+  if (!before.trim()) { showToast(t('tidyEmpty')); return; }
 
   // 이미 다듬어 둔 글을 또 누르면 되돌린다 (같은 버튼으로 왔다 갔다)
   if (Voice.undoTarget === id && Voice.undoText != null && Voice.undoText !== before) {
     el.value = Voice.undoText;
     Voice.undoText = null; Voice.undoTarget = null;
-    showToast('원래 글로 되돌렸어요');
+    showToast(t('tidyUndone'));
     return;
   }
 
   const after = tidyPrayerText(before);
-  if (after === before) { showToast('고칠 곳이 없어요. 잘 적으셨습니다 🌿'); return; }
+  if (after === before) { showToast(t('tidyNothing')); return; }
   Voice.undoText = before;
   Voice.undoTarget = id;
   el.value = after;
-  showToast('철자를 다듬었어요. 한 번 더 누르면 되돌립니다');
+  showToast(t('tidyDone'));
 }
 
 // ─── 내가 쓴 기도 읽어주기 ────────────────────────────────
@@ -366,10 +465,10 @@ const PrayerVoice = {
   read(id) {
     const el = document.getElementById(id);
     const text = (el && el.value || '').trim();
-    if (!text) { showToast('먼저 기도를 적어 주세요 🙏'); return; }
+    if (!text) { showToast(t('tidyEmpty')); return; }
     if (typeof ttsAvailable !== 'function' || !ttsAvailable()
         || typeof SpeechSynthesisUtterance === 'undefined') {
-      showToast('이 브라우저는 읽어주기 기능을 지원하지 않습니다');
+      showToast(t('ttsUnsupported'));
       return;
     }
     // 역사 이야기 읽어주기가 돌고 있으면 멈춘다 — 목소리가 겹치면 안 된다
@@ -415,8 +514,10 @@ const PrayerVoice = {
       const mine = this.active && b.dataset.read === this.targetId;
       b.classList.toggle('on', mine);
       b.setAttribute('aria-pressed', mine ? 'true' : 'false');
+      const word = mine ? t('readAloudStop') : t('readAloud');
       const lab = b.querySelector('.mic-btn-label');
-      if (lab) lab.textContent = mine ? '그만 듣기' : '읽어주기';
+      if (lab) lab.textContent = word;
+      b.setAttribute('aria-label', word);
     });
   },
 };
@@ -441,20 +542,20 @@ function attachMic(inputId, opts) {
   const row = document.createElement('div');
   row.className = 'mic-row' + (o.full ? ' full' : '');
 
-  const label = o.full ? '<span class="mic-btn-label">말로 쓰기</span>' : '';
+  const label = o.full ? `<span class="mic-btn-label">${escHtml(t('micWrite'))}</span>` : '';
   let html = `<button type="button" class="mic-btn" data-mic="${inputId}"
-      aria-pressed="false" aria-label="말로 쓰기"
+      aria-pressed="false" aria-label="${escHtml(t('micWrite'))}"
       onclick="Voice.toggle(document.getElementById('${inputId}'))">
       <span class="mic-btn-icon">🎤</span>${label}</button>`;
 
   if (o.full) {
     html += `<button type="button" class="mic-btn tidy"
-        onclick="tidyPrayerInput('${inputId}')" aria-label="철자 다듬기">
-        <span class="mic-btn-icon">✨</span><span class="mic-btn-label">다듬기</span></button>`;
+        onclick="tidyPrayerInput('${inputId}')" aria-label="${escHtml(t('tidyAria'))}">
+        <span class="mic-btn-icon">✨</span><span class="mic-btn-label">${escHtml(t('tidyBtn'))}</span></button>`;
     if (typeof ttsAvailable === 'function' && ttsAvailable()) {
       html += `<button type="button" class="mic-btn read-btn" data-read="${inputId}"
-          aria-pressed="false" onclick="PrayerVoice.toggle('${inputId}')" aria-label="읽어주기">
-          <span class="mic-btn-icon">🔊</span><span class="mic-btn-label">읽어주기</span></button>`;
+          aria-pressed="false" onclick="PrayerVoice.toggle('${inputId}')" aria-label="${escHtml(t('readAloud'))}">
+          <span class="mic-btn-icon">🔊</span><span class="mic-btn-label">${escHtml(t('readAloud'))}</span></button>`;
     }
   }
   row.innerHTML = html;

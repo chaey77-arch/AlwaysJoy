@@ -43,9 +43,12 @@ The heart of every story is the same: **God loves humanity and desires to restor
       ],
 
       modern: [
-        { emoji: '🪞', title: '나는 하나님의 형상', body: '치매가 오거나 몸이 약해져도, 나는 여전히 하나님의 형상대로 지음받은 존재입니다. 내 가치는 능력이 아니라 하나님께서 나를 만드셨다는 사실에서 옵니다.' },
-        { emoji: '💔', title: '죄는 관계를 끊는다', body: '오늘날도 우리는 두려움과 수치심으로 하나님께, 또 서로에게서 멀어집니다. Life Model Works가 말하는 "기쁨 결핍"은 창세기 3장의 단절에서 시작됩니다.' },
-        { emoji: '🌈', title: '회복은 하나님으로부터', body: '노아의 무지개처럼, 하나님은 언제나 새로운 시작을 약속하십니다. 우리가 아무리 실패해도 그분의 사랑은 끊어지지 않습니다.' },
+        { emoji: '🪞', title: '나는 하나님의 형상', body: '치매가 오거나 몸이 약해져도, 나는 여전히 하나님의 형상대로 지음받은 존재입니다. 내 가치는 능력이 아니라 하나님께서 나를 만드셨다는 사실에서 옵니다.',
+          titleEn: 'I bear God’s image', bodyEn: 'Even if memory fades or the body grows weak, I am still made in the image of God. My worth does not come from what I can do, but from the fact that God made me.' },
+        { emoji: '💔', title: '죄는 관계를 끊는다', body: '오늘날도 우리는 두려움과 수치심으로 하나님께, 또 서로에게서 멀어집니다. Life Model Works가 말하는 "기쁨 결핍"은 창세기 3장의 단절에서 시작됩니다.',
+          titleEn: 'Sin breaks relationship', bodyEn: 'Fear and shame still pull us away from God and from one another. The "joy deficit" that Life Model Works describes begins with the broken relationship of Genesis 3.' },
+        { emoji: '🌈', title: '회복은 하나님으로부터', body: '노아의 무지개처럼, 하나님은 언제나 새로운 시작을 약속하십니다. 우리가 아무리 실패해도 그분의 사랑은 끊어지지 않습니다.',
+          titleEn: 'Restoration comes from God', bodyEn: 'Like the rainbow given to Noah, God always promises a new beginning. However often we fail, his love is not cut off.' },
       ],
     },
 
@@ -87,9 +90,12 @@ Joseph was sold into slavery by his own brothers. Years of unjust suffering foll
       ],
 
       modern: [
-        { emoji: '🚶', title: '부르심에 응답하는 믿음', body: '아브라함처럼 우리도 예상치 못한 부르심을 받습니다. 노년에 새로운 여정을 시작하는 것, 익숙한 것을 떠나는 것 — 그것이 믿음의 삶입니다.' },
-        { emoji: '🤕', title: '상처받은 사람도 쓰신다', body: '야곱처럼 상처를 주고받은 관계, 요셉처럼 억울한 고난 — 하나님은 그런 깨진 이야기 속에서도 일하십니다. 내 과거의 실수가 하나님의 손에서 선으로 바뀔 수 있습니다.' },
-        { emoji: '🕊️', title: '섭리: 고난 너머의 의미', body: '요셉의 이야기는 정신적 고통을 겪는 분들에게 큰 위로입니다. "왜 이런 일이 나에게?" — 하나님은 그 고난의 의미를 나중에 보여주십니다.' },
+        { emoji: '🚶', title: '부르심에 응답하는 믿음', body: '아브라함처럼 우리도 예상치 못한 부르심을 받습니다. 노년에 새로운 여정을 시작하는 것, 익숙한 것을 떠나는 것 — 그것이 믿음의 삶입니다.',
+          titleEn: 'Faith answers the call', bodyEn: 'Like Abraham, we too are called in ways we did not expect. Beginning a new journey in later years, leaving what is familiar — that is the life of faith.' },
+        { emoji: '🤕', title: '상처받은 사람도 쓰신다', body: '야곱처럼 상처를 주고받은 관계, 요셉처럼 억울한 고난 — 하나님은 그런 깨진 이야기 속에서도 일하십니다. 내 과거의 실수가 하나님의 손에서 선으로 바뀔 수 있습니다.',
+          titleEn: 'God uses wounded people', bodyEn: 'Relationships that hurt and were hurt, like Jacob’s; unjust suffering, like Joseph’s — God works inside those broken stories too. My past mistakes can be turned to good in his hands.' },
+        { emoji: '🕊️', title: '섭리: 고난 너머의 의미', body: '요셉의 이야기는 정신적 고통을 겪는 분들에게 큰 위로입니다. "왜 이런 일이 나에게?" — 하나님은 그 고난의 의미를 나중에 보여주십니다.',
+          titleEn: 'Providence: meaning beyond pain', bodyEn: 'Joseph’s story is deep comfort for anyone carrying mental anguish. "Why is this happening to me?" — God shows the meaning of that suffering in time.' },
       ],
     },
 
@@ -135,9 +141,12 @@ At Mount Sinai, God gave the Ten Commandments — not as restriction, but as a l
       ],
 
       modern: [
-        { emoji: '⛓️', title: '오늘의 속박에서 자유로', body: '이집트의 노예처럼, 우리도 두려움·우울·중독·죄의 습관에 묶여 있을 수 있습니다. 하나님은 그 속박에서 건져내시는 분입니다.' },
-        { emoji: '🏕️', title: '광야는 훈련의 시간', body: '치매가 오거나 노년의 어려움이 있을 때 — 그것이 광야처럼 느껴져도, 하나님은 만나로 매일 공급하십니다. 40년 광야에서도 이스라엘의 신발이 닳지 않았습니다.' },
-        { emoji: '🔥', title: '지금 이 순간 하나님이 함께', body: '불 기둥과 구름 기둥은 하나님의 임재의 상징입니다. Life Model Works의 핵심인 "임마누엘 실천" — 지금 여기서 하나님의 존재를 인식하는 것이 출애굽의 영성입니다.' },
+        { emoji: '⛓️', title: '오늘의 속박에서 자유로', body: '이집트의 노예처럼, 우리도 두려움·우울·중독·죄의 습관에 묶여 있을 수 있습니다. 하나님은 그 속박에서 건져내시는 분입니다.',
+          titleEn: 'Freedom from today’s chains', bodyEn: 'Like the slaves in Egypt, we can be bound by fear, depression, addiction, or habits of sin. God is the one who brings us out of that bondage.' },
+        { emoji: '🏕️', title: '광야는 훈련의 시간', body: '치매가 오거나 노년의 어려움이 있을 때 — 그것이 광야처럼 느껴져도, 하나님은 만나로 매일 공급하십니다. 40년 광야에서도 이스라엘의 신발이 닳지 않았습니다.',
+          titleEn: 'The wilderness is training', bodyEn: 'When memory fades or old age grows hard — even if it feels like wilderness, God provides manna each day. Through forty years, Israel’s sandals did not wear out.' },
+        { emoji: '🔥', title: '지금 이 순간 하나님이 함께', body: '불 기둥과 구름 기둥은 하나님의 임재의 상징입니다. Life Model Works의 핵심인 "임마누엘 실천" — 지금 여기서 하나님의 존재를 인식하는 것이 출애굽의 영성입니다.',
+          titleEn: 'God is with you this moment', bodyEn: 'The pillar of fire and the cloud are signs of God’s presence. The heart of Life Model Works — "practising Immanuel," recognising God here and now — is the spirituality of the Exodus.' },
       ],
     },
 
@@ -183,9 +192,12 @@ The divided monarchy mostly turned away from God. The prophets warned repeatedly
       ],
 
       modern: [
-        { emoji: '🎵', title: '다윗의 찬양 — 우리의 찬양', body: '다윗은 기쁠 때도, 슬플 때도, 죄를 지었을 때도 하나님께 노래했습니다. 찬양은 감정의 표현이자 하나님과의 연결입니다. 우울할 때 찬양하는 것이 다윗의 방법이었습니다.' },
-        { emoji: '🔄', title: '반복되는 패턴을 깨는 법', body: '사사기의 죄→징계→회개 사이클은 우리 삶에도 있습니다. 패턴을 인식하고 하나님께 돌아오는 것 — 그것이 회복의 시작입니다.' },
-        { emoji: '🏚️', title: '깨진 사람도 쓰신다', body: '다윗의 이야기는 완벽해야 하나님이 쓰신다는 생각을 무너뜨립니다. 상처받고 실수하고 깨진 우리를 하나님은 여전히 "마음에 합한 사람"으로 보실 수 있습니다.' },
+        { emoji: '🎵', title: '다윗의 찬양 — 우리의 찬양', body: '다윗은 기쁠 때도, 슬플 때도, 죄를 지었을 때도 하나님께 노래했습니다. 찬양은 감정의 표현이자 하나님과의 연결입니다. 우울할 때 찬양하는 것이 다윗의 방법이었습니다.',
+          titleEn: 'David’s praise — and ours', bodyEn: 'David sang to God in joy, in sorrow, and even after sinning. Praise both expresses what we feel and connects us to God. Singing while low in spirit was David’s way.' },
+        { emoji: '🔄', title: '반복되는 패턴을 깨는 법', body: '사사기의 죄→징계→회개 사이클은 우리 삶에도 있습니다. 패턴을 인식하고 하나님께 돌아오는 것 — 그것이 회복의 시작입니다.',
+          titleEn: 'Breaking the cycle', bodyEn: 'The sin → discipline → repentance cycle of Judges runs through our lives too. Seeing the pattern and turning back to God — that is where recovery begins.' },
+        { emoji: '🏚️', title: '깨진 사람도 쓰신다', body: '다윗의 이야기는 완벽해야 하나님이 쓰신다는 생각을 무너뜨립니다. 상처받고 실수하고 깨진 우리를 하나님은 여전히 "마음에 합한 사람"으로 보실 수 있습니다.',
+          titleEn: 'God uses broken people', bodyEn: 'David’s story dismantles the idea that God only uses the perfect. Wounded, mistaken, broken as we are, God can still call us people after his own heart.' },
       ],
     },
 
@@ -231,9 +243,12 @@ Ezekiel's vision of dry bones — "Can these bones live?" When God's breath came
       ],
 
       modern: [
-        { emoji: '🌅', title: '아침마다 새로운 자비', body: '치매나 우울증으로 힘든 날도, 어제의 두려움과 혼란이 가득해도 — 오늘 아침은 새로운 자비로 시작됩니다. 예레미야애가 3:22-23은 절망 속에서 쓴 소망의 말씀입니다.' },
-        { emoji: '💀', title: '마른 뼈에도 생기가', body: '에스겔의 마른 뼈처럼, 우리 안에 죽은 것 같은 기쁨, 메마른 신앙, 사라진 활력 — 하나님의 영이 임하시면 다시 살아납니다.' },
-        { emoji: '🦁', title: '"그래도 우리는 절하지 않는다"', body: '세상이 우리에게 타협을 요구할 때, 다니엘의 친구들의 말이 우리의 고백이 됩니다. 결과와 상관없이 하나님을 신뢰하는 것이 믿음입니다.' },
+        { emoji: '🌅', title: '아침마다 새로운 자비', body: '치매나 우울증으로 힘든 날도, 어제의 두려움과 혼란이 가득해도 — 오늘 아침은 새로운 자비로 시작됩니다. 예레미야애가 3:22-23은 절망 속에서 쓴 소망의 말씀입니다.',
+          titleEn: 'New mercy every morning', bodyEn: 'On days made hard by memory loss or depression, even when yesterday was full of fear and confusion — this morning begins with new mercy. Lamentations 3:22-23 is hope written from inside despair.' },
+        { emoji: '💀', title: '마른 뼈에도 생기가', body: '에스겔의 마른 뼈처럼, 우리 안에 죽은 것 같은 기쁨, 메마른 신앙, 사라진 활력 — 하나님의 영이 임하시면 다시 살아납니다.',
+          titleEn: 'Breath for dry bones', bodyEn: 'Like Ezekiel’s dry bones — joy that seems dead in us, faith gone dry, vigour that has left — all of it lives again when God’s Spirit comes.' },
+        { emoji: '🦁', title: '"그래도 우리는 절하지 않는다"', body: '세상이 우리에게 타협을 요구할 때, 다니엘의 친구들의 말이 우리의 고백이 됩니다. 결과와 상관없이 하나님을 신뢰하는 것이 믿음입니다.',
+          titleEn: '"Even so, we will not bow"', bodyEn: 'When the world demands that we compromise, the words of Daniel’s friends become our own confession. Trusting God regardless of the outcome — that is faith.' },
       ],
     },
 
@@ -279,9 +294,12 @@ They waited 400 years for John the Baptist to arrive.`,
       ],
 
       modern: [
-        { emoji: '🧱', title: '폐허에서 다시 짓는 삶', body: '느헤미야처럼, 우리 삶의 어떤 부분이 무너졌어도 다시 세울 수 있습니다. 한 손에 하나님의 말씀, 한 손에 오늘의 일상 — 그것이 재건의 방법입니다.' },
-        { emoji: '⏳', title: '침묵의 시간도 하나님의 섭리', body: '400년의 침묵처럼, 기도 응답이 없는 것 같은 시간도 있습니다. 그 침묵 속에서도 하나님은 메시아를 준비하고 계셨습니다. 우리의 기다림도 헛되지 않습니다.' },
-        { emoji: '💪', title: '"여호와로 인한 기쁨"이 힘', body: '느헤미야 8:10은 항상기쁨 앱의 정신입니다. 기쁨은 상황에서 오지 않습니다. 여호와 하나님으로부터 옵니다. 그 기쁨이 우리의 힘입니다.' },
+        { emoji: '🧱', title: '폐허에서 다시 짓는 삶', body: '느헤미야처럼, 우리 삶의 어떤 부분이 무너졌어도 다시 세울 수 있습니다. 한 손에 하나님의 말씀, 한 손에 오늘의 일상 — 그것이 재건의 방법입니다.',
+          titleEn: 'Rebuilding from ruins', bodyEn: 'Like Nehemiah, whatever part of our life has collapsed can be built again. God’s word in one hand and today’s ordinary work in the other — that is how rebuilding is done.' },
+        { emoji: '⏳', title: '침묵의 시간도 하나님의 섭리', body: '400년의 침묵처럼, 기도 응답이 없는 것 같은 시간도 있습니다. 그 침묵 속에서도 하나님은 메시아를 준비하고 계셨습니다. 우리의 기다림도 헛되지 않습니다.',
+          titleEn: 'Even silence is providence', bodyEn: 'Like the four hundred silent years, there are seasons when prayer seems unanswered. Even in that silence God was preparing the Messiah. Our waiting is not wasted either.' },
+        { emoji: '💪', title: '"여호와로 인한 기쁨"이 힘', body: '느헤미야 8:10은 항상기쁨 앱의 정신입니다. 기쁨은 상황에서 오지 않습니다. 여호와 하나님으로부터 옵니다. 그 기쁨이 우리의 힘입니다.',
+          titleEn: '"The joy of the Lord" is strength', bodyEn: 'Nehemiah 8:10 is the spirit of the Always Joy app. Joy does not come from circumstances. It comes from the Lord God — and that joy is our strength.' },
       ],
     },
 
@@ -331,9 +349,12 @@ After 40 days with His disciples, He ascended and promised: "Surely I am with yo
       ],
 
       modern: [
-        { emoji: '🍞', title: '예수님은 지금도 쉬게 하신다', body: '"수고하고 무거운 짐 진 자들아 내게로 오라" — 치매, 우울, 외로움, 몸의 고통을 짊어진 모든 분들에게 하시는 말씀입니다. 예수님은 우리의 짐을 아십니다.' },
-        { emoji: '🫂', title: '발을 씻기신 예수님', body: '예수님은 아프고 약한 사람 곁에 앉으셨습니다. 죄인과 식사하셨습니다. 사회가 외면한 사람들을 찾아가셨습니다. 이것이 우리가 서로를 돌봐야 할 이유입니다.' },
-        { emoji: '🌅', title: '"항상 함께 있으리라"', body: '기억이 흐려져도, 혼자인 것 같아도, 예수님은 "항상 함께"라고 약속하셨습니다. 이것이 항상기쁨의 가장 깊은 근거입니다.' },
+        { emoji: '🍞', title: '예수님은 지금도 쉬게 하신다', body: '"수고하고 무거운 짐 진 자들아 내게로 오라" — 치매, 우울, 외로움, 몸의 고통을 짊어진 모든 분들에게 하시는 말씀입니다. 예수님은 우리의 짐을 아십니다.',
+          titleEn: 'Jesus still gives rest', bodyEn: '"Come to me, all you who are weary and burdened" — spoken to everyone carrying memory loss, depression, loneliness, or bodily pain. Jesus knows what we are carrying.' },
+        { emoji: '🫂', title: '발을 씻기신 예수님', body: '예수님은 아프고 약한 사람 곁에 앉으셨습니다. 죄인과 식사하셨습니다. 사회가 외면한 사람들을 찾아가셨습니다. 이것이 우리가 서로를 돌봐야 할 이유입니다.',
+          titleEn: 'Jesus washed their feet', bodyEn: 'Jesus sat beside the sick and the weak. He ate with sinners. He went to the people society turned away from. This is why we are to care for one another.' },
+        { emoji: '🌅', title: '"항상 함께 있으리라"', body: '기억이 흐려져도, 혼자인 것 같아도, 예수님은 "항상 함께"라고 약속하셨습니다. 이것이 항상기쁨의 가장 깊은 근거입니다.',
+          titleEn: '"I am with you always"', bodyEn: 'Even when memory dims, even when you feel alone, Jesus promised to be with us always. This is the deepest ground of Always Joy.' },
       ],
     },
 
@@ -379,9 +400,12 @@ Revelation was given to a persecuted church: the Lamb has conquered, God will ma
       ],
 
       modern: [
-        { emoji: '🔥', title: '성령은 지금도 임하신다', body: '오순절의 성령은 2천 년 전 사건이 아닙니다. 지금도 우리 안에 거하시며 위로하시고, 기억나지 않는 말씀을 떠올리게 하시고, 기쁨을 주십니다.' },
-        { emoji: '👥', title: '교회는 서로 돌보는 공동체', body: '초대교회처럼 함께 먹고, 함께 기도하고, 서로의 짐을 지는 것 — 치매나 정신적 어려움을 겪는 분들에게 가장 필요한 것이 이 공동체입니다.' },
-        { emoji: '🌟', title: '눈물을 닦아주실 날을 향해', body: '요한계시록 21장은 우리의 최종 소망입니다. 지금의 고통이 아무리 커도, 하나님이 친히 모든 눈물을 닦아주시는 날이 옵니다. 이 소망이 오늘을 살게 합니다.' },
+        { emoji: '🔥', title: '성령은 지금도 임하신다', body: '오순절의 성령은 2천 년 전 사건이 아닙니다. 지금도 우리 안에 거하시며 위로하시고, 기억나지 않는 말씀을 떠올리게 하시고, 기쁨을 주십니다.',
+          titleEn: 'The Spirit still comes', bodyEn: 'Pentecost is not an event locked in the distant past. The Spirit dwells in us now, comforting us, bringing back words we could not recall, and giving joy.' },
+        { emoji: '👥', title: '교회는 서로 돌보는 공동체', body: '초대교회처럼 함께 먹고, 함께 기도하고, 서로의 짐을 지는 것 — 치매나 정신적 어려움을 겪는 분들에게 가장 필요한 것이 이 공동체입니다.',
+          titleEn: 'The church cares for one another', bodyEn: 'Eating together, praying together, carrying each other’s burdens as the early church did — this community is what people facing memory loss or mental struggle need most.' },
+        { emoji: '🌟', title: '눈물을 닦아주실 날을 향해', body: '요한계시록 21장은 우리의 최종 소망입니다. 지금의 고통이 아무리 커도, 하나님이 친히 모든 눈물을 닦아주시는 날이 옵니다. 이 소망이 오늘을 살게 합니다.',
+          titleEn: 'Toward the day he wipes every tear', bodyEn: 'Revelation 21 is our final hope. However great today’s pain, a day is coming when God himself wipes away every tear. That hope lets us live today.' },
       ],
     },
   ],
