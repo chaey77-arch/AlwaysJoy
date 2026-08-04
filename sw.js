@@ -1,7 +1,7 @@
 // 캐시 이름 — 앱 파일을 수정하면 이 버전을 올린다
 // (이름이 바뀌면 activate 에서 예전 캐시를 지운다. localStorage 의
 //  'ajoy_' 접두사는 건드리지 않는다 — 그건 사용자 기록이라 바꾸면 다 날아간다)
-const CACHE_NAME = 'alwaysjoy-v19';
+const CACHE_NAME = 'alwaysjoy-v20';
 const ASSETS = [
   './',
   './index.html',
@@ -10,9 +10,8 @@ const ASSETS = [
   './css/theme-sky.css',
   './css/theme-mint.css',
   './css/theme-peach.css',
-  // 유리 시안(F). 아직 ?theme=glass 로만 켜지지만, 어머니가 폰에서
-  // 눌러 보실 때 오프라인이면 덧칠이 안 입혀져 예전 화면이 나온다.
-  // 그러면 "고쳤다더니 그대로네" 가 되므로 미리 담아 둔다.
+  // 유리(F) — 이제 평소 화면이다. 없으면 오프라인에서 덧칠이 안 입혀져
+  // 예전 화면이 나온다. 위의 세 시간대 테마는 ?theme=sky 로 견줘 볼 때 쓴다.
   './css/theme-glass.css',
   './css/theme-glass-night.css',
   './js/data.js',

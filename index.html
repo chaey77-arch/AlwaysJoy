@@ -27,15 +27,17 @@
       var q = new URLSearchParams(location.search).get('theme') || '';
       var theme;
       if (q === 'none') { theme = ''; }
-      // glass = 유리 시안(F). 아직 시안이라 ?theme=glass 로만 켜집니다 —
-      // 평소에 켜려면 아래 시간대 계산을 'glass' 하나로 바꾸면 됩니다.
       else if (/^(mint|sky|peach|glass)$/.test(q)) { theme = q; }
-      else {
-        var h = new Date().getHours();
-        theme = (h >= 5 && h < 11) ? 'sky'        // 아침 = 햇살이
-              : (h >= 11 && h < 17) ? 'mint'      // 점심 = 쉴만한 숲
-              : 'peach';                          // 저녁·밤 = 예수님
-      }
+      // 유리(F) 가 이제 평소 화면입니다 — 어머니가 시안 일곱 개 중 F 를 고르셨습니다.
+      // 예전 시간대 테마(아침 sky · 점심 mint · 저녁 peach)는 지우지 않았습니다.
+      // ?theme=sky 처럼 붙이면 그대로 나오므로 견줘 볼 수 있습니다.
+      //
+      // 유리는 시각에 따라 색을 바꾸지 않습니다. 밝기는 아래 isNight() 가
+      // 해 지는 시각을 보고 밤 덧칠을 얹어서 처리합니다.
+      // ⚠ 여기에 밤 덧칠 파일 이름을 적지 마세요 — t27 이 '밤 덧칠이 낮
+      //   덧칠보다 뒤에 얹히는가' 를 소스에 나오는 순서로 재기 때문에,
+      //   주석에 먼저 적으면 그 시험이 헛돌게 됩니다. (실제로 그랬습니다)
+      else { theme = 'glass'; }
       if (theme) {
         document.write('<link rel="stylesheet" href="css/theme-' + theme + '.css"/>');
         var bar = { sky: '#F8FBFF', mint: '#F7FBF9', peach: '#FFFAF7',
@@ -138,7 +140,9 @@
       <div class="hdr-name" id="header-name">항상기쁨</div>
       <div class="hdr-date" id="header-date"></div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center">
+    <!-- 오른쪽 단추 묶음 — 폭 관련 규칙은 style.css 의 .hdr-right 에 둔다.
+         여기 인라인으로 적으면 좁은 폰에서 줄이는 규칙을 CSS 가 덮을 수 없다 -->
+    <div class="hdr-right">
       <button id="lang-toggle-btn" onclick="toggleLang()"
         style="padding:6px 12px;border-radius:20px;background:var(--surface);border:1px solid var(--gold-line);font-size:12px;font-weight:600;color:var(--ink2)">English</button>
       <button class="hdr-bell" id="companion-trigger">🔔</button>

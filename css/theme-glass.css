@@ -284,6 +284,9 @@ body::before {
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   color: var(--ink);
+  /* 14px 이었다 — '사진 고르기' 가 옆의 큰 단추에 눌려 안 보였다.
+     으뜸 단추(16px)보다 한 급 아래로 두어 무엇이 먼저인지는 남긴다 */
+  font-size: 15px;
 }
 .ob-start-btn {
   min-height: 56px;
@@ -628,11 +631,90 @@ body::before {
   align-items: center;
   margin-bottom: 6px;
 }
-/* 글씨도 조금 키웁니다 — 11px 은 제목치고 작습니다 */
+/* 글씨도 키웁니다 — 11px 대문자 자간은 잡지에 어울리지만 읽기는 나쁩니다.
+   안 접히는 카드('오늘 감사한 일')도 여기에 걸립니다 */
 .card-label, .story-section-header {
-  font-size: 12px;
-  letter-spacing: 0.4px;
-  color: var(--ink2);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+.card-label::before { height: 16px; }
+
+/* ══ 짚는 곳은 '단추처럼' 보이게 ══
+   "어른들은 쉬워보이는 큰 버튼을 원하시는 것 같아" — 눌러야 하는 줄이
+   그냥 작은 제목처럼 생기면 누를 수 있는 줄 모르십니다. 그래서 홈의
+   빠른이동 카드(.quick-card)와 같은 옷을 입힙니다: 유리판 한 겹 ·
+   둥근 모서리 · 누르면 살짝 들어가는 느낌.
+   대문자 변환과 1px 자간은 벗깁니다 — 카페 간판처럼 편한 글씨로. */
+.card.collapsible > .card-inner > .card-label,
+.card.collapsible > .card-inner > .story-section-header {
+  min-height: 56px;
+  padding: 0 16px;
+  margin: -4px -4px 4px;
+  background: var(--gl-mid);
+  border: var(--glass-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-xs);
+  font-size: 17px; font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0;
+  text-transform: none;
+  transition: background var(--t), transform var(--t), box-shadow var(--t);
+}
+.card.collapsible > .card-inner > .card-label:active,
+.card.collapsible > .card-inner > .story-section-header:active {
+  background: var(--gl-hi);
+  transform: scale(0.98);
+  box-shadow: none;
+}
+/* 앞의 금색 막대는 지웁니다 — 단추 안에 들어가면 군더더기입니다.
+   대신 오른쪽 꺽쇠(∨)가 '눌러서 펴는 곳' 을 알려 줍니다 */
+.card.collapsible > .card-inner > .card-label::before { display: none; }
+.card.collapsible .collapse-chevron {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gl-solid);
+  color: var(--gold);
+  font-size: 13px;
+}
+/* 펼쳐 두면 단추 아래로 본문이 이어지니 사이를 조금 띄웁니다 */
+.card.collapsible:not(.collapsed) > .card-inner > .card-label,
+.card.collapsible:not(.collapsed) > .card-inner > .story-section-header {
+  margin-bottom: 12px;
+}
+/* 개수 힌트도 단추 안에 들어가니 눈에 보이게 키웁니다 */
+.card.collapsible .collapse-hint { font-size: 13px; color: var(--ink3); }
+
+/* ── 작은 알약 단추들 (말로 쓰기 · 다듬기 · 읽어주기 · 글씨 크기) ──
+      13px·12px 글씨였습니다. 짚는 높이는 48px 로 넉넉했지만 글씨가 작아
+      무슨 단추인지 눈에 안 들어옵니다.
+      임마누엘 다섯 칸에서는 세 단추가 2+1 로 들쭉날쭉 접혀 있었습니다
+      (그림으로 확인했습니다). 두 칸 격자로 세워 줄을 맞춥니다 —
+      가지런한 것만으로도 훨씬 쉬워 보입니다. */
+.mic-row.full {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.mic-btn {
+  font-size: 15px;
+  justify-content: center;
+  min-height: 52px;
+}
+.mic-btn-icon { font-size: 19px; }
+/* 세 개뿐이면 마지막 하나가 두 칸을 다 쓰게 — 빈 칸이 생기지 않습니다 */
+.mic-row.full > .mic-btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+/* 좁은 폰에서는 한 줄에 하나씩. @media 가 아니라 @container 를 쓰는 까닭은
+   시험이 창은 넓게 두고 판만 좁히기 때문입니다 (@media 는 '넓다'고 읽습니다) */
+.card-inner { container-type: inline-size; }
+@container (max-width: 260px) {
+  .mic-row.full { grid-template-columns: 1fr; }
+}
+.bible-size-btn {
+  min-height: 48px; padding: 12px 18px;
+  font-size: 15px;
 }
 
 /* ═══ 유리가 안 될 때 (옛 폰) ═══
