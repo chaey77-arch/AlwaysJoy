@@ -2420,6 +2420,30 @@ function updateTtsBtn() {
   if (!btn) return;
   btn.textContent = StoryState.ttsActive ? '⏸' : '▶';
   btn.setAttribute('aria-label', StoryState.ttsActive ? t('ttsPauseAria') : t('ttsPlayAria'));
+  const fill = document.getElementById('tts-progress-fill');
+  if (!fill) return;
+  const total = StoryState.ttsQueue && StoryState.ttsQueue.length;
+  const pct = total ? Math.round(StoryState.ttsIndex / total * 100) : 0;
+  fill.style.width = pct + '%';
+}
+
+function seekTts(e) {
+  const track = document.getElementById('tts-progress-track');
+  if (!track) return;
+  const total = StoryState.ttsQueue && StoryState.ttsQueue.length;
+  if (!total) return;
+  const pct = e.offsetX / track.offsetWidth;
+  const idx = Math.max(0, Math.min(total - 1, Math.floor(pct * total)));
+  const wasActive = StoryState.ttsActive;
+  const queue = StoryState.ttsQueue;
+  stopTts();
+  if (wasActive || StoryState.ttsPaused) {
+    StoryState.ttsQueue = queue;
+    StoryState.ttsIndex = idx;
+    StoryState.ttsActive = true;
+    updateTtsBtn();
+    speakTtsChunk();
+  }
 }
 
 // ══════════════════════════════════════════════════════════
