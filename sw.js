@@ -1,7 +1,7 @@
 // 캐시 이름 — 앱 파일을 수정하면 이 버전을 올린다
 // (이름이 바뀌면 activate 에서 예전 캐시를 지운다. localStorage 의
 //  'ajoy_' 접두사는 건드리지 않는다 — 그건 사용자 기록이라 바꾸면 다 날아간다)
-const CACHE_NAME = 'alwaysjoy-v22';
+const CACHE_NAME = 'alwaysjoy-v23';
 const ASSETS = [
   './',
   './index.html',
