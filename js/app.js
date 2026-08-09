@@ -68,6 +68,13 @@ function init() {
     State.bibleChapter = State.bibleLast.c;
   }
   applyCharacter();
+  // 볼드 모드 복원
+  const boldMode = Store.load('boldMode', false);
+  if (boldMode) {
+    document.body.classList.add('bold-mode');
+    const btn = document.getElementById('bold-toggle-btn');
+    if (btn) btn.style.fontWeight = '900';
+  }
   // 성경 읽음 기록 복원
   const savedRead = Store.load('readEras', []);
   StoryState.readEras = new Set(savedRead);
@@ -142,29 +149,37 @@ function switchTab(tab) {
 }
 
 // ─── Onboarding ──────────────────────────────────────────
+// 카카오로 시작하기
+async function startWithKakao() {
+  if (typeof Cloud === 'undefined' || !Cloud.signInKakao) {
+    showToast('로그인 기능을 불러오는 중입니다...');
+    return;
+  }
+
+  try {
+    await Cloud.signInKakao();
+    // 로그인 성공하면 Cloud.js가 자동으로 처리
+  } catch (e) {
+    console.error('카카오 로그인 실패:', e);
+    showToast('로그인에 실패했습니다. 다시 시도해주세요.');
+  }
+}
+
 function bindOnboard() {
-  // 나이를 묻지 않는다. 어머니께 권했더니 "이런건 어릴때 하는 거야,
-  // 난 하기 싫어" 하셨다 — 첫 화면에 '어르신 · 70대 이상' 이 골라져
-  // 있는 것을 보신 것이다. 앱이 당신을 그렇게 부르는 순간
-  // '내 것이 아니다' 가 된다.
-  //
-  // ageGroup 은 저장만 하고 어디서도 읽지 않았다 (셈해 보니 쓰는 곳이
-  // 0곳이었다). 내용이 달라지지도 않는 것을 물어서 마음만 상하게 한 셈이다.
-  // 그래서 물음 자체를 없앴다 — 나이로 갈리는 문이 아니라, 어린아이와
-  // 같이 들어가는 문 하나만 둔다 (누가복음 18:17).
-  document.getElementById('btn-start')?.addEventListener('click', () => {
-    const name = (document.getElementById('onboard-name')?.value || '').trim();
-    if (!name) { document.getElementById('onboard-name')?.focus(); showToast(t('obNameRequired')); return; }
-    // ⚠ ageGroup 을 넣지 않는다. 예전에 쓰시던 분의 기록에는 남아 있을 수
-    //   있는데, 그건 지우지 않는다 — 읽는 곳이 없으니 해가 없고,
-    //   지우자고 저장된 기록을 건드리면 이름·가입일까지 위험해진다.
-    State.user = { name, joinDate: new Date().toISOString() };
-    Store.save('user', State.user);
-    showScreen('main');
-    renderAll();
-    startCompanion();
-    setTimeout(() => showCompanionBanner('morning'), 1400);
-  });
+  // 카카오 로그인 버튼은 HTML에서 onclick으로 직접 연결
+  // startWithKakao() 함수가 처리
+
+  // "주님 안에서 시작하기" 버튼 - 로그인 없이 바로 시작
+  const localStartBtn = document.getElementById('btn-start');
+  if (localStartBtn) {
+    localStartBtn.onclick = () => {
+      Store.save('onboarded', true);
+      showScreen('main');
+      renderAll();
+      startCompanion();
+      setTimeout(() => showCompanionBanner('morning'), 1400);
+    };
+  }
 }
 
 // ─── Render all ──────────────────────────────────────────
@@ -173,6 +188,7 @@ function renderAll() {
   renderHeader();
   renderHome();
   renderWord();
+  restoreVerseHeroState();
   renderHymn();
   renderPrayer();
   renderGratitude();
@@ -474,9 +490,9 @@ function switchWordSub(sub) {
 // 단계 이름은 여기 적지 않는다 — fontSizeLabel() 이 말모음에서 가져온다
 // (여기 한글로 적어 두면 English 로 바꿔도 그대로 남는다).
 const BIBLE_SIZES = [
-  { v: '17px' },
-  { v: '21px' },
-  { v: '25px' }
+  { v: '17px', w: '400' },
+  { v: '21px', w: '500' },
+  { v: '25px', w: '700' }
 ];
 
 function renderBibleRead() {
@@ -773,8 +789,12 @@ function cycleBibleFontSize() {
 
 function applyBibleFontSize() {
   const idx = State.bibleFontIdx || 0;
+  const size = BIBLE_SIZES[idx];
   const body = document.getElementById('bible-body');
-  if (body) body.style.setProperty('--v', BIBLE_SIZES[idx].v);
+  if (body) {
+    body.style.setProperty('--v', size.v);
+    body.style.fontWeight = size.w;
+  }
   // 버튼에 지금 단계를 보여준다 — 글자 수로 크기를 짐작할 수 있게
   const btn = document.getElementById('bible-size-btn');
   if (btn) btn.textContent = fontSizeLabel(idx);
@@ -795,6 +815,28 @@ function prevVerse() {
 function nextVerse() {
   State.currentVerseIdx = (State.currentVerseIdx + 1) % DATA.dailyVerses.length;
   renderWord(); renderHome();
+}
+
+// 오늘의 말씀 상세 정보 펼치기/접기
+function toggleVerseHeroDetails() {
+  const details = document.getElementById('verse-hero-details');
+  const icon = document.querySelector('.verse-hero-toggle-icon');
+  if (!details || !icon) return;
+
+  const isOpen = details.classList.toggle('open');
+  icon.textContent = isOpen ? '▲' : '▼';
+  Store.save('verseHeroOpen', isOpen);
+}
+
+// 초기화 시 저장된 상태 복원
+function restoreVerseHeroState() {
+  const isOpen = Store.load('verseHeroOpen', false);
+  if (isOpen) {
+    const details = document.getElementById('verse-hero-details');
+    const icon = document.querySelector('.verse-hero-toggle-icon');
+    if (details) details.classList.add('open');
+    if (icon) icon.textContent = '▲';
+  }
 }
 
 // ─── Hymn ────────────────────────────────────────────────
@@ -1004,9 +1046,9 @@ function saveGratitude() {
 // ⚠ 첫 값을 바꾸면 style.css 의 var(--imm-fs, 17px) 대체값도 같이 고친다
 //   (JS 가 --imm-fs 를 심기 전 첫 페인트에 그 값이 쓰인다)
 const IMM_SIZES = [
-  { v: '17px' },
-  { v: '20px' },
-  { v: '24px' }
+  { v: '17px', w: '400' },
+  { v: '20px', w: '500' },
+  { v: '24px', w: '700' }
 ];
 
 function cycleImmFontSize() {
@@ -1019,7 +1061,10 @@ function applyImmFontSize() {
   const size = IMM_SIZES[State.immFontIdx || 0] || IMM_SIZES[0];
   // 입력칸·질문·기록을 한꺼번에 키운다. --imm-fs 는 CSS 가 읽어 간다
   const pane = document.getElementById('tab-gratitude');
-  if (pane) pane.style.setProperty('--imm-fs', size.v);
+  if (pane) {
+    pane.style.setProperty('--imm-fs', size.v);
+    pane.style.setProperty('--imm-fw', size.w);
+  }
   const btn = document.getElementById('imm-size-btn');
   if (btn) btn.textContent = fontSizeLabel(State.immFontIdx || 0);
 }
@@ -1434,23 +1479,24 @@ function sunsetLabel(d) {
 }
 
 function setScreenMode(mode) {
+  console.log('[screenMode] 선택:', mode);
   Store.save('screenMode', mode);
-  renderScreenMode();
-  // CSS 는 문서를 다시 열 때 골라진다. 지금 화면에서 바로 바뀌게
-  // 하려면 밤 CSS 를 붙였다 뗐다 해야 하는데, 그러면 '지금 켜진 것'
-  // 과 '다시 열면 켜질 것' 이 어긋날 수 있다. 그냥 다시 그린다 —
-  // 어머니께는 '잠깐 깜빡였다' 로만 보인다.
+  console.log('[screenMode] 저장 완료');
+
   const label = mode === 'night' ? t('screenModeNight')
               : mode === 'day'   ? t('screenModeDay')
               : t('screenModeAuto');
-  showToast(t('screenModeSaved').replace('{mode}', label));
+
+  showToast(label + ' 설정 완료');
+  console.log('[screenMode] 토스트 표시:', label);
+
+  // 저장 완료 후 새로고침 (localStorage 저장 보장)
   setTimeout(() => {
-    // 고른 것을 주소에 남기지 않는다 — ?night=1 이 붙어 있으면
-    // 그게 저장한 것보다 세서, 다음에 고쳐도 안 바뀐다
+    console.log('[screenMode] 새로고침 시작');
     const u = new URL(location.href);
     u.searchParams.delete('night');
-    location.replace(u.toString());
-  }, 700);
+    location.href = u.toString();
+  }, 800);
 }
 
 function renderScreenMode() {
@@ -1530,9 +1576,9 @@ function closeMemoryModal() { document.getElementById('memory-modal')?.classList
 // 담아 둔 말씀을 다시 읽는 곳이라 목록 글씨가 작으면 담아 둔 뜻이 없다.
 // 3단계는 다른 곳과 같게 맞췄다.
 const FAV_SIZES = [
-  { v: '14px' },
-  { v: '18px' },
-  { v: '22px' }
+  { v: '14px', w: '400' },
+  { v: '18px', w: '500' },
+  { v: '22px', w: '700' }
 ];
 
 function cycleFavFontSize() {
@@ -1545,7 +1591,10 @@ function applyFavFontSize() {
   const size = FAV_SIZES[State.favFontIdx || 0] || FAV_SIZES[0];
   // 목록을 감싼 곳에 심어 두면 항목이 몇 개든 한 번에 적용된다
   const list = document.getElementById('fav-verse-list');
-  if (list) list.style.setProperty('--fav-fs', size.v);
+  if (list) {
+    list.style.setProperty('--fav-fs', size.v);
+    list.style.fontWeight = size.w;
+  }
   const btn = document.getElementById('fav-size-btn');
   if (btn) btn.textContent = fontSizeLabel(State.favFontIdx || 0);
 }
@@ -1711,6 +1760,14 @@ function toggleLang() {
   Store.save('lang', State.lang);
   applyLangUI();
   renderAll();
+}
+
+// 볼드 모드 — 어르신들이 글씨를 더 굵게 보고 싶을 때
+function toggleBold() {
+  const isBold = document.body.classList.toggle('bold-mode');
+  Store.save('boldMode', isBold);
+  const btn = document.getElementById('bold-toggle-btn');
+  if (btn) btn.style.fontWeight = isBold ? '900' : '600';
 }
 
 // index.html 에 박힌 글을 언어에 맞게 갈아 끼운다.
@@ -2068,9 +2125,9 @@ function selectEra(idx) {
 // ─── 역사 이야기 글씨 크기 ───────────────────────────────
 // 성경읽기와 같은 3단계. 이야기 본문이 길어서 어르신이 직접 키울 수 있어야 한다.
 const STORY_SIZES = [
-  { v: '14px', lh: '1.9' },
-  { v: '18px', lh: '1.85' },
-  { v: '22px', lh: '1.8' }
+  { v: '14px', lh: '1.9', w: '400' },
+  { v: '18px', lh: '1.85', w: '500' },
+  { v: '22px', lh: '1.8', w: '700' }
 ];
 
 function cycleStoryFontSize() {
@@ -2087,9 +2144,13 @@ function applyStoryFontSize() {
   if (body) {
     body.style.fontSize = size.v;
     body.style.lineHeight = size.lh;
+    body.style.fontWeight = size.w;
   }
   const pane = document.getElementById('tab-story');
-  if (pane) pane.style.setProperty('--story-fs', size.v);
+  if (pane) {
+    pane.style.setProperty('--story-fs', size.v);
+    pane.style.setProperty('--story-fw', size.w);
+  }
 
   const btn = document.getElementById('story-size-btn');
   if (btn) btn.textContent = fontSizeLabel(idx);
@@ -2109,6 +2170,47 @@ function updateStoryProgress() {
 // ══════════════════════════════════════════════════════════
 // TTS (Web Speech API — 브라우저 내장 읽어주기)
 // ══════════════════════════════════════════════════════════
+
+// 성경 구절 표기를 읽는 말로 바꾼다 — '창세기 1:1' → '창세기 1장 1절'.
+//
+// 폰의 읽어주기는 1:1 을 시계로 본다. 어머니께는 "창세기 한 시 일 분" 으로
+// 들렸다. 구절의 : 는 시각이 아니라 장과 절을 가르는 기호다.
+// 앞 숫자에는 '장', 뒤 숫자에는 '절' 을 붙여 읽게 한다.
+//
+// 붙여 읽는 꼴도 함께 다룬다:
+//   창세기 1:1      → 창세기 1장 1절
+//   시편 121:1-2    → 시편 121장 1절에서 2절
+//   예레미야애가 3:22-23 → 예레미야애가 3장 22절에서 23절
+//   살전 5:16-18    → 살전 5장 16절에서 18절   (축약형도 그대로 통한다)
+//
+// 책 이름 목록에 기대지 않고 '숫자:숫자' 꼴만 본다. 이 앱은 온전한 이름
+// (창세기·데살로니가전서)과 축약형(살전·눅·느)을 섞어 쓰므로, 66권 이름으로
+// 맞추려 하면 절반을 놓친다 (세어 봤다: 축약형이 스물 몇 군데다).
+// 대신 앞에 낱말이 있는지 보고, 시각을 가리키는 말이면 비켜 간다.
+//
+// 영어로 읽을 때는 손대지 않는다 — 영어 읽어주기는 'Genesis 1:1' 을
+// 이미 "chapter one verse one" 에 가깝게 읽고, 'chapter'·'verse' 를
+// 한국어로 붙이면 뒤섞인다.
+
+// 이 말 뒤의 숫자:숫자 는 시각이다 — '오후 3:30' 을 "3장 30절" 로
+// 읽으면 안 된다. 지금 앱 글에는 이런 표기가 없지만, 나중에 누가
+// "저녁 6:00 예배" 같은 안내를 넣을 수 있어 미리 비켜 둔다.
+// ⚠ '시' 만 적으면 '시각' 이 빠져나간다 (시험에서 걸렸다). 낱말 전체로 적는다.
+const TIME_WORDS = /^(오전|오후|아침|저녁|밤|새벽|정오|낮|시|시각|시간|무렵|경)$/;
+
+function speakBibleRefs(text) {
+  const s = String(text == null ? '' : text);
+  if (State.lang === 'en') return s;
+  return s.replace(
+    // 앞: 책 이름의 끝 낱말(한글·영문). 그게 없으면(그냥 10:14) 시각으로 보고 둔다.
+    // 뒤: 절 하나 또는 '절-절'. 하이픈은 -(빼기) · –(엔) · ~ 를 다 받는다.
+    /([가-힣A-Za-z]+)\s*(\d+):(\d+)(?:\s*[-–~]\s*(\d+))?/g,
+    (m, before, chap, from, to) => {
+      if (TIME_WORDS.test(before)) return m;      // 시각이다 — 그대로 둔다
+      return `${before} ${chap}장 ${from}절` + (to ? `에서 ${to}절` : '');
+    }
+  );
+}
 
 function getTtsText() {
   const era = BIBLE_STORY.eras[StoryState.currentEraIdx];
@@ -2143,8 +2245,15 @@ function ttsAvailable() {
 function splitForTts(text, limit) {
   const max = limit || 180;
   const out = [];
+  // 구절 표기를 읽는 말로 바꾼 뒤에 자른다.
+  // ★ 여기서 하는 까닭 — 읽어주기는 두 곳에서 시작한다(역사 이야기의
+  //   startTts, 내가 쓴 기도의 PrayerVoice.read). 두 곳이 다 이 함수를
+  //   지나가므로 한 군데만 고쳐도 둘 다 따라온다. 부르는 쪽마다 붙이면
+  //   나중에 세 번째 읽어주기가 생길 때 빠뜨린다.
+  //   자르기 전에 해야 한다 — '1:1' 이 조각 경계에 걸리면 못 알아본다.
+  const spoken = typeof speakBibleRefs === 'function' ? speakBibleRefs(text) : text;
   // 문장 끝(. ! ? 뒤 공백)에서 끊는다. 한국어는 마침표가 잘 붙어 있다.
-  const sentences = String(text).replace(/\s+/g, ' ').trim().split(/(?<=[.!?])\s+/);
+  const sentences = String(spoken).replace(/\s+/g, ' ').trim().split(/(?<=[.!?])\s+/);
 
   let buf = '';
   const push = s => { if (s && s.trim()) out.push(s.trim()); };
@@ -2408,6 +2517,95 @@ function revealCard(el) {
     updateCollapseA11y(card);
     saveCollapseState();
   }
+}
+
+// ─── 데이터 백업/복원 ────────────────────────────────────
+function exportData() {
+  try {
+    // localStorage에서 모든 앱 데이터 수집
+    const data = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      gratitude: State.gratitude || [],
+      prayers: State.prayers || [],
+      immanuel: State.immanuel || [],
+      memories: State.memories || { people: [], myVerses: [], myFaith: {} },
+      bibleBook: State.bibleBook,
+      bibleChapter: State.bibleChapter,
+      bibleLast: State.bibleLast,
+      user: State.user
+    };
+
+    // JSON 파일로 다운로드
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `alwaysjoy-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('✅ 백업 파일이 다운로드되었습니다');
+  } catch (e) {
+    console.error('백업 실패:', e);
+    showToast('❌ 백업에 실패했습니다');
+  }
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+
+      // 확인 메시지
+      if (!confirm(`백업 파일을 불러오시겠습니까?\n\n내보낸 날짜: ${new Date(data.exportDate).toLocaleString('ko-KR')}\n감사 기록: ${data.gratitude?.length || 0}개\n기도 제목: ${data.prayers?.length || 0}개\n임마누엘 일기: ${data.immanuel?.length || 0}개\n\n⚠️ 현재 데이터를 덮어씁니다!`)) {
+        input.value = '';
+        return;
+      }
+
+      // 데이터 복원
+      if (data.gratitude) {
+        State.gratitude = data.gratitude;
+        Store.save('gratitude', data.gratitude);
+      }
+      if (data.prayers) {
+        State.prayers = data.prayers;
+        Store.save('prayers', data.prayers);
+      }
+      if (data.immanuel) {
+        State.immanuel = data.immanuel;
+        Store.save('immanuel', data.immanuel);
+      }
+      if (data.memories) {
+        State.memories = data.memories;
+        Store.save('memories', data.memories);
+      }
+      if (data.bibleBook) State.bibleBook = data.bibleBook;
+      if (data.bibleChapter) State.bibleChapter = data.bibleChapter;
+      if (data.bibleLast) {
+        State.bibleLast = data.bibleLast;
+        Store.save('bibleLast', data.bibleLast);
+      }
+      if (data.user) {
+        State.user = data.user;
+        Store.save('user', data.user);
+      }
+
+      showToast('✅ 데이터를 불러왔습니다! 페이지를 새로고침합니다...');
+      setTimeout(() => location.reload(), 1500);
+    } catch (e) {
+      console.error('불러오기 실패:', e);
+      showToast('❌ 파일을 읽을 수 없습니다');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // ─── Boot ────────────────────────────────────────────────
