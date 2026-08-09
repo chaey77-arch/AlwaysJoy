@@ -122,6 +122,42 @@ body { background: var(--bg); color: var(--ink); }
 /* 고른 메뉴 칸 — 낮에는 옅은 흰 알약이었는데 밤에는 포인트색을 옅게 */
 .tab-btn.active { background: rgba(61,220,245,0.12); }
 
+/* 홈 화면 네모 카드 — 밤에는 어두운 배경으로 */
+.home-grid-cell {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(139,163,199,0.25);
+}
+/* 홈 화면 게임 버튼 — 밤에도 화려하게 */
+.home-game-cell {
+  background: linear-gradient(135deg,
+    rgba(255,107,107,0.30) 0%,
+    rgba(255,165,0,0.25) 50%,
+    rgba(255,215,0,0.30) 100%);
+  border-color: rgba(255,165,0,0.55);
+  box-shadow: 0 4px 20px rgba(255,165,0,0.30);
+}
+
+/* 감사 스트릭 카드도 어둡게 */
+.home-streak {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(139,163,199,0.25);
+}
+
+/* 오늘의 말씀 카드도 어둡게 */
+.home-verse-card {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(139,163,199,0.25);
+}
+
+/* 오늘의 말씀 버튼 — "말씀 더 보기" 등 */
+.home-verse-btn {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(139,163,199,0.30);
+}
+.home-verse-btn:active {
+  background: rgba(255,255,255,0.16);
+}
+
 /* 입력칸 — 밤에는 눌러 쓰는 칸이 어디인지 더 분명해야 합니다.
    낮보다 살짝 밝혀 '여기 쓰세요' 가 보이게 */
 .prayer-textarea, .imm-input, .g-input, .modal-input,
@@ -160,6 +196,26 @@ body { background: var(--bg); color: var(--ink); }
   color: var(--on-accent) !important;
 }
 
+/* 말씀 탭 서브메뉴 — 밤에도 화려하게 */
+.subtabs {
+  background: linear-gradient(135deg, rgba(94,234,212,0.15), rgba(61,220,245,0.15));
+}
+.subtab {
+  background: rgba(255,255,255,0.08);
+  color: var(--ink2);
+  border-color: rgba(139,163,199,0.25);
+}
+
+/* 게임 카드 — 밤에도 화려하게 */
+.game-card {
+  background: linear-gradient(135deg,
+    rgba(255,193,7,0.20) 0%,
+    rgba(255,87,34,0.18) 50%,
+    rgba(156,39,176,0.20) 100%);
+  border-color: rgba(255,193,7,0.45);
+  box-shadow: 0 4px 20px rgba(255,193,7,0.25);
+}
+
 /* 유리가 안 되는 옛 폰 — 밤에도 반투명이 뭉개지면 안 읽힙니다.
    불투명한 남색 판으로 떨어집니다 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -174,3 +230,5 @@ body { background: var(--bg); color: var(--ink); }
   body::before { display: none; }
   body { background: var(--bg); }
 }
+
+.tts-progress-track { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.12); }
